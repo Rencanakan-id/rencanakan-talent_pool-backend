@@ -121,12 +121,29 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
-            cd /path/to/production
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << EOF
+            set -e  
+            
+            echo "current user"
+            whoami
+
+            echo "curr dir"
+            pwd
+            
+            if [ ! -d "./rencanakan-talent_pool-backend" ]; then
+              git clone -b main https://github.com/Rencanakan-id/rencanakan-talent_pool-backend.git
+            fi
+            cd ./rencanakan-talent_pool-backend
             git pull origin main
-            source /path/to/venv/bin/activate
-            pip install -r requirements.txt
-            python manage.py migrate
-            python manage.py collectstatic --noinput
-            sudo systemctl restart gunicorn
+        
+
+   
+            docker stop rencanakan_talent_pool || true
+            docker rm rencanakan_talent_pool || true
+
+       
+            docker build -t rencanakan_talent_pool .
+
+   
+            docker run -d -p 8000:8000 --name rencanakan_talent_pool rencanakan_talent_pool
           EOF
