@@ -80,7 +80,11 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << EOF
             set -e  
             
-      
+            echo "current user"
+            whoami
+
+            echo "curr dir"
+            pwd
             if [ ! -d "$HOME/rencanakan-talent_pool-backend" ]; then
               git clone -b staging https://github.com/Rencanakan-id/rencanakan-talent_pool-backend.git $HOME/rencanakan-talent_pool-backend
             else
