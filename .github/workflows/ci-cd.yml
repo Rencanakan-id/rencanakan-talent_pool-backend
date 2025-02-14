@@ -94,14 +94,14 @@ jobs:
         
 
    
-            docker stop rencanakan_talent_pool || true
-            docker rm rencanakan_talent_pool || true
+            sudo docker stop rencanakan_talent_pool || true
+            sudo docker rm rencanakan_talent_pool || true
 
        
-            docker build -t rencanakan_talent_pool .
+            sudo docker build -t rencanakan_talent_pool .
 
    
-            docker run -d -p 8000:8000 --name rencanakan_talent_pool rencanakan_talent_pool
+            sudo docker run -d -p 8000:8000 --name rencanakan_talent_pool rencanakan_talent_pool
           EOF
 
   deploy_production:
