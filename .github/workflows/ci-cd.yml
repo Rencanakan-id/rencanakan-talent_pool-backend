@@ -76,7 +76,7 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER_STAGING }}
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
+          chmod 400 private_key.pem
           ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << EOF
             set -e  
             
@@ -85,15 +85,16 @@ jobs:
 
             echo "curr dir"
             pwd
-            if [ ! -d "$HOME/rencanakan-talent_pool-backend" ]; then
-              git clone -b staging https://github.com/Rencanakan-id/rencanakan-talent_pool-backend.git $HOME/rencanakan-talent_pool-backend
+            
+            if [ ! -d "./rencanakan-talent_pool-backend" ]; then
+              git clone -b staging https://github.com/Rencanakan-id/rencanakan-talent_pool-backend.git ./rencanakan-talent_pool-backend
             else
-              cd $HOME/rencanakan-talent_pool-backend
+              cd ./rencanakan-talent_pool-backend
               git pull origin staging
             fi
             
       
-            cd $HOME/rencanakan-talent_pool-backend
+            cd ./rencanakan-talent_pool-backend
 
    
             docker stop rencanakan_talent_pool || true
