@@ -87,7 +87,7 @@ jobs:
             pwd
             
             if [ ! -d "./rencanakan-talent_pool-backend" ]; then
-              git clone -b staging https://github.com/Rencanakan-id/rencanakan-talent_pool-backend.git ./rencanakan-talent_pool-backend
+              git clone -b staging https://github.com/Rencanakan-id/rencanakan-talent_pool-backend.git
             else
               cd ./rencanakan-talent_pool-backend
               git pull origin staging
