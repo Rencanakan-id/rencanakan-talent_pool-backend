@@ -1,0 +1,130 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches:
+      - dev
+      - staging
+      - main
+  pull_request:
+    branches:
+      - dev
+      - staging
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # services:
+    #   postgres:
+    #     image: postgres:latest
+    #     env:
+    #       POSTGRES_DB: test_db
+    #       POSTGRES_USER: test_user
+    #       POSTGRES_PASSWORD: test_password
+    #     ports:
+    #       - 5432:5432
+    #     options: >-
+    #       --health-cmd "pg_isready -U test_user -d test_db"
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: |
+          python -m venv env
+          source env/bin/activate
+          pip install -r requirements.txt
+
+      - name: Run Migrations
+        # env:
+        #   DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+        run: |
+          source env/bin/activate
+          python manage.py migrate
+
+      - name: Run Tests
+        # env:
+        #   DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+        run: |
+          source env/bin/activate
+          python manage.py test
+
+  deploy_staging:
+    if: github.ref == 'refs/heads/staging'
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Staging Server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_STAGING }}
+          SERVER_IP: ${{ secrets.SERVER_IP_STAGING }}
+          SERVER_USER: ${{ secrets.SERVER_USER_STAGING }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << EOF
+            set -e  
+            
+      
+            if [ ! -d "$HOME/rencanakan-talent_pool-backend" ]; then
+              git clone -b staging https://github.com/Rencanakan-id/rencanakan-talent_pool-backend.git $HOME/rencanakan-talent_pool-backend
+            else
+              cd $HOME/rencanakan-talent_pool-backend
+              git pull origin staging
+            fi
+            
+      
+            cd $HOME/rencanakan-talent_pool-backend
+
+   
+            docker stop rencanakan_talent_pool || true
+            docker rm rencanakan_talent_pool || true
+
+       
+            docker build -t rencanakan_talent_pool .
+
+   
+            docker run -d -p 8000:8000 --name rencanakan_talent_pool rencanakan_talent_pool
+          EOF
+
+  deploy_production:
+    if: github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Production Server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
+          SERVER_IP: ${{ secrets.SERVER_IP_PROD }}
+          SERVER_USER: ${{ secrets.SERVER_USER_PROD }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
+            cd /path/to/production
+            git pull origin main
+            source /path/to/venv/bin/activate
+            pip install -r requirements.txt
+            python manage.py migrate
+            python manage.py collectstatic --noinput
+            sudo systemctl restart gunicorn
+          EOF
