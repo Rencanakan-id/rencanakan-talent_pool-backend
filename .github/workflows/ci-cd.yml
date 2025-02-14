@@ -60,6 +60,50 @@ jobs:
           source env/bin/activate
           python manage.py test
 
+  deploy_dev:
+    if: github.ref == 'refs/heads/dev'
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Production Server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_STAGING }}
+          SERVER_IP: ${{ secrets.SERVER_IP_DEV }}
+          SERVER_USER: ${{ secrets.SERVER_USER_STAGING }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << EOF
+            set -e  
+            
+            echo "current user"
+            whoami
+
+            echo "curr dir"
+            pwd
+            
+            if [ ! -d "./rencanakan-talent_pool-backend" ]; then
+              git clone -b dev https://github.com/Rencanakan-id/rencanakan-talent_pool-backend.git
+            fi
+            cd ./rencanakan-talent_pool-backend
+            git pull origin dev
+        
+
+   
+            docker stop rencanakan_talent_pool || true
+            docker rm rencanakan_talent_pool || true
+
+       
+            docker build -t rencanakan_talent_pool .
+
+   
+            docker run -d -p 8000:8000 --name rencanakan_talent_pool rencanakan_talent_pool
+          EOF
+
   deploy_staging:
     if: github.ref == 'refs/heads/staging'
     needs: test
