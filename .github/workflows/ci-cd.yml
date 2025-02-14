@@ -88,13 +88,10 @@ jobs:
             
             if [ ! -d "./rencanakan-talent_pool-backend" ]; then
               git clone -b staging https://github.com/Rencanakan-id/rencanakan-talent_pool-backend.git
-            else
-              cd ./rencanakan-talent_pool-backend
-              git pull origin staging
             fi
-            
-      
-            cd rencanakan-talent_pool-backend
+            cd ./rencanakan-talent_pool-backend
+            git pull origin staging
+        
 
    
             docker stop rencanakan_talent_pool || true
