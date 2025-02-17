@@ -86,7 +86,7 @@ jobs:
 
   deploy_dev:
     if: github.ref == 'refs/heads/dev'
-    needs: test
+    needs:  [test, sonar_scan]
     runs-on: ubuntu-latest
 
     steps:
@@ -130,7 +130,7 @@ jobs:
 
   deploy_staging:
     if: github.ref == 'refs/heads/staging'
-    needs: test
+    needs:  [test, sonar_scan]
     runs-on: ubuntu-latest
 
     steps:
@@ -174,7 +174,7 @@ jobs:
 
   deploy_production:
     if: github.ref == 'refs/heads/main'
-    needs: test
+    needs:  [test, sonar_scan]
     runs-on: ubuntu-latest
 
     steps:
