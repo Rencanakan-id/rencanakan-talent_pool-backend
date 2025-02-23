@@ -120,15 +120,16 @@ jobs:
         run: sudo apt-get install openssh-client
 
       - name: create ssh key
-        run: echo "${{ secrets.SSH_PRIVATE_KEY_STAGING }}" > ssh-key.pem && cat ssh-key.pem
+        run: echo "${{ secrets.SSH_PRIVATE_KEY_STAGING }}" > ssh-key.pem 
 
       - name: update permission
         run: chmod 400 ssh-key.pem
       - name: Deploy to Server
         run: |
-          ssh -o StrictHostKeyChecking=no -i ssh-key.pem ${{ secrets.SERVER_USER_STAGING }}@${{ secrets.SERVER_IP_DEV }} "
-            docker stop talent_pool || true &&
-            docker rm talent_pool || true &&
-            docker rmi rencanakan_talent_pool:latest || true &&
-            docker load -i ~/myapp.tar &&
+          ssh -o StrictHostKeyChecking=no -i ssh-key.pem ${{ secrets.SERVER_USER_STAGING }}@${{ secrets.SERVER_IP_DEV }} << 'EOF'
+            docker stop talent_pool || true
+            docker rm talent_pool || true
+            docker rmi rencanakan_talent_pool:latest || true
+            docker load -i ~/myapp.tar
             docker run --name talent_pool -d -p 80:8080 rencanakan_talent_pool:latest
+          EOF
