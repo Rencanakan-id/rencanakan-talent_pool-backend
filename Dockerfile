@@ -14,6 +14,6 @@ FROM gradle:jdk21-alpine
 
 WORKDIR /app
 RUN ls -al
-COPY ./rencanakan.id-0.0.1-SNAPSHOT.jar /app
+COPY ./talentPool-0.0.1-SNAPSHOT.jar /app
 EXPOSE 8080
-CMD ["java","-jar","rencanakan.id-0.0.1-SNAPSHOT.jar"]
+CMD ["java","-jar","talentPool-0.0.1-SNAPSHOT.jar"]
