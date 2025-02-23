@@ -101,7 +101,7 @@ jobs:
       - name: check directory
         run: ls -al
       - name: create ssh key
-        run: echo "${{ secrets.SSH_PRIVATE_KEY_STAGING }}" > ssh-key.pem
+        run: echo "${{ secrets.SSH_PRIVATE_KEY_PROD }}" > ssh-key.pem
       - name: update permission
         run: chmod 400 ssh-key.pem
       - name: Transfer Image to Server via SCP
@@ -120,7 +120,7 @@ jobs:
         run: sudo apt-get install openssh-client
 
       - name: create ssh key
-        run: echo "${{ secrets.SSH_PRIVATE_KEY_STAGING }}" > ssh-key.pem 
+        run: echo "${{ secrets.SSH_PRIVATE_KEY_PROD }}" > ssh-key.pem 
 
       - name: update permission
         run: chmod 400 ssh-key.pem
