@@ -88,8 +88,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
-      - name: Check Artifact
-        run: ls -al java-app/
       - name: check directory
         run: ls -al
       - name: export buildkit
