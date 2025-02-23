@@ -1,18 +1,19 @@
-# Gunakan base image Python
-FROM python:3.10
+FROM gradle:jdk21-alpine
+# ARG PRODUCTION
+# ARG JDBC_DATABASE_PASSWORD
+# ARG JDBC_DATABASE_URL
+# ARG JDBC_DATABASE_USERNAME
 
-# Set direktori kerja di dalam container
+
+# ENV PRODUCTION ${PRODUCTION}
+# ENV JDBC_DATABASE_PASSWORD ${JDBC_DATABASE_PASSWORD}
+# ENV JDBC_DATABASE_URL ${JDBC_DATABASE_URL}
+# ENV JDBC_DATABASE_USERNAME ${JDBC_DATABASE_USERNAME}
+
+
+
 WORKDIR /app
-
-# Copy semua file proyek ke dalam container
-COPY . .
-
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Jalankan migrasi database & collectstatic
-RUN python manage.py migrate
-# RUN python manage.py collectstatic --noinput
-
-# Jalankan server dengan Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "rencanakan_talent_pool.wsgi:application"]
+RUN ls -al
+COPY ./rencanakan.id-0.0.1-SNAPSHOT.jar /app
+EXPOSE 8080
+CMD ["java","-jar","rencanakan.id-0.0.1-SNAPSHOT.jar"]
