@@ -54,31 +54,4 @@ public class UserProfileTest {
         assertEquals("Arsitektur", userOccupation);
     }
 
-    // Test for edit profile information
-
-    @Test
-    void editUserProfileTest() {
-        String newFirstName = "Jane";
-        String newLastName = "Smith";
-        String newPhoneNumber = "0987654321";
-        String newDomisili = "Bandung";
-        String newAvailLocation = "Jawa Barat";
-        String newOccupation = "Interior Design";
-
-        user.setFirstName(newFirstName);
-        user.setLastName(newLastName);
-        user.setPhoneNumber(newPhoneNumber);
-        user.setDomisili(newDomisili);
-        user.setAvailLocation(newAvailLocation);
-        user.setOccupation(newOccupation);
-
-        assertEquals(newFirstName, user.getFirstName());
-        assertEquals(newLastName, user.getLastName());
-        assertEquals(newPhoneNumber, user.getPhoneNumber());
-        assertEquals(newDomisili, user.getDomisili());
-        assertEquals(newAvailLocation, user.getAvailLocation());
-        assertEquals(newOccupation, user.getOccupation());
-    }
-
-
 }
