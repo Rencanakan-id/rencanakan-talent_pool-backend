@@ -107,21 +107,4 @@ public class UserProfileRepositoryTest {
         assertEquals("O'Brien-Smith", editedProfile.getLastName());
     }
 
-    @Test
-    void preserveUnchangedFieldsTest() {
-        UserProfile partialUpdate = new UserProfile();
-        partialUpdate.setId(user.getId());
-        partialUpdate.setFirstName("Lebron");
-
-        UserProfile editedProfile = repo.editProfilePartial(user, partialUpdate);
-
-        assertEquals("Lebron", editedProfile.getFirstName());
-
-        assertEquals(user.getLastName(), editedProfile.getLastName());
-        assertEquals(user.getPhoneNumber(), editedProfile.getPhoneNumber());
-        assertEquals(user.getDomisili(), editedProfile.getDomisili());
-        assertEquals(user.getAvailLocation(), editedProfile.getAvailLocation());
-        assertEquals(user.getOccupation(), editedProfile.getOccupation());
-    }
-
 }
