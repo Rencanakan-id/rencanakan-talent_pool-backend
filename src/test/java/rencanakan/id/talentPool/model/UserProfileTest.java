@@ -14,7 +14,7 @@ public class UserProfileTest {
 
     @BeforeEach
     void setUp() {
-        UserProfile newProfile = new UserProfile(1, "John", "Doe", "012345678910", "Jakarta", "Jabodetabek", "Arsitektur");
+        UserProfile newProfile = new UserProfile("1", "John", "Doe", "012345678910", "Jakarta", "Jabodetabek", "Arsitektur");
         this.user = newProfile;
         this.listUser.add(newProfile);
     }
