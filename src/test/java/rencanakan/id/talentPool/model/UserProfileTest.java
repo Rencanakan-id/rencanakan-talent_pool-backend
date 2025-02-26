@@ -10,13 +10,11 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserProfileTest {
 
     private UserProfile user;
-    private List<UserProfile> listUser;
 
     @BeforeEach
     void setUp() {
         UserProfile newProfile = new UserProfile("1", "John", "Doe", "012345678910", "Jakarta", "Jabodetabek", "Arsitektur");
         this.user = newProfile;
-        this.listUser.add(newProfile);
     }
 
     // Test for retrieve user profile information

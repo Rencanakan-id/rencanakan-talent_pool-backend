@@ -22,6 +22,12 @@ public class UserProfile {
     private String occupation;
 
     public UserProfile(String id, String firstName, String lastName, String phoneNumber, String domisili, String availLocation, String occupation) {
-
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
+        this.domisili = domisili;
+        this.availLocation = availLocation;
+        this.occupation = occupation;
     }
 }
