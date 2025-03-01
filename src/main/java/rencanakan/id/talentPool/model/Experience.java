@@ -8,7 +8,6 @@ import rencanakan.id.talentPool.enums.EmploymentType;
 import rencanakan.id.talentPool.enums.LocationType;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Getter
@@ -59,6 +58,7 @@ public class Experience {
         return new ExperienceBuilder();
     }
 
+    @SuppressWarnings("unused")
     @AssertTrue(message = "End date must not be earlier than start date")
     public boolean isEndDateAfterStartDate() {
         if (endDate == null) {
