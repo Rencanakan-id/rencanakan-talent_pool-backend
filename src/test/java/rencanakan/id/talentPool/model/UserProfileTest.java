@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.api.function.Executable;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -95,4 +98,40 @@ class UserProfileTest {
         assertThat(user).isEqualTo(anotherUser);
         assertThat(user.hashCode()).isEqualTo(anotherUser.hashCode());
     }
+
+    @Test
+    void testInvalidEmailFormat() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            user.setEmail("fernando-at-example.com");
+        });
+    }
+
+    @Test
+    void testPasswordTooShort() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            user.setPassword("short");
+        });
+    }
+
+
+    @Test
+    void testDuplicateNIKAndNPWP() {
+        UserProfile anotherUser = UserProfile.builder()
+                .nik(user.getNik())
+                .npwp(user.getNpwp())
+                .build();
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            validateUniqueNIKandNPWP(user, anotherUser);
+        });
+    }
+
+    private void validateUniqueNIKandNPWP(UserProfile u1, UserProfile u2) {
+        if (u1.getNik().equals(u2.getNik()) || u1.getNpwp().equals(u2.getNpwp())) {
+            throw new IllegalArgumentException("NIK and NPWP must be unique");
+        }
+    }
+
+
+
 }

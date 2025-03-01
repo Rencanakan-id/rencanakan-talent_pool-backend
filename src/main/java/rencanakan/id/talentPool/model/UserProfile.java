@@ -84,4 +84,26 @@ public class UserProfile {
     public void setId(String id) {
         this.id = (id == null) ? UUID.randomUUID().toString() : id;
     }
+
+    public void setEmail(String email) {
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        if (password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters");
+        }
+        this.password = password;
+    }
+
+    public void setNik(String nik) {
+        if (nik.length() != 16) {
+            throw new IllegalArgumentException("NIK must be exactly 16 digits");
+        }
+        this.nik = nik;
+    }
+
 }
