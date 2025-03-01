@@ -41,14 +41,14 @@ public class ExperienceTest {
         LocalDate endDate = startDate.plusDays(1);
 
         Experience experience = Experience.builder()
-                .setTitle("Lead Construction Project Manager")
-                .setCompany("Aman")
-                .setEmploymentType(EmploymentType.FULL_TIME)
-                .setStartDate(startDate)
-                .setEndDate(endDate)
-                .setLocation("Depok")
-                .setLocationType(LocationType.ON_SITE)
-                .setTalentId(1)
+                .title("Lead Construction Project Manager")
+                .company("Aman")
+                .employmentType(EmploymentType.FULL_TIME)
+                .startDate(startDate)
+                .endDate(endDate)
+                .location("Depok")
+                .locationType(LocationType.ON_SITE)
+                .talentId(1)
                 .build();
 
         Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -60,14 +60,14 @@ public class ExperienceTest {
         @Test
         public void testTitleEmpty() {
             Experience experience = Experience.builder()
-                    .setTitle("")
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -81,14 +81,14 @@ public class ExperienceTest {
             String validTitle = "A".repeat(50);
 
             Experience experience = Experience.builder()
-                    .setTitle(validTitle)
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title(validTitle)
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -101,14 +101,14 @@ public class ExperienceTest {
         @Test
         public void testCompanyEmpty() {
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany("")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("Lead Construction Project Manager")
+                    .company("")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -121,14 +121,14 @@ public class ExperienceTest {
         public void testCompanyAtMaxLength() {
             String validCompany = "A".repeat(50);
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany(validCompany)
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("Lead Construction Project Manager")
+                    .company(validCompany)
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -139,14 +139,14 @@ public class ExperienceTest {
         public void testCompanyExceedingMaxLength() {
             String invalidCompany = "A".repeat(51);
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany(invalidCompany)
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("Lead Construction Project Manager")
+                    .company(invalidCompany)
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -161,14 +161,14 @@ public class ExperienceTest {
         @Test
         public void testEmploymentTypeNull() {
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany("Aman")
-                    .setEmploymentType(null)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("Lead Construction Project Manager")
+                    .company("Aman")
+                    .employmentType(null)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -183,14 +183,14 @@ public class ExperienceTest {
         @Test
         public void testStartDateNull() {
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(null)
-                    .setEndDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("Lead Construction Project Manager")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(null)
+                    .endDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -205,13 +205,13 @@ public class ExperienceTest {
         @Test
         public void testEndDateNull() {
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("Lead Construction Project Manager")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -225,14 +225,14 @@ public class ExperienceTest {
         @Test
         public void testLocationEmpty() {
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation("")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("Lead Construction Project Manager")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location("")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -245,14 +245,14 @@ public class ExperienceTest {
         public void testLocationAtMaxLength() {
             String validLocation = "A".repeat(50);
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation(validLocation)
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("Lead Construction Project Manager")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location(validLocation)
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -263,14 +263,14 @@ public class ExperienceTest {
         public void testLocationExceedingMaxLength() {
             String invalidLocation = "A".repeat(51);
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation(invalidLocation)
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("Lead Construction Project Manager")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location(invalidLocation)
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -285,14 +285,14 @@ public class ExperienceTest {
         @Test
         public void tesLocationTypeNull() {
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(null)
-                    .setTalentId(1)
+                    .title("Lead Construction Project Manager")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(null)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -307,14 +307,14 @@ public class ExperienceTest {
         @Test
         public void testTalentIdNegative() {
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(-1)
+                    .title("Lead Construction Project Manager")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(-1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -326,14 +326,14 @@ public class ExperienceTest {
         @Test
         public void testTalentIdZero() {
             Experience experience = Experience.builder()
-                    .setTitle("Lead Construction Project Manager")
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(LocalDate.now())
-                    .setEndDate(LocalDate.now())
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(-1)
+                    .title("Lead Construction Project Manager")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now())
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(-1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -351,14 +351,14 @@ public class ExperienceTest {
             LocalDate endDate = startDate.minusDays(1);
 
             Experience experience = Experience.builder()
-                    .setTitle("Software Engineer")
-                    .setCompany("Aman")
-                    .setEmploymentType(EmploymentType.FULL_TIME)
-                    .setStartDate(startDate)
-                    .setEndDate(endDate)
-                    .setLocation("Depok")
-                    .setLocationType(LocationType.ON_SITE)
-                    .setTalentId(1)
+                    .title("Software Engineer")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);

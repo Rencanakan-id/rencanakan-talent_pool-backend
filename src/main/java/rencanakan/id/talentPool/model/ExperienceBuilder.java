@@ -15,42 +15,42 @@ public class ExperienceBuilder {
     private LocationType locationType;
     private long talentId;
 
-    public ExperienceBuilder setTitle(String title) {
+    public ExperienceBuilder title(String title) {
         this.title = title;
         return this;
     }
 
-    public ExperienceBuilder setCompany(String company) {
+    public ExperienceBuilder company(String company) {
         this.company = company;
         return this;
     }
 
-    public ExperienceBuilder setEmploymentType(EmploymentType employmentType) {
+    public ExperienceBuilder employmentType(EmploymentType employmentType) {
         this.employmentType = employmentType;
         return this;
     }
 
-    public ExperienceBuilder setStartDate(LocalDate startDate) {
+    public ExperienceBuilder startDate(LocalDate startDate) {
         this.startDate = startDate;
         return this;
     }
 
-    public ExperienceBuilder setEndDate(LocalDate endDate) {
+    public ExperienceBuilder endDate(LocalDate endDate) {
         this.endDate = endDate;
         return this;
     }
 
-    public ExperienceBuilder setLocation(String location) {
+    public ExperienceBuilder location(String location) {
         this.location = location;
         return this;
     }
 
-    public ExperienceBuilder setLocationType(LocationType locationType) {
+    public ExperienceBuilder locationType(LocationType locationType) {
         this.locationType = locationType;
         return this;
     }
 
-    public ExperienceBuilder setTalentId(long talentId) {
+    public ExperienceBuilder talentId(long talentId) {
         this.talentId = talentId;
         return this;
     }
