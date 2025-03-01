@@ -6,6 +6,8 @@ import lombok.*;
 import java.util.List;
 import java.util.UUID;
 
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -79,7 +81,6 @@ public class UserProfile {
     @Column(name = "skill")
     private List<String> skills;
 
-    // Setter khusus untuk menghindari null UUID saat menggunakan Builder
     public void setId(String id) {
         this.id = (id == null) ? UUID.randomUUID().toString() : id;
     }
