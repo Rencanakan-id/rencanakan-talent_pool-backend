@@ -16,7 +16,7 @@ import java.time.LocalDate;
 public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(nullable = false, length = 50)
     @NotBlank(message = "Title is required")
@@ -52,7 +52,7 @@ public class Experience {
 
     @Column(nullable = false, name = "talent_id")
     @Positive(message = "Talent ID must be a positive number")
-    private long talentId;
+    private Long talentId;
 
     public static ExperienceBuilder builder() {
         return new ExperienceBuilder();

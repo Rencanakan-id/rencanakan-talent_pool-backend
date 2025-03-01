@@ -13,7 +13,7 @@ public class ExperienceBuilder {
     private LocalDate endDate;
     private String location;
     private LocationType locationType;
-    private long talentId;
+    private Long talentId;
 
     public ExperienceBuilder title(String title) {
         this.title = title;
@@ -50,7 +50,7 @@ public class ExperienceBuilder {
         return this;
     }
 
-    public ExperienceBuilder talentId(long talentId) {
+    public ExperienceBuilder talentId(Long talentId) {
         this.talentId = talentId;
         return this;
     }

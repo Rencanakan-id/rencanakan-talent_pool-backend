@@ -48,7 +48,7 @@ public class ExperienceTest {
                 .endDate(endDate)
                 .location("Depok")
                 .locationType(LocationType.ON_SITE)
-                .talentId(1)
+                .talentId(1L)
                 .build();
 
         Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -67,7 +67,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -88,7 +88,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -108,7 +108,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -128,7 +128,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -146,7 +146,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -168,7 +168,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -190,7 +190,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -211,7 +211,7 @@ public class ExperienceTest {
                     .startDate(LocalDate.now())
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -232,7 +232,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -252,7 +252,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location(validLocation)
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -270,7 +270,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location(invalidLocation)
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -292,7 +292,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("Depok")
                     .locationType(null)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -314,7 +314,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(-1)
+                    .talentId(-1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -333,7 +333,7 @@ public class ExperienceTest {
                     .endDate(LocalDate.now())
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(-1)
+                    .talentId(0L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -358,7 +358,7 @@ public class ExperienceTest {
                     .endDate(endDate)
                     .location("Depok")
                     .locationType(LocationType.ON_SITE)
-                    .talentId(1)
+                    .talentId(1L)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
