@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import rencanakan.id.talentPool.enums.EmploymentType;
 import rencanakan.id.talentPool.enums.LocationType;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ public class ExperienceTest {
                 .build();
 
         Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        System.out.println(violations);
         assertEquals(7, violations.size(), "Expected 7 validation errors for mandatory attributes in Experience");
     }
 
@@ -39,10 +41,11 @@ public class ExperienceTest {
                 .setTitle("")
                 .setCompany("Aman")
                 .setEmploymentType(EmploymentType.FULL_TIME)
-                .setStartDate(new Date())
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
                 .setLocation("Depok")
                 .setLocationType(LocationType.ON_SITE)
-                .setTalentId("1")
+                .setTalentId(1)
                 .build();
 
         Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -53,38 +56,289 @@ public class ExperienceTest {
 
     @Test
     public void testTitleMexLength() {
-        String validTitle = "A".repeat(30);
+        String validTitle = "A".repeat(50);
 
         Experience experience = Experience.builder()
                 .setTitle(validTitle)
                 .setCompany("Aman")
                 .setEmploymentType(EmploymentType.FULL_TIME)
-                .setStartDate(new Date())
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
                 .setLocation("Depok")
                 .setLocationType(LocationType.ON_SITE)
-                .setTalentId("1")
+                .setTalentId(1)
                 .build();
 
         Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
-        assertTrue(violations.isEmpty(), "Validation should pass for title with 30 characters");
+        assertTrue(violations.isEmpty(), "Validation should pass for title with 50 characters");
     }
 
     @Test
     public void testLocationExceedingMaxLength() {
-        String invalidLocation = "A".repeat(31);
+        String invalidLocation = "A".repeat(51);
         Experience experience = Experience.builder()
                 .setTitle(invalidLocation)
                 .setCompany("Aman")
                 .setEmploymentType(EmploymentType.FULL_TIME)
-                .setStartDate(new Date())
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
                 .setLocation(invalidLocation)
                 .setLocationType(LocationType.ON_SITE)
-                .setTalentId("1")
+                .setTalentId(1)
                 .build();
 
         Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
         boolean hasLocationViolation = violations.stream()
-                .anyMatch(v -> v.getMessage().equals("Title must not exceed 30 characters") && v.getPropertyPath().toString().equals("title"));
-        assertTrue(hasLocationViolation, "Expected violation for title exceeding 30 characters");
+                .anyMatch(v -> v.getMessage().equals("Title must not exceed 50 characters") && v.getPropertyPath().toString().equals("title"));
+        assertTrue(hasLocationViolation, "Expected violation for title exceeding 50 characters");
+    }
+
+    @Test
+    public void testCompanyEmpty() {
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany("")
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
+                .setLocation("Depok")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        boolean hasCompanyViolation = violations.stream()
+                .anyMatch(v -> v.getMessage().equals("Company is required") && v.getPropertyPath().toString().equals("company"));
+        assertTrue(hasCompanyViolation, "Expected violation for empty company");
+    }
+
+    @Test
+    public void testCompanyAtMaxLength() {
+        String validCompany = "A".repeat(50);
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany(validCompany)
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
+                .setLocation("Depok")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        assertTrue(violations.isEmpty(), "Validation should pass for company with 50 characters");
+    }
+
+    @Test
+    public void testCompanyExceedingMaxLength() {
+        String invalidCompany = "A".repeat(51);
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany(invalidCompany)
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
+                .setLocation("Depok")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        boolean hasCompanyViolation = violations.stream()
+                .anyMatch(v -> v.getMessage().equals("Company must not exceed 50 characters") && v.getPropertyPath().toString().equals("company"));
+        assertTrue(hasCompanyViolation, "Expected violation for company exceeding 50 characters");
+    }
+
+    @Test
+    public void testEmploymentTypeNull() {
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany("Aman")
+                .setEmploymentType(null)
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
+                .setLocation("Depok")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        boolean hasEmploymentTypeViolation = violations.stream()
+                .anyMatch(v -> v.getMessage().equals("Employment type is required") && v.getPropertyPath().toString().equals("employmentType"));
+        assertTrue(hasEmploymentTypeViolation, "Expected violation for null employment type");
+    }
+
+    @Test
+    public void testStartDateNull() {
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany("Aman")
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(null)
+                .setEndDate(LocalDate.now())
+                .setLocation("Depok")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        boolean hasStartDateViolation = violations.stream()
+                .anyMatch(v -> v.getMessage().equals("Start date is required") && v.getPropertyPath().toString().equals("startDate"));
+        assertTrue(hasStartDateViolation, "Expected violation for null start date");
+    }
+
+    @Test
+    public void testLocationEmpty() {
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany("Aman")
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
+                .setLocation("")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        boolean hasLocationViolation = violations.stream()
+                .anyMatch(v -> v.getMessage().equals("Location is required") && v.getPropertyPath().toString().equals("location"));
+        assertTrue(hasLocationViolation, "Expected violation for empty location");
+    }
+
+    @Test
+    public void testLocationAtMaxLength() {
+        String validLocation = "A".repeat(30);
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany("Aman")
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
+                .setLocation(validLocation)
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        assertTrue(violations.isEmpty(), "Validation should pass for location with 30 characters");
+    }
+
+    @Test
+    public void tesLocationTypeNull() {
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany("Aman")
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
+                .setLocation("Depok")
+                .setLocationType(null)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        boolean hasLocationTypeViolation = violations.stream()
+                .anyMatch(v -> v.getMessage().equals("Location type is required") && v.getPropertyPath().toString().equals("locationType"));
+        assertTrue(hasLocationTypeViolation, "Expected violation for null location type");
+    }
+
+    @Test
+    public void testTalentIdNegative() {
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany("Aman")
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
+                .setLocation("Depok")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(-1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        boolean hasTalentIdViolation = violations.stream()
+                .anyMatch(v -> v.getMessage().equals("Talent ID must be a positive number") && v.getPropertyPath().toString().equals("talentId"));
+        assertTrue(hasTalentIdViolation, "Expected violation for non-positive talent ID");
+    }
+
+    @Test
+    public void testTalentIdZero() {
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany("Aman")
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(LocalDate.now())
+                .setEndDate(LocalDate.now())
+                .setLocation("Depok")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(-1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        boolean hasTalentIdViolation = violations.stream()
+                .anyMatch(v -> v.getMessage().equals("Talent ID must be a positive number") && v.getPropertyPath().toString().equals("talentId"));
+        assertTrue(hasTalentIdViolation, "Expected violation for non-positive talent ID");
+    }
+
+    @Test
+    public void testEndDateNull() {
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany("Aman")
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(LocalDate.now())
+                .setEndDate(null)
+                .setLocation("Depok")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        System.out.println(violations);
+        assertTrue(violations.isEmpty(), "Validation should pass when endDate is null");
+    }
+
+    @Test
+    public void testEndDateValid() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(1);
+
+        Experience experience = Experience.builder()
+                .setTitle("Lead Construction Project Manager")
+                .setCompany("Aman")
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(startDate)
+                .setEndDate(endDate)
+                .setLocation("Depok")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        assertTrue(violations.isEmpty(), "Validation should pass when endDate is a valid Date");
+    }
+
+    @Test
+    public void testEndDateBeforeStartDate() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.minusDays(1);
+
+        Experience experience = Experience.builder()
+                .setTitle("Software Engineer")
+                .setCompany("Aman")
+                .setEmploymentType(EmploymentType.FULL_TIME)
+                .setStartDate(startDate)
+                .setEndDate(endDate)
+                .setLocation("Depok")
+                .setLocationType(LocationType.ON_SITE)
+                .setTalentId(1)
+                .build();
+
+        Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+        boolean hasEndDateViolation = violations.stream()
+                .anyMatch(v -> v.getMessage().equals("End date must not be earlier than start date"));
+        assertTrue(hasEndDateViolation, "Expected violation for endDate being earlier than startDate");
     }
 }
