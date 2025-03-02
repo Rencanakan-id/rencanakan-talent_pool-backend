@@ -33,9 +33,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
+
 @WebMvcTest(ExperienceController.class)
-@ExtendWith(MockitoExtension.class)
 public class ExperienceControllerTest {
 
     @Autowired
@@ -129,5 +128,20 @@ public class ExperienceControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errors").value("Experience Not Found"));  // Pastikan pesan sesuai dengan exception
     }
+    @Test
+    void testMissingAuthorizationHeader() throws Exception {
+        Long id = 1L;
+        EditExperienceRequestDTO validRequest = new EditExperienceRequestDTO();
+        validRequest.setTitle("Software Engineer");
+        validRequest.setCompany("Tech Corp");
+        validRequest.setStartDate(LocalDate.of(2022, 1, 1));
+        validRequest.setEndDate(LocalDate.of(2024, 12, 31));
+
+        mockMvc.perform(put("/api/experiences/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest))) // ❌ Tidak ada Authorization header
+                .andExpect(status().isUnauthorized());
+    }
+
 
 }
