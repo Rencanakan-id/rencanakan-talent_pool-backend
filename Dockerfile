@@ -9,7 +9,11 @@ FROM gradle:jdk21-alpine
 # ENV JDBC_DATABASE_PASSWORD ${JDBC_DATABASE_PASSWORD}
 # ENV JDBC_DATABASE_URL ${JDBC_DATABASE_URL}
 # ENV JDBC_DATABASE_USERNAME ${JDBC_DATABASE_USERNAME}
+# 2. Buat user baru yang bukan root
+RUN useradd -m nonRootUser
 
+# 3. Pindah ke user non-root
+USER nonRootUser
 
 
 WORKDIR /app
