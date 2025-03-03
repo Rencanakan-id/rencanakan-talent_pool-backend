@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rencanakan.id.talentPool.dto.EditExperienceRequestDTO;
+import rencanakan.id.talentPool.dto.ExperienceListResponseDTO;
 import rencanakan.id.talentPool.dto.ExperienceResponseDTO;
 import rencanakan.id.talentPool.enums.EmploymentType;
 import rencanakan.id.talentPool.enums.LocationType;
@@ -16,6 +17,9 @@ import rencanakan.id.talentPool.model.Experience;
 import rencanakan.id.talentPool.repository.ExperienceRepository;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +36,7 @@ public class ExperienceServiceImplTest {
 
     private Experience experience;
     private EditExperienceRequestDTO requestDTO;
+    private List<Experience> experienceList;
 
     @BeforeEach
     void setUp() {
@@ -55,6 +60,20 @@ public class ExperienceServiceImplTest {
         requestDTO.setLocation("Bali");
         requestDTO.setLocationType(LocationType.HYBRID);
         requestDTO.setTalentId(101L);
+
+        // Create a second experience for testing lists
+        Experience experience2 = new Experience();
+        experience2.setId(2L);
+        experience2.setTitle("Product Manager");
+        experience2.setCompany("Digital Solutions");
+        experience2.setEmploymentType(EmploymentType.PART_TIME);
+        experience2.setStartDate(LocalDate.of(2022, 6, 1));
+        experience2.setEndDate(LocalDate.of(2023, 5, 31));
+        experience2.setLocation("Bandung");
+        experience2.setLocationType(LocationType.HYBRID);
+        experience2.setTalentId(100L);
+
+        experienceList = Arrays.asList(experience, experience2);
     }
 
     @Test
@@ -95,5 +114,55 @@ public class ExperienceServiceImplTest {
 
         verify(experienceRepository, times(1)).findById(2L);
         verify(experienceRepository, never()).save(any(Experience.class));
+    }
+
+    @Test
+    void testGetByTalentId_Success() {
+        // Arrange
+        Long talentId = 100L;
+        when(experienceRepository.findByTalentId(talentId)).thenReturn(experienceList);
+
+        // Act
+        ExperienceListResponseDTO responseDTO = experienceService.getByTalentId(talentId);
+
+        // Assert
+        assertNotNull(responseDTO);
+        assertEquals(2, responseDTO.getExperiences().size());
+
+        // Verify first experience
+        ExperienceResponseDTO firstExp = responseDTO.getExperiences().get(0);
+        assertEquals(1L, firstExp.getId());
+        assertEquals("Software Engineer", firstExp.getTitle());
+        assertEquals("Tech Corp", firstExp.getCompany());
+        assertEquals(EmploymentType.FULL_TIME, firstExp.getEmploymentType());
+        assertEquals(LocalDate.of(2023, 1, 1), firstExp.getStartDate());
+        assertEquals(LocalDate.of(2023, 12, 31), firstExp.getEndDate());
+        assertEquals("Jakarta", firstExp.getLocation());
+        assertEquals(LocationType.HYBRID, firstExp.getLocationType());
+        assertEquals(100L, firstExp.getTalentId());
+
+        // Verify second experience
+        ExperienceResponseDTO secondExp = responseDTO.getExperiences().get(1);
+        assertEquals(2L, secondExp.getId());
+        assertEquals("Product Manager", secondExp.getTitle());
+        assertEquals("Digital Solutions", secondExp.getCompany());
+
+        // Verify repository was called with correct parameters
+        verify(experienceRepository, times(1)).findByTalentId(talentId);
+    }
+
+    @Test
+    void testGetByTalentId_EmptyList_ThrowsEntityNotFoundException() {
+        // Arrange
+        Long talentId = 999L;
+        when(experienceRepository.findByTalentId(talentId)).thenReturn(Collections.emptyList());
+
+        // Act & Assert
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            experienceService.getByTalentId(talentId);
+        });
+
+        assertEquals("Experience is empty", exception.getMessage());
+        verify(experienceRepository, times(1)).findByTalentId(talentId);
     }
 }
