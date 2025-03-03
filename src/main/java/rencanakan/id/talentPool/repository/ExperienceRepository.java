@@ -8,5 +8,4 @@ import java.util.List;
 
 public interface ExperienceRepository extends JpaRepository<Experience,Long>, JpaSpecificationExecutor<Experience> {
     List<Experience> findByTalentId(Long id);
-
 }
