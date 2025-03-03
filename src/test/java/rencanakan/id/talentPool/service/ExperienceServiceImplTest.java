@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -164,5 +165,33 @@ public class ExperienceServiceImplTest {
 
         assertEquals("Experience is empty", exception.getMessage());
         verify(experienceRepository, times(1)).findByTalentId(talentId);
+    }
+
+    @Test
+    void testDeleteById_Success() {
+        // Arrange
+        when(experienceRepository.findById(1L)).thenReturn(Optional.of(experience));
+
+        // Act
+        experienceService.deleteById(1L);
+
+        // Assert
+        verify(experienceRepository, times(1)).findById(1L);
+        verify(experienceRepository, times(1)).delete(experience);
+    }
+
+    @Test
+    void testDeleteById_EntityNotFoundException() {
+        // Arrange
+        when(experienceRepository.findById(2L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            experienceService.deleteById(2L);
+        });
+
+        assertEquals("Experience by id " + 2L + " not found", exception.getMessage());
+        verify(experienceRepository, times(1)).findById(2L);
+        verify(experienceRepository, never()).delete(any(Experience.class));
     }
 }
