@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ExperienceServiceImpl implements  ExperienceService{
+public class ExperienceServiceImpl implements ExperienceService {
     @Autowired
     ExperienceRepository experienceRepository;
 
@@ -22,7 +22,7 @@ public class ExperienceServiceImpl implements  ExperienceService{
         List<Experience> experiences = experienceRepository.findByTalentId(id);
         if (experiences.isEmpty()) {
             throw new EntityNotFoundException("Experience is empty");
-        }else{
+        } else {
             List<ExperienceResponseDTO> response = experiences.stream().map(this::toExperienceResponseDTO).collect(Collectors.toList());
             return new ExperienceListResponseDTO(response);
         }
@@ -43,8 +43,15 @@ public class ExperienceServiceImpl implements  ExperienceService{
         experience.setLocationType(dto.getLocationType());
         experience.setTalentId(dto.getTalentId());
 
-        Experience new_exp =  experienceRepository.save(experience);
+        Experience new_exp = experienceRepository.save(experience);
         return toExperienceResponseDTO(new_exp);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        Experience experience = experienceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Experience by id " + id + " not found"));
+        experienceRepository.delete(experience);
     }
 
     public ExperienceResponseDTO toExperienceResponseDTO(Experience experience) {

@@ -8,4 +8,6 @@ public interface ExperienceService{
     ExperienceResponseDTO editById(Long id, EditExperienceRequestDTO dto);
 
     ExperienceListResponseDTO getByTalentId(Long id);
+
+    void deleteById(Long id);
 }
