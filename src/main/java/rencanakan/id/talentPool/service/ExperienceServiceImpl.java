@@ -22,12 +22,14 @@ public class ExperienceServiceImpl implements  ExperienceService{
         List<Experience> experiences = experienceRepository.findByTalentId(id);
         if (experiences.isEmpty()) {
             throw new EntityNotFoundException("Experience is empty");
-        }else{
-            List<ExperienceResponseDTO> response = experiences.stream().map(this::toExperienceResponseDTO).collect(Collectors.toList());
+        } else {
+            List<ExperienceResponseDTO> response = experiences.stream()
+                    .map(this::toExperienceResponseDTO)
+                    .toList();
             return new ExperienceListResponseDTO(response);
         }
-
     }
+
 
     @Override
     public ExperienceResponseDTO editById(Long id, EditExperienceRequestDTO dto) {
