@@ -52,6 +52,7 @@ public class Experience {
 
     @Column(nullable = false, name = "talent_id")
     @Positive(message = "Talent ID must be a positive number")
+    @NotNull(message = "Talent ID type is required")
     private Long talentId;
 
     public static ExperienceBuilder builder() {
