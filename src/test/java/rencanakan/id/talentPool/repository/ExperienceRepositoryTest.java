@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 
 import rencanakan.id.talentPool.model.Experience;
@@ -182,5 +183,80 @@ public class ExperienceRepositoryTest {
         assertEquals("Yogyakarta", retrievedExperience.getLocation());
         assertEquals(LocationType.HYBRID, retrievedExperience.getLocationType());
         assertEquals(500L, retrievedExperience.getTalentId());
+    }
+
+    @Test
+    public void testDeleteExperienceById_ShouldDeleteSuccessfully_WhenExperienceExists() {
+        // Arrange
+        Experience experience = new Experience();
+        experience.setTitle("Software Engineer");
+        experience.setCompany("Tech Company A");
+        experience.setEmploymentType(EmploymentType.FULL_TIME);
+        experience.setStartDate(LocalDate.of(2020, 1, 1));
+        experience.setEndDate(LocalDate.of(2022, 1, 1));
+        experience.setLocation("Jakarta");
+        experience.setLocationType(LocationType.ON_SITE);
+        experience.setTalentId(1L);
+        
+        Experience savedExperience = entityManager.persist(experience);
+        entityManager.flush();
+
+        // Act
+        experienceRepository.deleteById(savedExperience.getId());
+        Experience deletedExperience = entityManager.find(Experience.class, savedExperience.getId());
+
+        // Assert
+        assertNull(deletedExperience);
+    }
+
+    @Test
+    public void testDeleteExperienceById_ShouldNotThrowException_WhenExperienceDoesNotExist() {
+        // Arrange
+        Long nonExistentId = 999L;
+
+        // Act & Assert
+        assertDoesNotThrow(() -> experienceRepository.deleteById(nonExistentId));
+    }
+
+    @SuppressWarnings("null")
+    @Test
+    public void testDeleteExperienceById_ShouldThrowException_WhenExperienceIdIsNull() {
+        // Act & Assert
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> experienceRepository.deleteById(null));
+    }
+
+    @Test
+    public void testDeleteExperienceById_ShouldOnlyDeleteTargetExperience() {
+        // Arrange
+        Experience experience1 = new Experience();
+        experience1.setTitle("Software Engineer");
+        experience1.setCompany("Tech Company A");
+        experience1.setEmploymentType(EmploymentType.FULL_TIME);
+        experience1.setStartDate(LocalDate.of(2020, 1, 1));
+        experience1.setEndDate(LocalDate.of(2022, 1, 1));
+        experience1.setLocation("Jakarta");
+        experience1.setLocationType(LocationType.ON_SITE);
+        experience1.setTalentId(1L);
+        
+        Experience experience2 = new Experience();
+        experience2.setTitle("Product Manager");
+        experience2.setCompany("Tech Company B");
+        experience2.setEmploymentType(EmploymentType.FULL_TIME);
+        experience2.setStartDate(LocalDate.of(2019, 1, 1));
+        experience2.setEndDate(LocalDate.of(2023, 1, 1));
+        experience2.setLocation("Surabaya");
+        experience2.setLocationType(LocationType.HYBRID);
+        experience2.setTalentId(2L);
+
+        Experience savedExperience1 = entityManager.persist(experience1);
+        Experience savedExperience2 = entityManager.persist(experience2);
+        entityManager.flush();
+
+        // Act
+        experienceRepository.deleteById(savedExperience1.getId());
+
+        // Assert
+        assertNull(entityManager.find(Experience.class, savedExperience1.getId()));
+        assertNotNull(entityManager.find(Experience.class, savedExperience2.getId()));
     }
 }
