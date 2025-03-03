@@ -10,8 +10,6 @@ FROM gradle:jdk21-alpine
 # ENV JDBC_DATABASE_URL ${JDBC_DATABASE_URL}
 # ENV JDBC_DATABASE_USERNAME ${JDBC_DATABASE_USERNAME}
 
-FROM gradle:jdk21-alpine
-
 RUN adduser -D -g '' nonRootUser
 
 WORKDIR /app
