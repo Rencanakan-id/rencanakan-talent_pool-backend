@@ -85,14 +85,16 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: check directory
-        run: ls -al
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           name: java-app
-      - name: check directory
-        run: ls -al
+      - name: Run Trivy Config Scan (CIS Benchmark)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          exit-code: '1'
+          severity: 'HIGH,CRITICAL'
       - name: export buildkit
         run: export DOCKER_BUILDKIT=1
       - name: Build Docker Image
