@@ -225,4 +225,34 @@ public class ExperienceControllerTest {
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void testDeleteExperienceById_Success() throws Exception {
+        Long id = 1L;
+        String token = "Bearer sample-token";
+
+        doNothing().when(experienceService).deleteById(id);
+
+        mockMvc.perform(delete("/api/experiences/" + id)
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value("Experience with id " + id + " deleted"));
+
+        verify(experienceService, times(1)).deleteById(id);
+    }
+
+    @Test
+    public void testGetDeleteByTalentId_MissingAuthorizationHeader() throws Exception {
+        // Arrange
+        Long id = 10L;
+
+        // Act & Assert - No Authorization header
+        mockMvc.perform(delete("/api/experiences/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+
+        // Verify service was never called
+        verify(experienceService, never()).getByTalentId(anyLong());
+    }
 }
