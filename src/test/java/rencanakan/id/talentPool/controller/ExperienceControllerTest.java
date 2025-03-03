@@ -3,46 +3,129 @@ package rencanakan.id.talentPool.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import rencanakan.id.talentPool.dto.EditExperienceRequestDTO;
+import rencanakan.id.talentPool.dto.ExperienceListResponseDTO;
 import rencanakan.id.talentPool.dto.ExperienceResponseDTO;
 import rencanakan.id.talentPool.enums.EmploymentType;
 import rencanakan.id.talentPool.enums.LocationType;
 import rencanakan.id.talentPool.service.ExperienceService;
 
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ExperienceController.class)
 public class ExperienceControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
     @MockBean
     private ExperienceService experienceService;
+
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
+    @Test
+    public void testGetExperiencesByTalentId_Success() throws Exception {
+        // Arrange
+        Long talentId = 10L;
+        String token = "Bearer sample-token";
+
+        // Create response DTOs
+        ExperienceResponseDTO exp1 = new ExperienceResponseDTO();
+        exp1.setId(1L);
+        exp1.setTitle("Software Engineer");
+        exp1.setCompany("Tech Corp");
+        exp1.setEmploymentType(EmploymentType.FULL_TIME);
+        exp1.setStartDate(LocalDate.of(2022, 1, 1));
+        exp1.setEndDate(LocalDate.of(2023, 1, 1));
+        exp1.setLocation("Jakarta");
+        exp1.setLocationType(LocationType.HYBRID);
+        exp1.setTalentId(talentId);
+
+        ExperienceResponseDTO exp2 = new ExperienceResponseDTO();
+        exp2.setId(2L);
+        exp2.setTitle("Product Manager");
+        exp2.setCompany("Digital Solutions");
+        exp2.setEmploymentType(EmploymentType.PART_TIME);
+        exp2.setStartDate(LocalDate.of(2021, 3, 1));
+        exp2.setEndDate(LocalDate.of(2022, 4, 1));
+        exp2.setLocation("Bandung");
+        exp2.setLocationType(LocationType.HYBRID);
+        exp2.setTalentId(talentId);
+
+        List<ExperienceResponseDTO> experiences = Arrays.asList(exp1, exp2);
+        ExperienceListResponseDTO responseDTO = new ExperienceListResponseDTO(experiences);
+
+        when(experienceService.getByTalentId(eq(talentId))).thenReturn(responseDTO);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/experiences/" + talentId)
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.experiences").isArray())
+                .andExpect(jsonPath("$.data.experiences.length()").value(2))
+                .andExpect(jsonPath("$.data.experiences[0].id").value(exp1.getId()))
+                .andExpect(jsonPath("$.data.experiences[0].title").value(exp1.getTitle()))
+                .andExpect(jsonPath("$.data.experiences[0].company").value(exp1.getCompany()))
+                .andExpect(jsonPath("$.data.experiences[0].employmentType").value(exp1.getEmploymentType().toString()))
+                .andExpect(jsonPath("$.data.experiences[0].startDate").value(exp1.getStartDate().toString()))
+                .andExpect(jsonPath("$.data.experiences[0].endDate").value(exp1.getEndDate().toString()))
+                .andExpect(jsonPath("$.data.experiences[0].location").value(exp1.getLocation()))
+                .andExpect(jsonPath("$.data.experiences[0].locationType").value(exp1.getLocationType().toString()))
+                .andExpect(jsonPath("$.data.experiences[0].talentId").value(exp1.getTalentId()))
+                .andExpect(jsonPath("$.data.experiences[1].id").value(exp2.getId()))
+                .andExpect(jsonPath("$.data.experiences[1].title").value(exp2.getTitle()));
+
+        verify(experienceService, times(1)).getByTalentId(talentId);
+    }
+
+    @Test
+    public void testGetExperiencesByTalentId_EntityNotFoundException() throws Exception {
+        // Arrange
+        Long talentId = 999L;
+        String token = "Bearer sample-token";
+
+        when(experienceService.getByTalentId(eq(talentId)))
+                .thenThrow(new EntityNotFoundException("Experience is empty"));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/experiences/" + talentId)
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors").value("Experience is empty"));
+
+        verify(experienceService, times(1)).getByTalentId(talentId);
+    }
+
+    @Test
+    public void testGetExperiencesByTalentId_MissingAuthorizationHeader() throws Exception {
+        // Arrange
+        Long talentId = 10L;
+
+        // Act & Assert - No Authorization header
+        mockMvc.perform(get("/api/experiences/" + talentId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+
+        // Verify service was never called
+        verify(experienceService, never()).getByTalentId(anyLong());
+    }
+
+    // Existing tests from the original file
     @Test
     public void testEditExperienceById_Success() throws Exception {
         Long experienceId = 1L;
@@ -87,11 +170,12 @@ public class ExperienceControllerTest {
                 .andExpect(jsonPath("$.data.locationType").value(responseDTO.getLocationType().toString()))
                 .andExpect(jsonPath("$.data.talentId").value(responseDTO.getTalentId()));
     }
+
     @Test
     void testValidationError() throws Exception {
         String token = "Bearer sample-token";
         Long id = 1L;
-         EditExperienceRequestDTO invalidRequest = new EditExperienceRequestDTO();
+        EditExperienceRequestDTO invalidRequest = new EditExperienceRequestDTO();
         invalidRequest.setTitle("Software Engineer");
 
         mockMvc.perform(put("/api/experiences/" + id)
@@ -101,8 +185,6 @@ public class ExperienceControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors").exists());
     }
-
-
 
     @Test
     void testEntityNotFoundException() throws Exception {
@@ -122,12 +204,13 @@ public class ExperienceControllerTest {
                 .thenThrow(new EntityNotFoundException("Experience Not Found"));
 
         mockMvc.perform(put("/api/experiences/" + invalidId)
-                        .header("Authorization", token)  // Tambahkan header Authorization
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errors").value("Experience Not Found"));  // Pastikan pesan sesuai dengan exception
+                .andExpect(jsonPath("$.errors").value("Experience Not Found"));
     }
+
     @Test
     void testMissingAuthorizationHeader() throws Exception {
         Long id = 1L;
@@ -139,9 +222,7 @@ public class ExperienceControllerTest {
 
         mockMvc.perform(put("/api/experiences/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validRequest))) // ❌ Tidak ada Authorization header
+                        .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isUnauthorized());
     }
-
-
 }
