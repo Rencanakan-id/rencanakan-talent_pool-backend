@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ExperienceController.class)
-public class ExperienceControllerTest {
+class ExperienceControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,7 +36,7 @@ public class ExperienceControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Test
-    public void testGetExperiencesByTalentId_Success() throws Exception {
+    void testGetExperiencesByTalentId_Success() throws Exception {
         // Arrange
         Long talentId = 10L;
         String token = "Bearer sample-token";
@@ -67,10 +67,10 @@ public class ExperienceControllerTest {
         List<ExperienceResponseDTO> experiences = Arrays.asList(exp1, exp2);
         ExperienceListResponseDTO responseDTO = new ExperienceListResponseDTO(experiences);
 
-        when(experienceService.getByTalentId(eq(talentId))).thenReturn(responseDTO);
+        when(experienceService.getByTalentId(talentId)).thenReturn(responseDTO);
 
         // Act & Assert
-        mockMvc.perform(get("/api/experiences/" + talentId)
+        mockMvc.perform(get("/api/experiences/talent/" + talentId)
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -93,16 +93,16 @@ public class ExperienceControllerTest {
     }
 
     @Test
-    public void testGetExperiencesByTalentId_EntityNotFoundException() throws Exception {
+    void testGetExperiencesByTalentId_EntityNotFoundException() throws Exception {
         // Arrange
         Long talentId = 999L;
         String token = "Bearer sample-token";
 
-        when(experienceService.getByTalentId(eq(talentId)))
+        when(experienceService.getByTalentId(talentId))
                 .thenThrow(new EntityNotFoundException("Experience is empty"));
 
         // Act & Assert
-        mockMvc.perform(get("/api/experiences/" + talentId)
+        mockMvc.perform(get("/api/experiences/talent/" + talentId)
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -112,12 +112,12 @@ public class ExperienceControllerTest {
     }
 
     @Test
-    public void testGetExperiencesByTalentId_MissingAuthorizationHeader() throws Exception {
+    void testGetExperiencesByTalentId_MissingAuthorizationHeader() throws Exception {
         // Arrange
-        Long talentId = 10L;
+        long talentId = 10L;
 
         // Act & Assert - No Authorization header
-        mockMvc.perform(get("/api/experiences/" + talentId)
+        mockMvc.perform(get("/api/experiences/talent/" + talentId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
 
@@ -127,7 +127,7 @@ public class ExperienceControllerTest {
 
     // Existing tests from the original file
     @Test
-    public void testEditExperienceById_Success() throws Exception {
+    void testEditExperienceById_Success() throws Exception {
         Long experienceId = 1L;
         String token = "Bearer sample-token";
 
