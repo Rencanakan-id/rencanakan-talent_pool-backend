@@ -9,16 +9,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import rencanakan.id.talentPool.enums.EmploymentType;
 import rencanakan.id.talentPool.enums.LocationType;
 
-public class ExperienceListResponseDTOTest {
+class ExperienceListResponseDTOTest {
 
     @Test
-    public void testNoArgsConstructorDefaults() {
+    void testNoArgsConstructorDefaults() {
         ExperienceListResponseDTO dto = new ExperienceListResponseDTO();
         assertNull(dto.getExperiences());
     }
 
     @Test
-    public void testSettersAndGetters() {
+    void testSettersAndGetters() {
         ExperienceListResponseDTO dto = new ExperienceListResponseDTO();
         List<ExperienceResponseDTO> experiences = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public class ExperienceListResponseDTOTest {
     }
 
     @Test
-    public void testAllArgsConstructor() {
+    void testAllArgsConstructor() {
         ExperienceResponseDTO experience1 = new ExperienceResponseDTO(
                 1L,
                 "Software Engineer",
@@ -107,7 +107,7 @@ public class ExperienceListResponseDTOTest {
     }
 
     @Test
-    public void testEmptyList() {
+    void testEmptyList() {
         List<ExperienceResponseDTO> emptyList = new ArrayList<>();
         ExperienceListResponseDTO dto = new ExperienceListResponseDTO(emptyList);
 
