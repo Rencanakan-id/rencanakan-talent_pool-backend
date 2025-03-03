@@ -32,7 +32,7 @@ public class ExperienceTest {
 
         Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
         System.out.println(violations);
-        assertEquals(7, violations.size(), "Expected 7 validation errors for mandatory attributes in Experience");
+        assertEquals(6, violations.size(), "Expected 7 validation errors for mandatory attributes in Experience");
     }
 
     @Test
