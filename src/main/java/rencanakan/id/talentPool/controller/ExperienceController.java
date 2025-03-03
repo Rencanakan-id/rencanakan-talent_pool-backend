@@ -15,9 +15,9 @@ public class ExperienceController {
     @Autowired
     ExperienceService experienceService;
 
-    @GetMapping("/{talent_id}")
-    public WebResponse<ExperienceListResponseDTO> getExperiencesByTalentId(@PathVariable Long talent_id, @RequestHeader("Authorization") String token) {
-        ExperienceListResponseDTO resp = experienceService.getByTalentId(talent_id);
+    @GetMapping("/talent/{talentId}")
+    public WebResponse<ExperienceListResponseDTO> getExperiencesByTalentId(@PathVariable Long talentId, @RequestHeader("Authorization") String token) {
+        ExperienceListResponseDTO resp = experienceService.getByTalentId(talentId);
         return WebResponse.<ExperienceListResponseDTO>builder()
                 .data(resp)
                 .build();
