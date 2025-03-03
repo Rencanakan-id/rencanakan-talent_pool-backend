@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-public class ExperienceRepositoryTest {
+class ExperienceRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -26,7 +26,7 @@ public class ExperienceRepositoryTest {
     private ExperienceRepository experienceRepository;
 
     @Test
-    public void testFindByTalentId_ShouldReturnExperiences_WhenTalentIdExists() {
+    void testFindByTalentId_ShouldReturnExperiences_WhenTalentIdExists() {
         // Arrange
         Experience experience1 = new Experience();
         experience1.setTitle("Software Engineer");
@@ -74,7 +74,7 @@ public class ExperienceRepositoryTest {
     }
 
     @Test
-    public void testFindByTalentId_ShouldReturnEmptyList_WhenTalentIdDoesNotExist() {
+    void testFindByTalentId_ShouldReturnEmptyList_WhenTalentIdDoesNotExist() {
         // Act
         List<Experience> foundExperiences = experienceRepository.findByTalentId(999L); // Non-existent ID
 
@@ -84,7 +84,7 @@ public class ExperienceRepositoryTest {
     }
 
     @Test
-    public void testFindByTalentId_ShouldReturnCorrectExperiences_WhenMultipleTalentIdsExist() {
+    void testFindByTalentId_ShouldReturnCorrectExperiences_WhenMultipleTalentIdsExist() {
         // Arrange
         // Create experiences for talent with ID 101
         Experience experience1 = new Experience();
@@ -133,7 +133,7 @@ public class ExperienceRepositoryTest {
     }
 
     @Test
-    public void testFindByTalentId_ShouldReturnEmptyList_WhenTalentIdHasNoExperiences() {
+    void testFindByTalentId_ShouldReturnEmptyList_WhenTalentIdHasNoExperiences() {
         // Arrange - We have experiences in the database but not for talent ID 200
         Experience experience = new Experience();
         experience.setTitle("Software Engineer");
@@ -156,7 +156,7 @@ public class ExperienceRepositoryTest {
     }
 
     @Test
-    public void testSaveExperience_ShouldPersistAndRetrieveExperience() {
+    void testSaveExperience_ShouldPersistAndRetrieveExperience() {
         // Arrange
         Experience experience = new Experience();
         experience.setTitle("Full Stack Developer");
