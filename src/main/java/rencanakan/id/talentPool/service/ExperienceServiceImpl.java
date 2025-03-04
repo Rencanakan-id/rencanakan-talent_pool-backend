@@ -27,12 +27,9 @@ public class ExperienceServiceImpl implements ExperienceService {
         System.out.println(violations);
 
         if (!violations.isEmpty()) {
-            System.out.println("she");
-
             throw new IllegalArgumentException("Validation failed");
         }
 
-        System.out.println("he");
         Experience newExperience = Experience.builder()
                 .title(request.getTitle())
                 .company(request.getCompany())
