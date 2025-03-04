@@ -30,7 +30,7 @@ public class ExperienceController {
     }
 
     @DeleteMapping("/{id}")
-    public WebResponse<String> deleteExperienceById(@PathVariable Long id, @RequestHeader("Authorization") String token) {
+    public WebResponse<String> deleteExperienceById(@PathVariable("id") Long id, @RequestHeader("Authorization") String token) {
         experienceService.deleteById(id);
         return WebResponse.<String>builder()
                 .data("Experience with id " + id + " deleted")
