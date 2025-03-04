@@ -365,6 +365,55 @@ public class ExperienceTest {
             boolean hasEndDateViolation = violations.stream()
                     .anyMatch(v -> v.getMessage().equals("End date must not be earlier than start date"));
             assertTrue(hasEndDateViolation, "Expected violation for endDate being earlier than startDate");
+
+            assertTrue(experience.isEndDateBeforeStartDate(), "Should return false when endDate is before startDate");
+        }
+
+        @Test
+        public void testEndDateAfterStartDate() {
+            LocalDate startDate = LocalDate.now();
+            LocalDate endDate = startDate.plusDays(1);
+
+            Experience experience = Experience.builder()
+                    .title("Software Engineer")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1L)
+                    .build();
+
+            Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+            boolean hasEndDateViolation = violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("End date must not be earlier than start date"));
+            assertFalse(hasEndDateViolation, "Expected no violation when endDate is after startDate.");
+            assertFalse(experience.isEndDateBeforeStartDate(), "Should return false when endDate is after startDate");
+        }
+
+        @Test
+        public void testEndDateSameAsStartDate() {
+            LocalDate startDate = LocalDate.now();
+            LocalDate endDate = LocalDate.now();
+
+            Experience experience = Experience.builder()
+                    .title("Software Engineer")
+                    .company("Aman")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .location("Depok")
+                    .locationType(LocationType.ON_SITE)
+                    .talentId(1L)
+                    .build();
+
+            Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+            boolean hasEndDateViolation = violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("End date must not be earlier than start date"));
+            assertFalse(hasEndDateViolation, "Expected no violation when endDate is the same as startDate");
+
+            assertFalse(experience.isEndDateBeforeStartDate(), "Should return false when endDate is same as startDate");
         }
     }
 }
