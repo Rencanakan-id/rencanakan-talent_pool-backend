@@ -243,7 +243,7 @@ public class ExperienceControllerTest {
     }
 
     @Test
-    public void testGetDeleteByTalentId_MissingAuthorizationHeader() throws Exception {
+    void testGetDeleteByTalentId_MissingAuthorizationHeader() throws Exception {
         // Arrange
         Long id = 10L;
 
