@@ -210,7 +210,7 @@ public class ExperienceRepositoryTest {
     }
 
     @Test
-    public void testDeleteExperienceById_ShouldNotThrowException_WhenExperienceDoesNotExist() {
+    void testDeleteExperienceById_ShouldNotThrowException_WhenExperienceDoesNotExist() {
         // Arrange
         Long nonExistentId = 999L;
 
@@ -220,13 +220,13 @@ public class ExperienceRepositoryTest {
 
     @SuppressWarnings("null")
     @Test
-    public void testDeleteExperienceById_ShouldThrowException_WhenExperienceIdIsNull() {
+    void testDeleteExperienceById_ShouldThrowException_WhenExperienceIdIsNull() {
         // Act & Assert
         assertThrows(InvalidDataAccessApiUsageException.class, () -> experienceRepository.deleteById(null));
     }
 
     @Test
-    public void testDeleteExperienceById_ShouldOnlyDeleteTargetExperience() {
+    void testDeleteExperienceById_ShouldOnlyDeleteTargetExperience() {
         // Arrange
         Experience experience1 = new Experience();
         experience1.setTitle("Software Engineer");
