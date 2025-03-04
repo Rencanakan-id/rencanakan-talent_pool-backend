@@ -365,7 +365,6 @@ public class ExperienceTest {
             boolean hasEndDateViolation = violations.stream()
                     .anyMatch(v -> v.getMessage().equals("End date must not be earlier than start date"));
             assertTrue(hasEndDateViolation, "Expected violation for endDate being earlier than startDate");
-
             assertTrue(experience.isEndDateBeforeStartDate(), "Should return false when endDate is before startDate");
         }
 
@@ -412,7 +411,6 @@ public class ExperienceTest {
             boolean hasEndDateViolation = violations.stream()
                     .anyMatch(v -> v.getMessage().equals("End date must not be earlier than start date"));
             assertFalse(hasEndDateViolation, "Expected no violation when endDate is the same as startDate");
-
             assertFalse(experience.isEndDateBeforeStartDate(), "Should return false when endDate is same as startDate");
         }
     }
