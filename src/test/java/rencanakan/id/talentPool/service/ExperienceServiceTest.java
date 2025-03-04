@@ -1,13 +1,8 @@
 package rencanakan.id.talentPool.service;
 
-
-import com.zaxxer.hikari.HikariConfig;
 import jakarta.validation.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rencanakan.id.talentPool.dto.ExperienceRequestDTO;
@@ -17,8 +12,6 @@ import rencanakan.id.talentPool.model.Experience;
 import rencanakan.id.talentPool.repository.ExperienceRepository;
 
 import java.time.LocalDate;
-import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -177,10 +170,5 @@ public class ExperienceServiceTest {
             assertEquals("Validation failed", exception.getMessage());
             verify(experienceRepository, never()).save(any(Experience.class));
         }
-
-
     }
-
-
-
 }
