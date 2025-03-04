@@ -59,12 +59,11 @@ public class Experience {
         return new ExperienceBuilder();
     }
 
-    @SuppressWarnings("unused")
-    @AssertTrue(message = "End date must not be earlier than start date")
-    public boolean isEndDateAfterStartDate() {
+    @AssertFalse(message = "End date must not be earlier than start date")
+    public boolean isEndDateBeforeStartDate() {
         if (endDate == null) {
-            return true;
+            return false;
         }
-        return startDate != null && !endDate.isBefore(startDate);
+        return startDate != null && endDate.isBefore(startDate);
     }
 }
