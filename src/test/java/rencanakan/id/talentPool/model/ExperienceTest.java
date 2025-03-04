@@ -351,7 +351,7 @@ public class ExperienceTest {
             LocalDate endDate = startDate.minusDays(1);
 
             Experience experience = Experience.builder()
-                    .title("Software Engineer")
+                    .title("Lead Construction Project Manager")
                     .company("Aman")
                     .employmentType(EmploymentType.FULL_TIME)
                     .startDate(startDate)
@@ -374,7 +374,7 @@ public class ExperienceTest {
             LocalDate endDate = startDate.plusDays(1);
 
             Experience experience = Experience.builder()
-                    .title("Software Engineer")
+                    .title("Lead Construction Project Manager")
                     .company("Aman")
                     .employmentType(EmploymentType.FULL_TIME)
                     .startDate(startDate)
@@ -397,7 +397,7 @@ public class ExperienceTest {
             LocalDate endDate = LocalDate.now();
 
             Experience experience = Experience.builder()
-                    .title("Software Engineer")
+                    .title("Lead Construction Project Manager")
                     .company("Aman")
                     .employmentType(EmploymentType.FULL_TIME)
                     .startDate(startDate)
