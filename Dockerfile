@@ -10,10 +10,18 @@ FROM gradle:jdk21-alpine
 # ENV JDBC_DATABASE_URL ${JDBC_DATABASE_URL}
 # ENV JDBC_DATABASE_USERNAME ${JDBC_DATABASE_USERNAME}
 
-
+RUN adduser -D -g '' nonRootUser
 
 WORKDIR /app
-RUN ls -al
+
+USER nonRootUser
+
+# 4. Copy file JAR ke dalam container
 COPY ./talentPool-0.0.1-SNAPSHOT.jar /app
+
+# 5. Buka port 8080
 EXPOSE 8080
-CMD ["java","-jar","talentPool-0.0.1-SNAPSHOT.jar"]
+
+# 6. Jalankan aplikasi
+CMD ["java", "-jar", "talentPool-0.0.1-SNAPSHOT.jar"]
+
