@@ -3,18 +3,12 @@ package rencanakan.id.talentPool.service;
 
 import com.zaxxer.hikari.HikariConfig;
 import jakarta.validation.*;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rencanakan.id.talentPool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentPool.enums.EmploymentType;
@@ -27,17 +21,50 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ExperienceServiceTest {
     @Mock
     private ExperienceRepository experienceRepository;
 
+    @Mock
+    private Validator mockValidator;
+
     @InjectMocks
     private ExperienceServiceImpl experienceService;
 
+    @Captor
+    private ArgumentCaptor<Experience> experienceCaptor;
+
     private static Validator validator;
+
+    private ExperienceRequestDTO createValidRequestDTO() {
+        ExperienceRequestDTO dto = new ExperienceRequestDTO();
+        dto.setTitle("Lead Construction Project Manager");
+        dto.setCompany("Aman");
+        dto.setEmploymentType(EmploymentType.FULL_TIME);
+        dto.setStartDate(LocalDate.now());
+        dto.setEndDate(LocalDate.now().plusDays(1));
+        dto.setLocation("Depok");
+        dto.setLocationType(LocationType.ON_SITE);
+        dto.setTalentId(1L);
+        return dto;
+    }
+
+    private Experience createMockExperience() {
+        return Experience.builder()
+                .title("Lead Construction Project Manager")
+                .company("Aman")
+                .employmentType(EmploymentType.FULL_TIME)
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusDays(1))
+                .location("Depok")
+                .locationType(LocationType.ON_SITE)
+                .talentId(1L)
+                .build();
+    }
 
     @BeforeAll
     public static void setupValidator() {
@@ -45,91 +72,113 @@ public class ExperienceServiceTest {
         validator = factory.getValidator();
     }
 
-    @BeforeEach
-    void setup() {
-        String title = "Lead Construction Project Manager";
-        String company = "Aman";
-        EmploymentType employmentType = EmploymentType.FULL_TIME;
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.plusDays(1);
-        String location = "Depok";
-        LocationType locationType = LocationType.ON_SITE;
-        Long talentId = 1L;
-
-        ExperienceRequestDTO request = new ExperienceRequestDTO();
-        request.setTitle(title);
-        request.setCompany(company);
-        request.setEmploymentType(employmentType);
-        request.setStartDate(startDate);
-        request.setEndDate(endDate);
-        request.setLocation(location);
-        request.setLocationType(locationType);
-        request.setTalentId(talentId);
-    }
-    
     @Nested
-    class CreateExperienceTest {
+    @DisplayName("Create Experience Tests")
+    class CreateExperienceTests {
+
         @Test
-        public void testCreateExperience_Success() {
-            String title = "Lead Construction Project Manager";
-            String company = "Aman";
-            EmploymentType employmentType = EmploymentType.FULL_TIME;
-            LocalDate startDate = LocalDate.now();
-            LocalDate endDate = startDate.plusDays(1);
-            String location = "Depok";
-            LocationType locationType = LocationType.ON_SITE;
-            Long talentId = 1L;
+        @DisplayName("Should create and save experience with valid data")
+        void createExperience_AllValid() {
+            ExperienceRequestDTO request = createValidRequestDTO();
+            Experience mockSavedExperience = createMockExperience();
 
-            ExperienceRequestDTO request = new ExperienceRequestDTO();
-            request.setTitle(title);
-            request.setCompany(company);
-            request.setEmploymentType(employmentType);
-            request.setStartDate(startDate);
-            request.setEndDate(endDate);
-            request.setLocation(location);
-            request.setLocationType(locationType);
-            request.setTalentId(talentId);
-
-            when(experienceRepository.save(ArgumentMatchers.any(Experience.class))).thenAnswer(invocation -> {
-                Experience experienceToSave = invocation.getArgument(0, Experience.class);
-                experienceToSave.setId(1L);
-                return experienceToSave;
-            });
+            when(experienceRepository.save(any(Experience.class))).thenReturn(mockSavedExperience);
 
             Experience result = experienceService.createExperience(request);
 
-            assertNotNull(result, "Result should not be null");
-            assertNotNull(result.getId(), "ID should be auto-generated");
-            assertEquals(title, result.getTitle(), "Title mismatch");
-            assertEquals(company, result.getCompany(), "Company mismatch");
-            assertEquals(employmentType, result.getEmploymentType(), "Employment type mismatch");
-            assertEquals(startDate, result.getStartDate(), "Start date mismatch");
-            assertEquals(endDate, result.getEndDate(), "End date mismatch");
-            assertEquals(location, result.getLocation(), "Location mismatch");
-            assertEquals(locationType, result.getLocationType(), "Location type mismatch");
-            assertEquals(talentId, result.getTalentId(), "Talent ID mismatch");
+            verify(experienceRepository).save(experienceCaptor.capture());
+            Experience capturedExperience = experienceCaptor.getValue();
+
+            assertEquals(request.getTitle(), capturedExperience.getTitle());
+            assertEquals(request.getCompany(), capturedExperience.getCompany());
+            assertEquals(request.getEmploymentType(), capturedExperience.getEmploymentType());
+            assertEquals(request.getStartDate(), capturedExperience.getStartDate());
+            assertEquals(request.getEndDate(), capturedExperience.getEndDate());
+            assertEquals(request.getLocation(), capturedExperience.getLocation());
+            assertEquals(request.getLocationType(), capturedExperience.getLocationType());
+            assertEquals(request.getTalentId(), capturedExperience.getTalentId());
+
+            assertEquals(result, mockSavedExperience);
         }
 
-        private static Stream<String> invalidTitles() {
-            return Stream.of(
-                    "",
-                    "A".repeat(51)
-            );
+        @Test
+        @DisplayName("Should create experience with null end date")
+        void createExperience_NullEndDate() {
+            ExperienceRequestDTO request = createValidRequestDTO();
+            request.setEndDate(null);
+            Experience mockSavedExperience = createMockExperience();
+            mockSavedExperience.setEndDate(null);
+
+            when(experienceRepository.save(any(Experience.class))).thenReturn(mockSavedExperience);
+
+            Experience result = experienceService.createExperience(request);
+
+            verify(experienceRepository).save(experienceCaptor.capture());
+            Experience capturedExperience = experienceCaptor.getValue();
+
+            assertNull(capturedExperience.getEndDate());
+            assertNull(result.getEndDate());
+        }
+        @Test
+        @DisplayName("Should create experience with maximum character limits")
+        void createExperience_MaxCharLimit() {
+            ExperienceRequestDTO request = createValidRequestDTO();
+            String maxAllowedChars = "A".repeat(50);
+            request.setTitle(maxAllowedChars);
+            request.setCompany(maxAllowedChars);
+            request.setLocation(maxAllowedChars);
+
+            Experience mockSavedExperience = createMockExperience();
+            mockSavedExperience.setTitle(maxAllowedChars);
+            mockSavedExperience.setCompany(maxAllowedChars);
+            mockSavedExperience.setLocation(maxAllowedChars);
+            when(experienceRepository.save(any(Experience.class))).thenReturn(mockSavedExperience);
+
+            Experience result = experienceService.createExperience(request);
+
+            verify(experienceRepository).save(experienceCaptor.capture());
+            Experience capturedExperience = experienceCaptor.getValue();
+
+            assertEquals(maxAllowedChars, capturedExperience.getTitle(), "Title should match the maximum allowed characters");
+            assertEquals(maxAllowedChars, capturedExperience.getCompany(), "Company should match the maximum allowed characters");
+            assertEquals(maxAllowedChars, capturedExperience.getLocation(), "Location should match the maximum allowed characters");
+            assertEquals(mockSavedExperience, result, "The returned experience should match the mocked saved experience");
         }
 
-        @ParameterizedTest
-        @MethodSource("invalidTitles")
-        public void testCreateExperience_TitleInvalid(String title) {
+        @Test
+        @DisplayName("Should reject experience with invalid/missing data")
+        void createExperience_MissingValue() {
             ExperienceRequestDTO request = new ExperienceRequestDTO();
-            request.setTitle(title);
-            request.setCompany("Aman");
-            request.setEmploymentType(EmploymentType.FULL_TIME);
-            request.setStartDate(LocalDate.now());
-            request.setEndDate(LocalDate.now().plusDays(1));
-            request.setLocation("Depok");
-            request.setLocationType(LocationType.ON_SITE);
-            request.setTalentId(1L);
+
+            when(mockValidator.validate(request)).thenReturn(validator.validate(request));
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+                experienceService.createExperience(request);
+            });
+
+            assertEquals("Validation failed", exception.getMessage());
+            verify(experienceRepository, never()).save(any(Experience.class));
         }
+
+        @Test
+        @DisplayName("Should reject experience with exceeding characters limit")
+        void createExperience_ExceedingCharLimit() {
+            ExperienceRequestDTO request = createValidRequestDTO();
+            request.setTitle("A".repeat(51));
+            request.setCompany("A".repeat(51));
+            request.setLocation("A".repeat(51));
+
+            when(mockValidator.validate(request)).thenReturn(validator.validate(request));
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+                experienceService.createExperience(request);
+            });
+
+            assertEquals("Validation failed", exception.getMessage());
+            verify(experienceRepository, never()).save(any(Experience.class));
+        }
+
+
     }
 
 
