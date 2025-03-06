@@ -1,4 +1,8 @@
 package rencanakan.id.talentPool.service;
 
-public class UserProfileService {
+import rencanakan.id.talentPool.model.UserProfile;
+
+public interface UserProfileService {
+
+    UserProfile getUserProfile(int id);
 }
