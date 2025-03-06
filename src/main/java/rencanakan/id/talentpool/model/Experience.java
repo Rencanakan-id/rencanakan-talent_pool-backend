@@ -2,6 +2,7 @@ package rencanakan.id.talentpool.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import rencanakan.id.talentpool.enums.EmploymentType;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
+@Builder
 @Table(name = "experience")
 public class Experience {
     @Id
