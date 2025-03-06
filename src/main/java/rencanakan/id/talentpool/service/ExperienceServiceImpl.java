@@ -21,11 +21,7 @@ public class ExperienceServiceImpl implements ExperienceService {
 
     @Override
     public Experience createExperience(ExperienceRequestDTO request) {
-        System.out.println(request.getCompany());
-
         Set<ConstraintViolation<ExperienceRequestDTO>> violations = validator.validate(request);
-        System.out.println(violations);
-
         if (!violations.isEmpty()) {
             throw new IllegalArgumentException("Validation failed");
         }
