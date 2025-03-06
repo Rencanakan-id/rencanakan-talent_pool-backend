@@ -110,7 +110,7 @@ public class ExperienceControllerTest {
 
         @Test
         void testCreateExperience_BadRequest() throws Exception {
-            ExperienceRequestDTO request = createValidRequestDTO();
+            ExperienceRequestDTO request = new ExperienceRequestDTO();
 
             when(experienceService.createExperience(any(ExperienceRequestDTO.class)))
                     .thenThrow(new IllegalArgumentException("Invalid experience data"));
