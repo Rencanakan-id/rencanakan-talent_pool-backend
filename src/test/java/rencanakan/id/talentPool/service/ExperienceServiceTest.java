@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ExperienceServiceTest {
+class ExperienceServiceTest {
     @Mock
     private ExperienceRepository experienceRepository;
 

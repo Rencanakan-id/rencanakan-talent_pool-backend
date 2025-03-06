@@ -15,18 +15,18 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ExperienceTest {
+class ExperienceTest {
 
     private static Validator validator;
 
     @BeforeAll
-    public static void setupValidator() {
+    static void setupValidator() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }
 
     @Test
-    public void testEmptyConstructor() {
+    void testEmptyConstructor() {
         Experience experience = Experience.builder()
                 .build();
 
@@ -36,7 +36,7 @@ public class ExperienceTest {
     }
 
     @Test
-    public void testFullValidParameters() {
+    void testFullValidParameters() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(1);
 
@@ -58,7 +58,7 @@ public class ExperienceTest {
     @Nested
     class TitleAttributeTests {
         @Test
-        public void testTitleEmpty() {
+        void testTitleEmpty() {
             Experience experience = Experience.builder()
                     .title("")
                     .company("Aman")
@@ -77,7 +77,7 @@ public class ExperienceTest {
         }
 
         @Test
-        public void testTitleMexLength() {
+        void testTitleMexLength() {
             String validTitle = "A".repeat(50);
 
             Experience experience = Experience.builder()
@@ -99,7 +99,7 @@ public class ExperienceTest {
     @Nested
     class CompanyAttributeTests {
         @Test
-        public void testCompanyEmpty() {
+        void testCompanyEmpty() {
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
                     .company("")
@@ -118,7 +118,7 @@ public class ExperienceTest {
         }
 
         @Test
-        public void testCompanyAtMaxLength() {
+        void testCompanyAtMaxLength() {
             String validCompany = "A".repeat(50);
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
@@ -136,7 +136,7 @@ public class ExperienceTest {
         }
 
         @Test
-        public void testCompanyExceedingMaxLength() {
+        void testCompanyExceedingMaxLength() {
             String invalidCompany = "A".repeat(51);
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
@@ -159,7 +159,7 @@ public class ExperienceTest {
     @Nested
     class EmploymentTypeTests {
         @Test
-        public void testEmploymentTypeNull() {
+        void testEmploymentTypeNull() {
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
                     .company("Aman")
@@ -181,7 +181,7 @@ public class ExperienceTest {
     @Nested
     class StartDateAttributeTests {
         @Test
-        public void testStartDateNull() {
+        void testStartDateNull() {
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
                     .company("Aman")
@@ -203,7 +203,7 @@ public class ExperienceTest {
     @Nested
     class EndDateAttributeTests {
         @Test
-        public void testEndDateNull() {
+        void testEndDateNull() {
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
                     .company("Aman")
@@ -223,7 +223,7 @@ public class ExperienceTest {
     @Nested
     class LocationAttributeTests {
         @Test
-        public void testLocationEmpty() {
+        void testLocationEmpty() {
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
                     .company("Aman")
@@ -242,7 +242,7 @@ public class ExperienceTest {
         }
 
         @Test
-        public void testLocationAtMaxLength() {
+        void testLocationAtMaxLength() {
             String validLocation = "A".repeat(50);
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
@@ -260,7 +260,7 @@ public class ExperienceTest {
         }
 
         @Test
-        public void testLocationExceedingMaxLength() {
+        void testLocationExceedingMaxLength() {
             String invalidLocation = "A".repeat(51);
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
@@ -283,7 +283,7 @@ public class ExperienceTest {
     @Nested
     class LocationTypeAttributeTests {
         @Test
-        public void tesLocationTypeNull() {
+        void tesLocationTypeNull() {
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
                     .company("Aman")
@@ -305,7 +305,7 @@ public class ExperienceTest {
     @Nested
     class TalentIdAttributeTests {
         @Test
-        public void testTalentIdNegative() {
+        void testTalentIdNegative() {
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
                     .company("Aman")
@@ -324,7 +324,7 @@ public class ExperienceTest {
         }
 
         @Test
-        public void testTalentIdZero() {
+        void testTalentIdZero() {
             Experience experience = Experience.builder()
                     .title("Lead Construction Project Manager")
                     .company("Aman")
@@ -346,7 +346,7 @@ public class ExperienceTest {
     @Nested
     class CustomLogicTests {
         @Test
-        public void testEndDateBeforeStartDate() {
+        void testEndDateBeforeStartDate() {
             LocalDate startDate = LocalDate.now();
             LocalDate endDate = startDate.minusDays(1);
 
@@ -369,7 +369,7 @@ public class ExperienceTest {
         }
 
         @Test
-        public void testEndDateAfterStartDate() {
+        void testEndDateAfterStartDate() {
             LocalDate startDate = LocalDate.now();
             LocalDate endDate = startDate.plusDays(1);
 
@@ -392,7 +392,7 @@ public class ExperienceTest {
         }
 
         @Test
-        public void testEndDateSameAsStartDate() {
+        void testEndDateSameAsStartDate() {
             LocalDate startDate = LocalDate.now();
             LocalDate endDate = LocalDate.now();
 
