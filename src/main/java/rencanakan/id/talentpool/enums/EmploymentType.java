@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool.enums;
+package rencanakan.id.talentpool.enums;
 
 public enum EmploymentType {
     FULL_TIME,

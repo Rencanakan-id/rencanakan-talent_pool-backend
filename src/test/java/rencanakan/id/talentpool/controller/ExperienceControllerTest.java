@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool.controller;
+package rencanakan.id.talentpool.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -15,11 +15,11 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import rencanakan.id.talentPool.dto.ExperienceRequestDTO;
-import rencanakan.id.talentPool.enums.EmploymentType;
-import rencanakan.id.talentPool.enums.LocationType;
-import rencanakan.id.talentPool.model.Experience;
-import rencanakan.id.talentPool.service.ExperienceServiceImpl;
+import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
+import rencanakan.id.talentpool.enums.EmploymentType;
+import rencanakan.id.talentpool.enums.LocationType;
+import rencanakan.id.talentpool.model.Experience;
+import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

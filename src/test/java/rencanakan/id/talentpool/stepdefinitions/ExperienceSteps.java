@@ -1,14 +1,15 @@
-package rencanakan.id.talentPool.stepdefinitions;
+package rencanakan.id.talentpool.stepdefinitions;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import rencanakan.id.talentPool.dto.ExperienceRequestDTO;
-import rencanakan.id.talentPool.enums.EmploymentType;
-import rencanakan.id.talentPool.enums.LocationType;
-import rencanakan.id.talentPool.service.ExperienceServiceImpl;
+import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
+import rencanakan.id.talentpool.enums.EmploymentType;
+import rencanakan.id.talentpool.enums.LocationType;
+import rencanakan.id.talentpool.repository.ExperienceRepository;
+import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
 import java.time.LocalDate;
 
@@ -20,6 +21,9 @@ public class ExperienceSteps {
 
     @Mock
     private ExperienceServiceImpl experienceService;
+
+    @Mock
+    private ExperienceRepository experienceRepository;
 
     private ExperienceRequestDTO request;
 

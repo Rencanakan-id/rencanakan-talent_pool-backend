@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool;
+package rencanakan.id.talentpool;
 
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
@@ -9,5 +9,5 @@ import org.junit.runner.RunWith;
         features = "src/test/resources/features",
         glue = "rencanakan.id.talentPool.stepdefinitions"
 )
-public class CucumberTestRunner {
+public class CucumberRunnerTest {
 }

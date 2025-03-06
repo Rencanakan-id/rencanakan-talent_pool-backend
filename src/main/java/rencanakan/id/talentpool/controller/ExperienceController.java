@@ -1,10 +1,10 @@
-package rencanakan.id.talentPool.controller;
+package rencanakan.id.talentpool.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import rencanakan.id.talentPool.dto.ExperienceRequestDTO;
-import rencanakan.id.talentPool.model.Experience;
-import rencanakan.id.talentPool.service.ExperienceServiceImpl;
+import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
+import rencanakan.id.talentpool.model.Experience;
+import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
 @RestController
 @RequestMapping("/experience")
