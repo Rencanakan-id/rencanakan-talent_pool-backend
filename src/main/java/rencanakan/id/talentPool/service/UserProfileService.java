@@ -1,8 +1,7 @@
 package rencanakan.id.talentPool.service;
 
-import rencanakan.id.talentPool.model.UserProfile;
+import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
 
 public interface UserProfileService {
-
-    UserProfile getUserProfile(int id);
+    UserProfileResponseDTO getById(String id);
 }
