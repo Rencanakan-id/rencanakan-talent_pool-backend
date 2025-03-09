@@ -1,7 +1,6 @@
 package rencanakan.id.talentPool.controller;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import rencanakan.id.talentPool.dto.WebResponse;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
