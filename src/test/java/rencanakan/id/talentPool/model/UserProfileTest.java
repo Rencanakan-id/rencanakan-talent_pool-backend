@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.api.function.Executable;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +40,7 @@ class UserProfileTest {
                 .skkLevel("Level 3")
                 .currentLocation("Jakarta")
                 .preferredLocations(Arrays.asList("Jakarta", "Bandung", "Surabaya"))
-                .skills(Arrays.asList("Java", "Spring Boot", "Hibernate"))
+                .skill("Operator")
                 .build();
 
         user.setId(UUID.randomUUID().toString());
@@ -93,7 +92,7 @@ class UserProfileTest {
                 .skkLevel("Level 3")
                 .currentLocation("Jakarta")
                 .preferredLocations(Arrays.asList("Jakarta", "Bandung", "Surabaya"))
-                .skills(Arrays.asList("Java", "Spring Boot", "Hibernate"))
+                .skill("Operator")
                 .build();
 
         anotherUser.setId(user.getId());
@@ -174,14 +173,14 @@ class UserProfileTest {
     }
 
     @Test
-    void testSkillsManagement() {
-        List<String> newSkills = Arrays.asList("Python", "Django", "PostgreSQL");
-        user.setSkills(newSkills);
-        assertEquals(newSkills, user.getSkills());
+    void testSkillManagement() {
+        String newSkill = "Operator";
+        user.setSkill(newSkill);
+        assertEquals(newSkill, user.getSkill());
 
-        List<String> emptySkills = Arrays.asList();
-        user.setSkills(emptySkills);
-        assertEquals(emptySkills, user.getSkills());
+        String emptySkill = "";
+        user.setSkill(emptySkill);
+        assertEquals(emptySkill, user.getSkill());
     }
 
     @Test

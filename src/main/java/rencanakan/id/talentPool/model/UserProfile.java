@@ -76,10 +76,8 @@ public class UserProfile {
     @Column(name = "preferred_location")
     private List<String> preferredLocations;
 
-    @ElementCollection
-    @CollectionTable(name = "user_skills", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "skill")
-    private List<String> skills;
+    @Column(name = "skill", length = 255)
+    private String skill;
 
     public void setId(String id) {
         this.id = (id == null) ? UUID.randomUUID().toString() : id;
