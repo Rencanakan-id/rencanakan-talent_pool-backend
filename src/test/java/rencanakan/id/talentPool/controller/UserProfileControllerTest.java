@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentPool.service.UserProfileService;
+import rencanakan.id.talentPool.model.UserProfile;
 
 @WebMvcTest(UserProfileController.class)
 public class UserProfileControllerTest {
@@ -26,6 +28,8 @@ public class UserProfileControllerTest {
     private UserProfileService userProfileService;
 
     private UserProfileResponseDTO userProfileResponseDTO;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
@@ -84,5 +88,41 @@ public class UserProfileControllerTest {
 
         // Verify that the service method was called
         verify(userProfileService, times(1)).getById(userId);
+    }
+
+    @Test
+    void testEditProfileWithValidValue() throws Exception {
+        String userId = "user123";
+
+        UserProfile updatedProfile = new UserProfile();
+        updatedProfile.setId(userId);
+        updatedProfile.setFirstName("Jane");
+        updatedProfile.setLastName("Doe");
+        updatedProfile.setEmail("jane.doe@example.com");
+
+        updatedProfile.setPassword("password12345");
+        updatedProfile.setPhoneNumber("08123456789");
+        updatedProfile.setNik("1234567891234567");
+
+        UserProfileResponseDTO responseDTO = new UserProfileResponseDTO();
+        responseDTO.setId(userId);
+        responseDTO.setFirstName("Jane");
+        responseDTO.setLastName("Doe");
+        responseDTO.setEmail("jane.doe@example.com");
+
+        when(userProfileService.editProfile(eq(userId), any(UserProfile.class))).thenReturn(responseDTO);
+
+        mockMvc.perform(put("/api/user-profiles/edit/{id}", userId)
+                        .header("Authorization", "Bearer test-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedProfile)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.data.id").value(userId))
+                .andExpect(jsonPath("$.data.firstName").value("Jane"))
+                .andExpect(jsonPath("$.data.lastName").value("Doe"))
+                .andExpect(jsonPath("$.data.email").value("jane.doe@example.com"));
+
+        verify(userProfileService, times(1)).editProfile(eq(userId), any(UserProfile.class));
     }
 }
