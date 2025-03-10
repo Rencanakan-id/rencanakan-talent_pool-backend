@@ -29,6 +29,73 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserProfileResponseDTO editProfile(String id, UserProfile editedProfile) {
+        Optional<UserProfile> userProfileOptional = userProfileRepository.findById(id);
+
+        if (userProfileOptional.isPresent()) {
+            UserProfile userProfile = userProfileOptional.get();
+
+            if (editedProfile.getFirstName() != null) {
+                userProfile.setFirstName(editedProfile.getFirstName());
+            }
+            if (editedProfile.getLastName() != null) {
+                userProfile.setLastName(editedProfile.getLastName());
+            }
+            if (editedProfile.getEmail() != null) {
+                userProfile.setEmail(editedProfile.getEmail());
+            }
+            if (editedProfile.getPassword() != null) {
+                userProfile.setPassword(editedProfile.getPassword());
+            }
+            if (editedProfile.getPhoneNumber() != null) {
+                userProfile.setPhoneNumber(editedProfile.getPhoneNumber());
+            }
+            if (editedProfile.getAddress() != null) {
+                userProfile.setAddress(editedProfile.getAddress());
+            }
+            if (editedProfile.getJob() != null) {
+                userProfile.setJob(editedProfile.getJob());
+            }
+            if (editedProfile.getPhoto() != null) {
+                userProfile.setPhoto(editedProfile.getPhoto());
+            }
+            if (editedProfile.getAboutMe() != null) {
+                userProfile.setAboutMe(editedProfile.getAboutMe());
+            }
+            if (editedProfile.getNik() != null) {
+                userProfile.setNik(editedProfile.getNik());
+            }
+            if (editedProfile.getNpwp() != null) {
+                userProfile.setNpwp(editedProfile.getNpwp());
+            }
+            if (editedProfile.getPhotoKtp() != null) {
+                userProfile.setPhotoKtp(editedProfile.getPhotoKtp());
+            }
+            if (editedProfile.getPhotoNpwp() != null) {
+                userProfile.setPhotoNpwp(editedProfile.getPhotoNpwp());
+            }
+            if (editedProfile.getPhotoIjazah() != null) {
+                userProfile.setPhotoIjazah(editedProfile.getPhotoIjazah());
+            }
+            if (editedProfile.getExperienceYears() != null) {
+                userProfile.setExperienceYears(editedProfile.getExperienceYears());
+            }
+            if (editedProfile.getSkkLevel() != null) {
+                userProfile.setSkkLevel(editedProfile.getSkkLevel());
+            }
+            if (editedProfile.getCurrentLocation() != null) {
+                userProfile.setCurrentLocation(editedProfile.getCurrentLocation());
+            }
+            if (editedProfile.getPreferredLocations() != null) {
+                userProfile.setPreferredLocations(editedProfile.getPreferredLocations());
+            }
+            if (editedProfile.getSkill() != null) {
+                userProfile.setSkill(editedProfile.getSkill());
+            }
+
+            userProfileRepository.save(userProfile);
+            return convertToDTO(userProfile);
+        }
+
         return null;
     }
 
