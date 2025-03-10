@@ -27,6 +27,12 @@ public class UserProfileServiceImpl implements UserProfileService {
         return null;
     }
 
+    @Override
+    public UserProfileResponseDTO editProfile(String id, UserProfile editedProfile) {
+        return null;
+    }
+
+
     private UserProfileResponseDTO convertToDTO(UserProfile userProfile) {
         UserProfileResponseDTO dto = new UserProfileResponseDTO();
         dto.setId(userProfile.getId());
