@@ -85,6 +85,15 @@ public class UserProfileServiceImplTest {
         newUserProfile.setFirstName(newFirstName);
         newUserProfile.setLastName(newLastName);
         newUserProfile.setEmail(newEmail);
+        newUserProfile.setPhoneNumber("1234567890");
+        newUserProfile.setPassword("password123");
+        newUserProfile.setAboutMe("This is me!");
+        newUserProfile.setAddress("Jakarta Street");
+        newUserProfile.setCurrentLocation("New York");
+        newUserProfile.setExperienceYears(6);
+        newUserProfile.setJob("Software Engineering");
+        newUserProfile.setNik("1234567891011121");
+        newUserProfile.setNpwp("01122334456789101231");
 
         when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
