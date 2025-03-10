@@ -209,4 +209,19 @@ public class UserProfileServiceImplTest {
         assertEquals("NIK must be exactly 16 digits", exception.getMessage());
     }
 
+    @Test
+    public void testEdit_UserNotFound() throws Exception {
+        String userId = "user123";
+        UserProfile userProfile = new UserProfile();
+        userProfile.setId(userId);
+        userProfile.setFirstName("John");
+        userProfile.setLastName("Doe");
+
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+
+        UserProfileResponseDTO editResult = userProfileService.editProfile("invalid-id", new UserProfile());
+
+        assertNull(editResult);
+    }
+
 }
