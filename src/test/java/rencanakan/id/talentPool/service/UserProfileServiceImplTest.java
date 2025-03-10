@@ -30,7 +30,7 @@ public class UserProfileServiceImplTest {
     }
 
     @Test
-    public void testGetById_Success() {
+    void testGetById_Success() {
         // Arrange
         String userId = UUID.randomUUID().toString();
         UserProfile userProfile = new UserProfile();
@@ -86,7 +86,7 @@ public class UserProfileServiceImplTest {
     }
 
     @Test
-    public void testGetById_NotFound() {
+    void testGetById_NotFound() {
         // Arrange
         String userId = "nonexistent";
         when(userProfileRepository.findById(userId)).thenReturn(Optional.empty());
