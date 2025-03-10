@@ -102,6 +102,22 @@ class UserProfileTest {
     }
 
     @Test
+    void testIdNotProvided() {
+        UserProfile userWithoutId = UserProfile.builder()
+                .firstName("Test")
+                .lastName("User")
+                .email("test@example.com")
+                .password("securepassword")
+                .phoneNumber("081234567890")
+                .nik("1234567890123456")
+                .build();
+
+        userWithoutId.setId(null);
+
+        assertThat(userWithoutId.getId()).hasSize(36);
+    }
+
+    @Test
     void testInvalidEmailFormat() {
         assertThrows(IllegalArgumentException.class, () -> {
             user.setEmail("fernando-at-example.com");
