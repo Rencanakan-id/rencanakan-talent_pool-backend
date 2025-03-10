@@ -66,4 +66,33 @@ public class UserProfileServiceImplTest {
         assertNull(result);
         verify(userProfileRepository, times(1)).findById(userId);
     }
+
+    @Test
+    public void testEdit_Success() {
+        String userId = "user123";
+        UserProfile userProfile = new UserProfile();
+        userProfile.setId(userId);
+        userProfile.setFirstName("John");
+        userProfile.setLastName("Cena");
+        userProfile.setEmail("john.cena12@example.com");
+        userProfile.setPassword("password");
+
+        String newFirstName = "Jane";
+        String newLastName = "Doe";
+        String newEmail = "jane.doe@example.com";
+        UserProfile newUserProfile = new UserProfile();
+        newUserProfile.setId(userId);
+        newUserProfile.setFirstName(newFirstName);
+        newUserProfile.setLastName(newLastName);
+        newUserProfile.setEmail(newEmail);
+
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+
+        UserProfileResponseDTO editResult = userProfileService.editProfile(userId, newUserProfile);
+
+        assertEquals(userId, editResult.getId());
+        assertEquals("Jane", editResult.getFirstName());
+        assertEquals("Doe", editResult.getLastName());
+        assertEquals("jane.doe@example.com", editResult.getEmail());
+    }
 }
