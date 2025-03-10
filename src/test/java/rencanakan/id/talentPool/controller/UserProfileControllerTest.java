@@ -47,7 +47,7 @@ public class UserProfileControllerTest {
     }
 
     @Test
-    void testGetExperiencesByTalentId() throws Exception {
+    void testGetUserProfileById() throws Exception {
         // Arrange
         String userId = "user123";
         when(userProfileService.getById(userId)).thenReturn(userProfileResponseDTO);
@@ -70,7 +70,7 @@ public class UserProfileControllerTest {
     }
 
     @Test
-    void testGetExperiencesByTalentIdNotFound() throws Exception {
+    void testGetUserProfileByIdNotFound() throws Exception {
         // Arrange
         String userId = "nonexistent";
         when(userProfileService.getById(userId)).thenReturn(null);
