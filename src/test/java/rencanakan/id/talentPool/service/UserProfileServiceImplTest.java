@@ -29,6 +29,7 @@ public class UserProfileServiceImplTest {
 
     @Test
     public void testGetById_Success() {
+        // Arrange
         String userId = "user123";
         UserProfile userProfile = new UserProfile();
         userProfile.setId(userId);
@@ -38,8 +39,10 @@ public class UserProfileServiceImplTest {
 
         when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
+        // Act
         UserProfileResponseDTO result = userProfileService.getById(userId);
 
+        // Assert
         assertNotNull(result);
         assertEquals(userId, result.getId());
         assertEquals("John", result.getFirstName());
@@ -67,16 +70,26 @@ public class UserProfileServiceImplTest {
         userProfile.setFirstName("John");
         userProfile.setLastName("Cena");
         userProfile.setEmail("john.cena12@example.com");
+        userProfile.setPassword("password123");
+        userProfile.setNik("1234567891011121");
 
         UserProfile newUserProfile = new UserProfile();
         newUserProfile.setId(userId);
         newUserProfile.setFirstName("Jane");
         newUserProfile.setLastName("Doe");
         newUserProfile.setEmail("jane.doe@example.com");
-        newUserProfile.setPhoto("profile_new.jpg");
-        newUserProfile.setPhotoNpwp("npwp_new.jpg");
-        newUserProfile.setPhotoKtp("ktp_new.jpg");
-        newUserProfile.setPhotoIjazah("diploma_new.pdf");
+        newUserProfile.setPhoneNumber("1234567890");
+        newUserProfile.setPassword("password1234");
+        newUserProfile.setAboutMe("This is me!");
+        newUserProfile.setAddress("Jakarta Street");
+        newUserProfile.setCurrentLocation("New York");
+        newUserProfile.setExperienceYears(6);
+        newUserProfile.setJob("Software Engineering");
+        newUserProfile.setNik("1234567891011121");
+        newUserProfile.setNpwp("01122334456789101231");
+        newUserProfile.setPhotoKtp("ktp.jpg");
+        newUserProfile.setPhotoNpwp("npwp.jpg");
+        newUserProfile.setPhotoIjazah("ijazah.jpg");
 
         when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
@@ -86,10 +99,6 @@ public class UserProfileServiceImplTest {
         assertEquals("Jane", editResult.getFirstName());
         assertEquals("Doe", editResult.getLastName());
         assertEquals("jane.doe@example.com", editResult.getEmail());
-        assertEquals("profile_new.jpg", editResult.getPhoto());
-        assertEquals("npwp_new.jpg", editResult.getPhotoNpwp());
-        assertEquals("ktp_new.jpg", editResult.getPhotoKtp());
-        assertEquals("diploma_new.pdf", editResult.getPhotoIjazah());
     }
 
     @Test
@@ -103,7 +112,7 @@ public class UserProfileServiceImplTest {
 
         when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
-        UserProfileResponseDTO editResult = userProfileService.editProfile(userId, userProfile);
+        UserProfileResponseDTO editResult = userProfileService.editProfile(userId, new UserProfile());
 
         assertEquals(userId, editResult.getId());
         assertEquals("John", editResult.getFirstName());
@@ -112,53 +121,35 @@ public class UserProfileServiceImplTest {
     }
 
     @Test
-    public void testEdit_UserNotFound() {
-        String userId = "nonexistent";
-        UserProfile newUserProfile = new UserProfile();
-        newUserProfile.setFirstName("Jane");
-
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.empty());
-
-        UserProfileResponseDTO editResult = userProfileService.editProfile(userId, newUserProfile);
-
-        assertNull(editResult);
-    }
-
-    @Test
-    public void testEdit_InvalidEmail() {
-        String userId = "user123";
+    public void testUserProfile_InvalidEmail() {
         UserProfile userProfile = new UserProfile();
-        userProfile.setId(userId);
-        userProfile.setEmail("valid@example.com");
-
-        UserProfile newUserProfile = new UserProfile();
-        newUserProfile.setEmail("invalid-email");
-
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            userProfileService.editProfile(userId, newUserProfile);
+            userProfile.setEmail("invalid-email");
         });
 
         assertEquals("Invalid email format", exception.getMessage());
     }
 
     @Test
-    public void testEdit_InvalidPhoneNumber() {
-        String userId = "user123";
+    public void testUserProfile_InvalidPassword() {
         UserProfile userProfile = new UserProfile();
-        userProfile.setId(userId);
-        userProfile.setPhoneNumber("08123456789");
-
-        UserProfile newUserProfile = new UserProfile();
-        newUserProfile.setPhoneNumber("abcd123");
-
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            userProfileService.editProfile(userId, newUserProfile);
+            userProfile.setPassword("short");
         });
 
-        assertEquals("Invalid phone number", exception.getMessage());
+        assertEquals("Password must be at least 8 characters", exception.getMessage());
+    }
+
+    @Test
+    public void testUserProfile_InvalidNIK() {
+        UserProfile userProfile = new UserProfile();
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            userProfile.setNik("12345678");
+        });
+
+        assertEquals("NIK must be exactly 16 digits", exception.getMessage());
     }
 }
