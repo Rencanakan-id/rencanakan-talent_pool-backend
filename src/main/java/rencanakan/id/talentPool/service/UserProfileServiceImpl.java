@@ -36,15 +36,12 @@ public class UserProfileServiceImpl implements UserProfileService {
 
             try {
                 if (editedProfile.getEmail() != null) {
-                    validateEmail(editedProfile.getEmail());
                     userProfile.setEmail(editedProfile.getEmail());
                 }
                 if (editedProfile.getPassword() != null) {
-                    validatePassword(editedProfile.getPassword());
                     userProfile.setPassword(editedProfile.getPassword());
                 }
                 if (editedProfile.getNik() != null) {
-                    validateNik(editedProfile.getNik());
                     userProfile.setNik(editedProfile.getNik());
                 }
 
@@ -114,24 +111,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         }
 
         return null;
-    }
-
-    private void validateEmail(String email) {
-        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new IllegalArgumentException("Invalid email format");
-        }
-    }
-
-    private void validatePassword(String password) {
-        if (password.length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters");
-        }
-    }
-
-    private void validateNik(String nik) {
-        if (nik.length() != 16) {
-            throw new IllegalArgumentException("NIK must be exactly 16 digits");
-        }
     }
 
     private UserProfileResponseDTO convertToDTO(UserProfile userProfile) {

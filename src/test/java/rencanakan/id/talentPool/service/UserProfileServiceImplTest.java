@@ -5,12 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.lang.reflect.Field;
 
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentPool.model.UserProfile;
@@ -94,6 +96,7 @@ public class UserProfileServiceImplTest {
         newUserProfile.setPreferredLocations(preferredLocations);
         newUserProfile.setJob("Software Engineering");
         newUserProfile.setSkkLevel("Professional");
+        newUserProfile.setPhoto("photo.jpg");
         newUserProfile.setNik("1234567891011121");
         newUserProfile.setNpwp("01122334456789101231");
         newUserProfile.setPhotoKtp("ktp.jpg");
@@ -131,33 +134,76 @@ public class UserProfileServiceImplTest {
     }
 
     @Test
-    public void testUserProfile_InvalidEmail() {
+    public void testEdit_InvalidEmail() throws Exception {
+        String userId = "user123";
         UserProfile userProfile = new UserProfile();
+        userProfile.setId(userId);
+        userProfile.setFirstName("John");
+        userProfile.setLastName("Doe");
+        userProfile.setEmail("john.doe@example.com");
+
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+
+        UserProfile invalidUserProfile = new UserProfile();
+
+        Field emailField = UserProfile.class.getDeclaredField("email");
+        emailField.setAccessible(true);
+        emailField.set(invalidUserProfile, "invalid-email");
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            userProfile.setEmail("invalid-email");
+            userProfileService.editProfile(userId, invalidUserProfile);
         });
 
         assertEquals("Invalid email format", exception.getMessage());
     }
 
     @Test
-    public void testUserProfile_InvalidPassword() {
+    public void testEdit_InvalidPassword() throws Exception {
+        String userId = "user123";
         UserProfile userProfile = new UserProfile();
+        userProfile.setId(userId);
+        userProfile.setFirstName("John");
+        userProfile.setLastName("Doe");
+        userProfile.setPassword("password123");
+
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+
+        UserProfile invalidUserProfile = new UserProfile();
+
+        Field passwordField = UserProfile.class.getDeclaredField("password");
+        passwordField.setAccessible(true);
+        passwordField.set(invalidUserProfile, "pass");
+
+        invalidUserProfile.setId(userId);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            userProfile.setPassword("short");
+            userProfileService.editProfile(userId, invalidUserProfile);
         });
 
         assertEquals("Password must be at least 8 characters", exception.getMessage());
     }
 
     @Test
-    public void testUserProfile_InvalidNIK() {
+    public void testEdit_InvalidNIK() throws Exception {
+        String userId = "user123";
         UserProfile userProfile = new UserProfile();
+        userProfile.setId(userId);
+        userProfile.setFirstName("John");
+        userProfile.setLastName("Doe");
+        userProfile.setNik("1234567891011121");
+
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+
+        UserProfile invalidUserProfile = new UserProfile();
+
+        Field nikField = UserProfile.class.getDeclaredField("nik");
+        nikField.setAccessible(true);
+        nikField.set(invalidUserProfile, "invalid-nik");
+
+        invalidUserProfile.setId(userId);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            userProfile.setNik("12345678");
+            userProfileService.editProfile(userId, invalidUserProfile);
         });
 
         assertEquals("NIK must be exactly 16 digits", exception.getMessage());
