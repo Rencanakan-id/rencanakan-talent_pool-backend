@@ -8,6 +8,8 @@ import org.mockito.MockitoAnnotations;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
@@ -64,6 +66,11 @@ public class UserProfileServiceImplTest {
 
     @Test
     public void testEdit_Success() {
+        List<String> preferredLocations = new ArrayList<>();
+        preferredLocations.add("Bekasi");
+        preferredLocations.add("Depok");
+        preferredLocations.add("Bogor");
+
         String userId = "user123";
         UserProfile userProfile = new UserProfile();
         userProfile.setId(userId);
@@ -84,12 +91,15 @@ public class UserProfileServiceImplTest {
         newUserProfile.setAddress("Jakarta Street");
         newUserProfile.setCurrentLocation("New York");
         newUserProfile.setExperienceYears(6);
+        newUserProfile.setPreferredLocations(preferredLocations);
         newUserProfile.setJob("Software Engineering");
+        newUserProfile.setSkkLevel("Professional");
         newUserProfile.setNik("1234567891011121");
         newUserProfile.setNpwp("01122334456789101231");
         newUserProfile.setPhotoKtp("ktp.jpg");
         newUserProfile.setPhotoNpwp("npwp.jpg");
         newUserProfile.setPhotoIjazah("ijazah.jpg");
+        newUserProfile.setSkill("Cooking, Mewing");
 
         when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
@@ -152,4 +162,5 @@ public class UserProfileServiceImplTest {
 
         assertEquals("NIK must be exactly 16 digits", exception.getMessage());
     }
+
 }
