@@ -34,6 +34,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         if (userProfileOptional.isPresent()) {
             UserProfile userProfile = userProfileOptional.get();
 
+            // Update only non-null fields
             if (editedProfile.getFirstName() != null) {
                 userProfile.setFirstName(editedProfile.getFirstName());
             }
