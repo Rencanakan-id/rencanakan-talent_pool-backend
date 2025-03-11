@@ -1,10 +1,12 @@
 package rencanakan.id.talentPool.service;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,7 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.lang.reflect.Field;
+import java.util.Set;
 
+import rencanakan.id.talentPool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentPool.model.UserProfile;
 import rencanakan.id.talentPool.repository.UserProfileRepository;
@@ -23,12 +27,107 @@ public class UserProfileServiceImplTest {
     @Mock
     private UserProfileRepository userProfileRepository;
 
+    @Mock
+    private Validator mockValidator;
+
     @InjectMocks
     private UserProfileServiceImpl userProfileService;
+
+    @Captor
+    private ArgumentCaptor<UserProfile> userProfileCaptor;
+
+    private static Validator validator;
+
+    private UserProfileRequestDTO createValidRequestDTO() {
+        UserProfileRequestDTO dto = new UserProfileRequestDTO();
+        dto.setFirstName("John");
+        dto.setLastName("Doe");
+        dto.setEmail("john.doe@example.com");
+        dto.setPhoneNumber("1234567890");
+        dto.setAddress("Jalan Margonda");
+        dto.setJob("Arsitek");
+        dto.setAboutMe("Hola");
+        dto.setNik("1234567890123456");
+        dto.setNpwp("123456789");
+        dto.setExperienceYears(5);
+        dto.setSkkLevel("Profesional");
+        dto.setCurrentLocation("Jakarta");
+        dto.setPreferredLocations(List.of("Bali", "Bandung"));
+        dto.setSkill("Arsitektur");
+        return dto;
+    }
+
+    private UserProfile createMockProfile() {
+        return UserProfile.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .phoneNumber("1234567890")
+                .address("Jalan Margonda")
+                .job("Arsitek")
+                .aboutMe("Hola")
+                .nik("1234567890123456")
+                .npwp("123456789")
+                .experienceYears(5)
+                .skkLevel("Profesional")
+                .currentLocation("Jakarta")
+                .preferredLocations(List.of("Bali", "Bandung"))
+                .skill("Arsitektur")
+                .build();
+    }
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+    }
+
+    @BeforeAll
+    public static void setupValidator() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
+    @Test
+    public void createProfileValid() {
+        UserProfileRequestDTO request = createValidRequestDTO();
+        UserProfile expectedProfile = createMockProfile();
+
+        when(userProfileRepository.save(any(UserProfile.class))).thenReturn(expectedProfile);
+
+        UserProfile createdProfile = userProfileService.createProfile(request);
+
+        verify(userProfileRepository).save(userProfileCaptor.capture());
+        UserProfile capturedProfile = userProfileCaptor.getValue();
+
+        assertNotNull(createdProfile);
+
+        assertEquals(request.getFirstName(), capturedProfile.getFirstName());
+        assertEquals(request.getLastName(), capturedProfile.getLastName());
+        assertEquals(request.getEmail(), capturedProfile.getEmail());
+        assertEquals(request.getPhoneNumber(), capturedProfile.getPhoneNumber());
+        assertEquals(request.getAddress(), capturedProfile.getAddress());
+        assertEquals(request.getJob(), capturedProfile.getJob());
+        assertEquals(request.getAboutMe(), capturedProfile.getAboutMe());
+        assertEquals(request.getNik(), capturedProfile.getNik());
+        assertEquals(request.getNpwp(), capturedProfile.getNpwp());
+        assertEquals(request.getExperienceYears(), capturedProfile.getExperienceYears());
+        assertEquals(request.getSkkLevel(), capturedProfile.getSkkLevel());
+        assertEquals(request.getCurrentLocation(), capturedProfile.getCurrentLocation());
+        assertEquals(request.getPreferredLocations(), capturedProfile.getPreferredLocations());
+        assertEquals(request.getSkill(), capturedProfile.getSkill());
+
+        assertEquals(expectedProfile, createdProfile);
+
+    }
+
+    @Test
+    void testCreateProfile_ValidationFailure() {
+        UserProfileRequestDTO request = new UserProfileRequestDTO();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userProfileService.createProfile(request);
+        });
+        assertEquals("Validation failed", exception.getMessage());
+        verify(userProfileRepository, never()).save(any(UserProfile.class));
     }
 
     @Test
@@ -249,5 +348,8 @@ public class UserProfileServiceImplTest {
 
         assertEquals("First name exceeds maximum length", exception.getMessage());
     }
+
+
+
 
 }
