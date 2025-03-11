@@ -87,6 +87,7 @@ public class UserProfile {
         if (firstName.length() > 32) {
             throw new IllegalArgumentException("First name exceeds maximum length");
         }
+        this.firstName = firstName;
     }
 
     public void setEmail(String email) {
