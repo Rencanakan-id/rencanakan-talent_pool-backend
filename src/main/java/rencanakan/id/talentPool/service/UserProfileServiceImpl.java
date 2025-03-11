@@ -1,19 +1,29 @@
 package rencanakan.id.talentPool.service;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import rencanakan.id.talentPool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentPool.model.UserProfile;
 import rencanakan.id.talentPool.repository.UserProfileRepository;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserProfileServiceImpl implements UserProfileService {
 
     @Autowired
     private UserProfileRepository userProfileRepository;
+    private final Validator validator;
+
+    public UserProfileServiceImpl(UserProfileRepository userProfileRepository, Validator validator) {
+        this.userProfileRepository = userProfileRepository;
+        this.validator = validator;
+    }
 
     @Override
     public UserProfileResponseDTO getById(String id) {
@@ -135,5 +145,35 @@ public class UserProfileServiceImpl implements UserProfileService {
         dto.setPreferredLocations(userProfile.getPreferredLocations());
         dto.setSkill(userProfile.getSkill());
         return dto;
+    }
+
+    @Override
+    public UserProfile createProfile(UserProfileRequestDTO request) {
+        Set<ConstraintViolation<UserProfileRequestDTO>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            throw new IllegalArgumentException("Validation failed");
+        }
+
+        UserProfile newProfile = UserProfile.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .address(request.getAddress())
+                .job(request.getJob())
+                .photo(request.getPhoto())
+                .aboutMe(request.getAboutMe())
+                .nik(request.getNik())
+                .npwp(request.getNpwp())
+                .photoKtp(request.getPhotoKtp())
+                .photoNpwp(request.getPhotoNpwp())
+                .photoIjazah(request.getPhotoIjazah())
+                .experienceYears(request.getExperienceYears())
+                .skkLevel(request.getSkkLevel())
+                .currentLocation(request.getCurrentLocation())
+                .preferredLocations(request.getPreferredLocations())
+                .skill(request.getSkill())
+                .build();
+        return userProfileRepository.save(newProfile);
     }
 }
