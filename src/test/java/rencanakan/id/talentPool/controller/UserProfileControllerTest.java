@@ -5,8 +5,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,6 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import rencanakan.id.talentPool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentPool.service.UserProfileService;
 import rencanakan.id.talentPool.model.UserProfile;
@@ -23,6 +31,9 @@ public class UserProfileControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Mock
+    private Validator validator;
 
     @MockBean
     private UserProfileService userProfileService;
@@ -48,6 +59,44 @@ public class UserProfileControllerTest {
         userProfileResponseDTO.setCurrentLocation("Jakarta");
         userProfileResponseDTO.setPreferredLocations(Arrays.asList("Jakarta", "Bandung", "Surabaya"));
         userProfileResponseDTO.setSkill("Java, Spring Boot");
+    }
+
+    private UserProfileRequestDTO createValidRequestDTO() {
+        UserProfileRequestDTO dto = new UserProfileRequestDTO();
+        dto.setFirstName("John");
+        dto.setLastName("Doe");
+        dto.setEmail("john.doe@example.com");
+        dto.setPhoneNumber("1234567890");
+        dto.setAddress("Jalan Margonda");
+        dto.setJob("Arsitek");
+        dto.setAboutMe("Hola");
+        dto.setNik("1234567890123456");
+        dto.setNpwp("123456789");
+        dto.setExperienceYears(5);
+        dto.setSkkLevel("Profesional");
+        dto.setCurrentLocation("Jakarta");
+        dto.setPreferredLocations(List.of("Bali", "Bandung"));
+        dto.setSkill("Arsitektur");
+        return dto;
+    }
+
+    private UserProfile createMockProfile() {
+        return UserProfile.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .phoneNumber("1234567890")
+                .address("Jalan Margonda")
+                .job("Arsitek")
+                .aboutMe("Hola")
+                .nik("1234567890123456")
+                .npwp("123456789")
+                .experienceYears(5)
+                .skkLevel("Profesional")
+                .currentLocation("Jakarta")
+                .preferredLocations(List.of("Bali", "Bandung"))
+                .skill("Arsitektur")
+                .build();
     }
 
     @Test
@@ -124,5 +173,108 @@ public class UserProfileControllerTest {
                 .andExpect(jsonPath("$.data.email").value("jane.doe@example.com"));
 
         verify(userProfileService, times(1)).editProfile(eq(userId), any(UserProfile.class));
+    }
+
+    @Test
+    public void testCreateExperience_ValidRequest() throws Exception {
+        UserProfileRequestDTO request = new UserProfileRequestDTO();
+        request.setFirstName("John");
+        request.setLastName("Doe");
+        request.setEmail("john.doe@example.com");
+        request.setPhoneNumber("1234567890");
+        request.setAddress("123 Main St");
+        request.setJob("Software Engineer");
+        request.setPhoto("photo.jpg");
+        request.setAboutMe("Experienced developer");
+        request.setNik("1234567890123456");
+        request.setNpwp("123456789");
+        request.setPhotoKtp("ktp.jpg");
+        request.setPhotoNpwp("npwp.jpg");
+        request.setPhotoIjazah("ijazah.jpg");
+        request.setExperienceYears(5);
+        request.setSkkLevel("Senior");
+        request.setCurrentLocation("Jakarta");
+        request.setPreferredLocations(List.of("Jakarta", "Bandung"));
+        request.setSkill("Java, Spring Boot");
+
+        UserProfile mockProfile = new UserProfile();
+        mockProfile.setFirstName(request.getFirstName());
+        mockProfile.setLastName(request.getLastName());
+        mockProfile.setEmail(request.getEmail());
+        mockProfile.setPhoneNumber(request.getPhoneNumber());
+        mockProfile.setAddress(request.getAddress());
+        mockProfile.setJob(request.getJob());
+        mockProfile.setPhoto(request.getPhoto());
+        mockProfile.setAboutMe(request.getAboutMe());
+        mockProfile.setNik(request.getNik());
+        mockProfile.setNpwp(request.getNpwp());
+        mockProfile.setPhotoKtp(request.getPhotoKtp());
+        mockProfile.setPhotoNpwp(request.getPhotoNpwp());
+        mockProfile.setPhotoIjazah(request.getPhotoIjazah());
+        mockProfile.setExperienceYears(request.getExperienceYears());
+        mockProfile.setSkkLevel(request.getSkkLevel());
+        mockProfile.setCurrentLocation(request.getCurrentLocation());
+        mockProfile.setPreferredLocations(request.getPreferredLocations());
+        mockProfile.setSkill(request.getSkill());
+
+        when(validator.validate(any(UserProfileRequestDTO.class))).thenReturn(Collections.emptySet());
+        when(userProfileService.createProfile(any(UserProfileRequestDTO.class))).thenReturn(mockProfile);
+
+        mockMvc.perform(post("/api/user-profiles/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("John"))
+                .andExpect(jsonPath("$.lastName").value("Doe"))
+                .andExpect(jsonPath("$.email").value("john.doe@example.com"))
+                .andExpect(jsonPath("$.phoneNumber").value("1234567890"))
+                .andExpect(jsonPath("$.address").value("123 Main St"))
+                .andExpect(jsonPath("$.job").value("Software Engineer"))
+                .andExpect(jsonPath("$.photo").value("photo.jpg"))
+                .andExpect(jsonPath("$.aboutMe").value("Experienced developer"))
+                .andExpect(jsonPath("$.nik").value("1234567890123456"))
+                .andExpect(jsonPath("$.npwp").value("123456789"))
+                .andExpect(jsonPath("$.photoKtp").value("ktp.jpg"))
+                .andExpect(jsonPath("$.photoNpwp").value("npwp.jpg"))
+                .andExpect(jsonPath("$.photoIjazah").value("ijazah.jpg"))
+                .andExpect(jsonPath("$.experienceYears").value(5))
+                .andExpect(jsonPath("$.skkLevel").value("Senior"))
+                .andExpect(jsonPath("$.currentLocation").value("Jakarta"))
+                .andExpect(jsonPath("$.preferredLocations[0]").value("Jakarta"))
+                .andExpect(jsonPath("$.preferredLocations[1]").value("Bandung"))
+                .andExpect(jsonPath("$.skill").value("Java, Spring Boot"));
+
+        verify(userProfileService, times(1)).createProfile(any(UserProfileRequestDTO.class));
+    }
+
+    @Test
+    public void testCreateExperience_InvalidRequest_MissingFields() throws Exception {
+        UserProfileRequestDTO request = new UserProfileRequestDTO();
+        request.setFirstName(""); // Invalid: NotBlank
+        request.setLastName(""); // Invalid: NotBlank
+        request.setEmail(""); // Invalid: NotBlank
+        request.setPhoneNumber(""); // Invalid: NotBlank
+        request.setAddress(null); // Invalid: NotBlank
+        request.setJob(null); // Invalid: NotBlank
+        request.setExperienceYears(null); // Invalid: NotNull
+        request.setSkkLevel(""); // Invalid: NotBlank
+        request.setCurrentLocation(""); // Invalid: NotBlank
+        request.setPreferredLocations(null); // Invalid: NotNull
+        request.setSkill(""); // Invalid: NotBlank
+
+        ConstraintViolation<UserProfileRequestDTO> violation = mock(ConstraintViolation.class);
+        when(violation.getMessage()).thenReturn("Validation error");
+        Set<ConstraintViolation<UserProfileRequestDTO>> violations = Set.of(violation);
+
+        when(validator.validate(any(UserProfileRequestDTO.class))).thenReturn(violations);
+        when(userProfileService.createProfile(any(UserProfileRequestDTO.class)))
+                .thenThrow(new IllegalArgumentException("Validation failed"));
+
+        mockMvc.perform(post("/api/user-profiles/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        verify(userProfileService, times(1)).createProfile(any(UserProfileRequestDTO.class));
     }
 }
