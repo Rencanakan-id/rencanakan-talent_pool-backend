@@ -54,14 +54,4 @@ public class UserProfileRequestDTOTest {
         Set<ConstraintViolation<UserProfileRequestDTO>> violations = validator.validate(dto);
         assertFalse(violations.isEmpty(), "Expected validation errors due to missing fields");
     }
-
-    private void setField(Object target, String fieldName, Object value) {
-        try {
-            var field = UserProfileRequestDTO.class.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            field.set(target, value);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
