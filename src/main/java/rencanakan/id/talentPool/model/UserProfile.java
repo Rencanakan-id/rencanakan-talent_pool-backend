@@ -83,6 +83,12 @@ public class UserProfile {
         this.id = (id == null) ? UUID.randomUUID().toString() : id;
     }
 
+    public void setFirstName(String firstName) {
+        if (firstName.length() > 32) {
+            throw new IllegalArgumentException("First name exceeds maximum length");
+        }
+    }
+
     public void setEmail(String email) {
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new IllegalArgumentException("Invalid email format");
