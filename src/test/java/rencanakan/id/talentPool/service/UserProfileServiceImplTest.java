@@ -123,6 +123,7 @@ public class UserProfileServiceImplTest {
     @Test
     void testCreateProfile_ValidationFailure() {
         UserProfileRequestDTO request = new UserProfileRequestDTO();
+        when(mockValidator.validate(request)).thenReturn(validator.validate(request));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             userProfileService.createProfile(request);
         });
