@@ -8,6 +8,7 @@ import rencanakan.id.talentPool.model.UserProfile;
 import rencanakan.id.talentPool.repository.UserProfileRepository;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @Service
 public class UserProfileServiceImpl implements UserProfileService {
@@ -35,73 +36,7 @@ public class UserProfileServiceImpl implements UserProfileService {
             UserProfile userProfile = userProfileOptional.get();
 
             try {
-                if (editedProfile.getEmail() != null) {
-                    userProfile.setEmail(editedProfile.getEmail());
-                }
-                if (editedProfile.getPassword() != null) {
-                    userProfile.setPassword(editedProfile.getPassword());
-                }
-                if (editedProfile.getNik() != null) {
-                    userProfile.setNik(editedProfile.getNik());
-                }
-
-                if (editedProfile.getFirstName() != null) {
-                    userProfile.setFirstName(editedProfile.getFirstName());
-                }
-                if (editedProfile.getLastName() != null) {
-                    userProfile.setLastName(editedProfile.getLastName());
-                }
-                if (editedProfile.getEmail() != null) {
-                    userProfile.setEmail(editedProfile.getEmail());
-                }
-                if (editedProfile.getPassword() != null) {
-                    userProfile.setPassword(editedProfile.getPassword());
-                }
-                if (editedProfile.getPhoneNumber() != null) {
-                    userProfile.setPhoneNumber(editedProfile.getPhoneNumber());
-                }
-                if (editedProfile.getAddress() != null) {
-                    userProfile.setAddress(editedProfile.getAddress());
-                }
-                if (editedProfile.getJob() != null) {
-                    userProfile.setJob(editedProfile.getJob());
-                }
-                if (editedProfile.getPhoto() != null) {
-                    userProfile.setPhoto(editedProfile.getPhoto());
-                }
-                if (editedProfile.getAboutMe() != null) {
-                    userProfile.setAboutMe(editedProfile.getAboutMe());
-                }
-                if (editedProfile.getNik() != null) {
-                    userProfile.setNik(editedProfile.getNik());
-                }
-                if (editedProfile.getNpwp() != null) {
-                    userProfile.setNpwp(editedProfile.getNpwp());
-                }
-                if (editedProfile.getPhotoKtp() != null) {
-                    userProfile.setPhotoKtp(editedProfile.getPhotoKtp());
-                }
-                if (editedProfile.getPhotoNpwp() != null) {
-                    userProfile.setPhotoNpwp(editedProfile.getPhotoNpwp());
-                }
-                if (editedProfile.getPhotoIjazah() != null) {
-                    userProfile.setPhotoIjazah(editedProfile.getPhotoIjazah());
-                }
-                if (editedProfile.getExperienceYears() != null) {
-                    userProfile.setExperienceYears(editedProfile.getExperienceYears());
-                }
-                if (editedProfile.getSkkLevel() != null) {
-                    userProfile.setSkkLevel(editedProfile.getSkkLevel());
-                }
-                if (editedProfile.getCurrentLocation() != null) {
-                    userProfile.setCurrentLocation(editedProfile.getCurrentLocation());
-                }
-                if (editedProfile.getPreferredLocations() != null) {
-                    userProfile.setPreferredLocations(editedProfile.getPreferredLocations());
-                }
-                if (editedProfile.getSkill() != null) {
-                    userProfile.setSkill(editedProfile.getSkill());
-                }
+                updateFields(userProfile, editedProfile);
 
                 userProfileRepository.save(userProfile);
                 return convertToDTO(userProfile);
@@ -111,6 +46,34 @@ public class UserProfileServiceImpl implements UserProfileService {
         }
 
         return null;
+    }
+
+    private void updateFields(UserProfile userProfile, UserProfile editedProfile) {
+        applyIfNotNull(editedProfile.getEmail(), userProfile::setEmail);
+        applyIfNotNull(editedProfile.getPassword(), userProfile::setPassword);
+        applyIfNotNull(editedProfile.getNik(), userProfile::setNik);
+        applyIfNotNull(editedProfile.getFirstName(), userProfile::setFirstName);
+        applyIfNotNull(editedProfile.getLastName(), userProfile::setLastName);
+        applyIfNotNull(editedProfile.getPhoneNumber(), userProfile::setPhoneNumber);
+        applyIfNotNull(editedProfile.getAddress(), userProfile::setAddress);
+        applyIfNotNull(editedProfile.getJob(), userProfile::setJob);
+        applyIfNotNull(editedProfile.getPhoto(), userProfile::setPhoto);
+        applyIfNotNull(editedProfile.getAboutMe(), userProfile::setAboutMe);
+        applyIfNotNull(editedProfile.getNpwp(), userProfile::setNpwp);
+        applyIfNotNull(editedProfile.getPhotoKtp(), userProfile::setPhotoKtp);
+        applyIfNotNull(editedProfile.getPhotoNpwp(), userProfile::setPhotoNpwp);
+        applyIfNotNull(editedProfile.getPhotoIjazah(), userProfile::setPhotoIjazah);
+        applyIfNotNull(editedProfile.getExperienceYears(), userProfile::setExperienceYears);
+        applyIfNotNull(editedProfile.getSkkLevel(), userProfile::setSkkLevel);
+        applyIfNotNull(editedProfile.getCurrentLocation(), userProfile::setCurrentLocation);
+        applyIfNotNull(editedProfile.getPreferredLocations(), userProfile::setPreferredLocations);
+        applyIfNotNull(editedProfile.getSkill(), userProfile::setSkill);
+    }
+
+    private <T> void applyIfNotNull(T newValue, Consumer<T> setter) {
+        if (newValue != null) {
+            setter.accept(newValue);
+        }
     }
 
     private UserProfileResponseDTO convertToDTO(UserProfile userProfile) {
