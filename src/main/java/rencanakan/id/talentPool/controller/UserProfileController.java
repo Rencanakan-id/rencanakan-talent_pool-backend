@@ -1,8 +1,10 @@
 package rencanakan.id.talentPool.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import rencanakan.id.talentPool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentPool.dto.WebResponse;
 import rencanakan.id.talentPool.model.UserProfile;
@@ -34,5 +36,15 @@ public class UserProfileController {
         return WebResponse.<UserProfileResponseDTO>builder()
                 .data(updatedProfile)
                 .build();
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<UserProfile> createExperience(@RequestBody UserProfileRequestDTO request) {
+        try {
+            UserProfile createdProfile = userProfileService.createProfile(request);
+            return ResponseEntity.ok(createdProfile);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 }
