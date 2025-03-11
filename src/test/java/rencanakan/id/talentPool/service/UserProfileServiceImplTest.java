@@ -224,4 +224,30 @@ public class UserProfileServiceImplTest {
         assertNull(editResult);
     }
 
+    @Test
+    public void testEdit_CharTooLong() throws Exception {
+        String userId = "user123";
+        UserProfile userProfile = new UserProfile();
+        userProfile.setId(userId);
+        userProfile.setFirstName("John");
+        userProfile.setLastName("Doe");
+        userProfile.setEmail("john.doe@example.com");
+
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+
+        UserProfile invalidUserProfile = new UserProfile();
+        invalidUserProfile.setId(userId);
+
+        String longName = "A".repeat(300);
+        Field nameField = UserProfile.class.getDeclaredField("firstName");
+        nameField.setAccessible(true);
+        nameField.set(invalidUserProfile, longName);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            userProfileService.editProfile(userId, invalidUserProfile);
+        });
+
+        assertEquals("First name exceeds maximum length", exception.getMessage());
+    }
+
 }
