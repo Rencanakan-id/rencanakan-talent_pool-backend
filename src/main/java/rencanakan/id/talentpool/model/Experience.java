@@ -2,9 +2,7 @@ package rencanakan.id.talentpool.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 
@@ -15,6 +13,8 @@ import java.time.LocalDate;
 @Setter
 @Builder
 @Table(name = "experience")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
