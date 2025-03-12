@@ -14,7 +14,7 @@ import java.util.UUID;
 @EqualsAndHashCode(exclude = "id")
 @Entity
 @Table(name = "user_profiles")
-public class UserProfile {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

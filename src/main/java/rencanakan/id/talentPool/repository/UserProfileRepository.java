@@ -2,12 +2,12 @@ package rencanakan.id.talentPool.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import rencanakan.id.talentPool.model.UserProfile;
+import rencanakan.id.talentPool.model.User;
 
 import java.util.Optional;
 
 @Repository
-public interface UserProfileRepository extends JpaRepository<UserProfile, String> {
+public interface UserProfileRepository extends JpaRepository<User, String> {
     
     /**
      * Find a user profile by email address
@@ -15,5 +15,5 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, String
      * @param email the email address to search for
      * @return an Optional containing the user profile if found, or an empty Optional if not found
      */
-    Optional<UserProfile> findByEmail(String email);
+    Optional<User> findByEmail(String email);
 }

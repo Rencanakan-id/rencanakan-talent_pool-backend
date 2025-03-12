@@ -24,10 +24,10 @@ import java.util.Set;
 import rencanakan.id.talentPool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentPool.service.UserProfileService;
-import rencanakan.id.talentPool.model.UserProfile;
+import rencanakan.id.talentPool.model.User;
 
 @WebMvcTest(UserProfileController.class)
-public class UserProfileControllerTest {
+public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -80,8 +80,8 @@ public class UserProfileControllerTest {
         return dto;
     }
 
-    private UserProfile createMockProfile() {
-        return UserProfile.builder()
+    private User createMockProfile() {
+        return User.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@example.com")
@@ -143,7 +143,7 @@ public class UserProfileControllerTest {
     void testEditProfileWithValidValue() throws Exception {
         String userId = "user123";
 
-        UserProfile updatedProfile = new UserProfile();
+        User updatedProfile = new User();
         updatedProfile.setId(userId);
         updatedProfile.setFirstName("Jane");
         updatedProfile.setLastName("Doe");
@@ -159,7 +159,7 @@ public class UserProfileControllerTest {
         responseDTO.setLastName("Doe");
         responseDTO.setEmail("jane.doe@example.com");
 
-        when(userProfileService.editProfile(eq(userId), any(UserProfile.class))).thenReturn(responseDTO);
+        when(userProfileService.editProfile(eq(userId), any(User.class))).thenReturn(responseDTO);
 
         mockMvc.perform(put("/api/user-profiles/edit/{id}", userId)
                         .header("Authorization", "Bearer test-token")
@@ -172,7 +172,7 @@ public class UserProfileControllerTest {
                 .andExpect(jsonPath("$.data.lastName").value("Doe"))
                 .andExpect(jsonPath("$.data.email").value("jane.doe@example.com"));
 
-        verify(userProfileService, times(1)).editProfile(eq(userId), any(UserProfile.class));
+        verify(userProfileService, times(1)).editProfile(eq(userId), any(User.class));
     }
 
     @Test
@@ -197,7 +197,7 @@ public class UserProfileControllerTest {
         request.setPreferredLocations(List.of("Jakarta", "Bandung"));
         request.setSkill("Java, Spring Boot");
 
-        UserProfile mockProfile = new UserProfile();
+        User mockProfile = new User();
         mockProfile.setFirstName(request.getFirstName());
         mockProfile.setLastName(request.getLastName());
         mockProfile.setEmail(request.getEmail());

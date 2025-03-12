@@ -15,13 +15,13 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UserProfileTest {
+class UserTest {
 
-    private UserProfile user;
+    private User user;
 
     @BeforeEach
     void setUp() {
-        user = UserProfile.builder()
+        user = User.builder()
                 .firstName("Fernando")
                 .lastName("Valentino")
                 .email("fernando@example.com")
@@ -73,7 +73,7 @@ class UserProfileTest {
 
     @Test
     void testEqualsAndHashCode() {
-        UserProfile anotherUser = UserProfile.builder()
+        User anotherUser = User.builder()
                 .firstName("Fernando")
                 .lastName("Valentino")
                 .email("fernando@example.com")
@@ -103,7 +103,7 @@ class UserProfileTest {
 
     @Test
     void testIdNotProvided() {
-        UserProfile userWithoutId = UserProfile.builder()
+        User userWithoutId = User.builder()
                 .firstName("Test")
                 .lastName("User")
                 .email("test@example.com")
@@ -178,7 +178,7 @@ class UserProfileTest {
 
     @Test
     void testDuplicateNIKAndNPWP() {
-        UserProfile anotherUser = UserProfile.builder()
+        User anotherUser = User.builder()
                 .nik(user.getNik())
                 .npwp(user.getNpwp())
                 .build();
@@ -249,7 +249,7 @@ class UserProfileTest {
         assertEquals(newNpwp, user.getNpwp());
     }
 
-    private void validateUniqueNIKandNPWP(UserProfile u1, UserProfile u2) {
+    private void validateUniqueNIKandNPWP(User u1, User u2) {
         if (u1.getNik().equals(u2.getNik()) || u1.getNpwp().equals(u2.getNpwp())) {
             throw new IllegalArgumentException("NIK and NPWP must be unique");
         }

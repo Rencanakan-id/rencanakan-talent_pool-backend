@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentPool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentPool.dto.WebResponse;
-import rencanakan.id.talentPool.model.UserProfile;
+import rencanakan.id.talentPool.model.User;
 import rencanakan.id.talentPool.service.UserProfileService;
 
 @RestController
@@ -28,7 +28,7 @@ public class UserProfileController {
     @PutMapping("/edit/{id}")
     public WebResponse<UserProfileResponseDTO> editUserProfile(
             @PathVariable String id,
-            @RequestBody UserProfile editedProfile,
+            @RequestBody User editedProfile,
             @RequestHeader("Authorization") String token) {
 
         UserProfileResponseDTO updatedProfile = userProfileService.editProfile(id, editedProfile);
@@ -39,9 +39,9 @@ public class UserProfileController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<UserProfile> createExperience(@RequestBody UserProfileRequestDTO request) {
+    public ResponseEntity<User> createExperience(@RequestBody UserProfileRequestDTO request) {
         try {
-            UserProfile createdProfile = userProfileService.createProfile(request);
+            User createdProfile = userProfileService.createProfile(request);
             return ResponseEntity.ok(createdProfile);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);

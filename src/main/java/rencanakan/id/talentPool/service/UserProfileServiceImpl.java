@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import rencanakan.id.talentPool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
-import rencanakan.id.talentPool.model.UserProfile;
+import rencanakan.id.talentPool.model.User;
 import rencanakan.id.talentPool.repository.UserProfileRepository;
 
 import java.util.Optional;
@@ -27,94 +27,94 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserProfileResponseDTO getById(String id) {
-        Optional<UserProfile> userProfileOptional = userProfileRepository.findById(id);
+        Optional<User> userProfileOptional = userProfileRepository.findById(id);
         
         if (userProfileOptional.isPresent()) {
-            UserProfile userProfile = userProfileOptional.get();
-            return convertToDTO(userProfile);
+            User user = userProfileOptional.get();
+            return convertToDTO(user);
         }
         
         return null;
     }
 
     @Override
-    public UserProfileResponseDTO editProfile(String id, UserProfile editedProfile) {
-        Optional<UserProfile> userProfileOptional = userProfileRepository.findById(id);
+    public UserProfileResponseDTO editProfile(String id, User editedProfile) {
+        Optional<User> userProfileOptional = userProfileRepository.findById(id);
 
         if (userProfileOptional.isPresent()) {
-            UserProfile userProfile = userProfileOptional.get();
+            User user = userProfileOptional.get();
 
             try {
                 if (editedProfile.getEmail() != null) {
-                    userProfile.setEmail(editedProfile.getEmail());
+                    user.setEmail(editedProfile.getEmail());
                 }
                 if (editedProfile.getPassword() != null) {
-                    userProfile.setPassword(editedProfile.getPassword());
+                    user.setPassword(editedProfile.getPassword());
                 }
                 if (editedProfile.getNik() != null) {
-                    userProfile.setNik(editedProfile.getNik());
+                    user.setNik(editedProfile.getNik());
                 }
 
                 if (editedProfile.getFirstName() != null) {
-                    userProfile.setFirstName(editedProfile.getFirstName());
+                    user.setFirstName(editedProfile.getFirstName());
                 }
                 if (editedProfile.getLastName() != null) {
-                    userProfile.setLastName(editedProfile.getLastName());
+                    user.setLastName(editedProfile.getLastName());
                 }
                 if (editedProfile.getEmail() != null) {
-                    userProfile.setEmail(editedProfile.getEmail());
+                    user.setEmail(editedProfile.getEmail());
                 }
                 if (editedProfile.getPassword() != null) {
-                    userProfile.setPassword(editedProfile.getPassword());
+                    user.setPassword(editedProfile.getPassword());
                 }
                 if (editedProfile.getPhoneNumber() != null) {
-                    userProfile.setPhoneNumber(editedProfile.getPhoneNumber());
+                    user.setPhoneNumber(editedProfile.getPhoneNumber());
                 }
                 if (editedProfile.getAddress() != null) {
-                    userProfile.setAddress(editedProfile.getAddress());
+                    user.setAddress(editedProfile.getAddress());
                 }
                 if (editedProfile.getJob() != null) {
-                    userProfile.setJob(editedProfile.getJob());
+                    user.setJob(editedProfile.getJob());
                 }
                 if (editedProfile.getPhoto() != null) {
-                    userProfile.setPhoto(editedProfile.getPhoto());
+                    user.setPhoto(editedProfile.getPhoto());
                 }
                 if (editedProfile.getAboutMe() != null) {
-                    userProfile.setAboutMe(editedProfile.getAboutMe());
+                    user.setAboutMe(editedProfile.getAboutMe());
                 }
                 if (editedProfile.getNik() != null) {
-                    userProfile.setNik(editedProfile.getNik());
+                    user.setNik(editedProfile.getNik());
                 }
                 if (editedProfile.getNpwp() != null) {
-                    userProfile.setNpwp(editedProfile.getNpwp());
+                    user.setNpwp(editedProfile.getNpwp());
                 }
                 if (editedProfile.getPhotoKtp() != null) {
-                    userProfile.setPhotoKtp(editedProfile.getPhotoKtp());
+                    user.setPhotoKtp(editedProfile.getPhotoKtp());
                 }
                 if (editedProfile.getPhotoNpwp() != null) {
-                    userProfile.setPhotoNpwp(editedProfile.getPhotoNpwp());
+                    user.setPhotoNpwp(editedProfile.getPhotoNpwp());
                 }
                 if (editedProfile.getPhotoIjazah() != null) {
-                    userProfile.setPhotoIjazah(editedProfile.getPhotoIjazah());
+                    user.setPhotoIjazah(editedProfile.getPhotoIjazah());
                 }
                 if (editedProfile.getExperienceYears() != null) {
-                    userProfile.setExperienceYears(editedProfile.getExperienceYears());
+                    user.setExperienceYears(editedProfile.getExperienceYears());
                 }
                 if (editedProfile.getSkkLevel() != null) {
-                    userProfile.setSkkLevel(editedProfile.getSkkLevel());
+                    user.setSkkLevel(editedProfile.getSkkLevel());
                 }
                 if (editedProfile.getCurrentLocation() != null) {
-                    userProfile.setCurrentLocation(editedProfile.getCurrentLocation());
+                    user.setCurrentLocation(editedProfile.getCurrentLocation());
                 }
                 if (editedProfile.getPreferredLocations() != null) {
-                    userProfile.setPreferredLocations(editedProfile.getPreferredLocations());
+                    user.setPreferredLocations(editedProfile.getPreferredLocations());
                 }
                 if (editedProfile.getSkill() != null) {
-                    userProfile.setSkill(editedProfile.getSkill());
+                    user.setSkill(editedProfile.getSkill());
                 }
 
-                userProfileRepository.save(userProfile);
-                return convertToDTO(userProfile);
+                userProfileRepository.save(user);
+                return convertToDTO(user);
             } catch (IllegalArgumentException e) {
                 throw e;
             }
@@ -123,38 +123,38 @@ public class UserProfileServiceImpl implements UserProfileService {
         return null;
     }
 
-    private UserProfileResponseDTO convertToDTO(UserProfile userProfile) {
+    private UserProfileResponseDTO convertToDTO(User user) {
         UserProfileResponseDTO dto = new UserProfileResponseDTO();
-        dto.setId(userProfile.getId());
-        dto.setFirstName(userProfile.getFirstName());
-        dto.setLastName(userProfile.getLastName());
-        dto.setEmail(userProfile.getEmail());
-        dto.setPhoneNumber(userProfile.getPhoneNumber());
-        dto.setAddress(userProfile.getAddress());
-        dto.setJob(userProfile.getJob());
-        dto.setPhoto(userProfile.getPhoto());
-        dto.setAboutMe(userProfile.getAboutMe());
-        dto.setNik(userProfile.getNik());
-        dto.setNpwp(userProfile.getNpwp());
-        dto.setPhotoKtp(userProfile.getPhotoKtp());
-        dto.setPhotoNpwp(userProfile.getPhotoNpwp());
-        dto.setPhotoIjazah(userProfile.getPhotoIjazah());
-        dto.setExperienceYears(userProfile.getExperienceYears());
-        dto.setSkkLevel(userProfile.getSkkLevel());
-        dto.setCurrentLocation(userProfile.getCurrentLocation());
-        dto.setPreferredLocations(userProfile.getPreferredLocations());
-        dto.setSkill(userProfile.getSkill());
+        dto.setId(user.getId());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setAddress(user.getAddress());
+        dto.setJob(user.getJob());
+        dto.setPhoto(user.getPhoto());
+        dto.setAboutMe(user.getAboutMe());
+        dto.setNik(user.getNik());
+        dto.setNpwp(user.getNpwp());
+        dto.setPhotoKtp(user.getPhotoKtp());
+        dto.setPhotoNpwp(user.getPhotoNpwp());
+        dto.setPhotoIjazah(user.getPhotoIjazah());
+        dto.setExperienceYears(user.getExperienceYears());
+        dto.setSkkLevel(user.getSkkLevel());
+        dto.setCurrentLocation(user.getCurrentLocation());
+        dto.setPreferredLocations(user.getPreferredLocations());
+        dto.setSkill(user.getSkill());
         return dto;
     }
 
     @Override
-    public UserProfile createProfile(UserProfileRequestDTO request) {
+    public User createProfile(UserProfileRequestDTO request) {
         Set<ConstraintViolation<UserProfileRequestDTO>> violations = validator.validate(request);
         if (!violations.isEmpty()) {
             throw new IllegalArgumentException("Validation failed");
         }
 
-        UserProfile newProfile = UserProfile.builder()
+        User newProfile = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())

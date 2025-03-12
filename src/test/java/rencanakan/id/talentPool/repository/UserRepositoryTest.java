@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import rencanakan.id.talentPool.model.UserProfile;
+import rencanakan.id.talentPool.model.User;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -13,7 +13,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class UserProfileRepositoryTest {
+public class UserRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -24,7 +24,7 @@ public class UserProfileRepositoryTest {
     @Test
     void testFindById_ExistingId_ReturnUserProfile() {
         // Arrange
-        UserProfile userProfile = UserProfile.builder()
+        User user = User.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@example.com")
@@ -46,13 +46,13 @@ public class UserProfileRepositoryTest {
                 .skill("Java, Spring Boot")
                 .build();
 
-        entityManager.persist(userProfile);
+        entityManager.persist(user);
         entityManager.flush();
         
-        String id = userProfile.getId();
+        String id = user.getId();
 
         // Act
-        Optional<UserProfile> found = userProfileRepository.findById(id);
+        Optional<User> found = userProfileRepository.findById(id);
 
         // Assert
         assertTrue(found.isPresent());
@@ -69,7 +69,7 @@ public class UserProfileRepositoryTest {
         String nonExistingId = UUID.randomUUID().toString();
 
         // Act
-        Optional<UserProfile> result = userProfileRepository.findById(nonExistingId);
+        Optional<User> result = userProfileRepository.findById(nonExistingId);
 
         // Assert
         assertFalse(result.isPresent());
@@ -78,7 +78,7 @@ public class UserProfileRepositoryTest {
     @Test
     void testSaveUserProfile() {
         // Arrange
-        UserProfile userProfile = UserProfile.builder()
+        User user = User.builder()
                 .firstName("Jane")
                 .lastName("Smith")
                 .email("jane.smith@example.com")
@@ -88,7 +88,7 @@ public class UserProfileRepositoryTest {
                 .build();
 
         // Act
-        UserProfile saved = userProfileRepository.save(userProfile);
+        User saved = userProfileRepository.save(user);
 
         // Assert
         assertNotNull(saved.getId());
@@ -96,7 +96,7 @@ public class UserProfileRepositoryTest {
         assertEquals("Smith", saved.getLastName());
         
         // Verify it was saved to the database
-        Optional<UserProfile> retrieved = userProfileRepository.findById(saved.getId());
+        Optional<User> retrieved = userProfileRepository.findById(saved.getId());
         assertTrue(retrieved.isPresent());
         assertEquals("Jane", retrieved.get().getFirstName());
     }
@@ -104,7 +104,7 @@ public class UserProfileRepositoryTest {
     @Test
     void testDeleteUserProfile() {
         // Arrange
-        UserProfile userProfile = UserProfile.builder()
+        User user = User.builder()
                 .firstName("Alex")
                 .lastName("Johnson")
                 .email("alex.johnson@example.com")
@@ -113,10 +113,10 @@ public class UserProfileRepositoryTest {
                 .nik("1122334455667788")
                 .build();
 
-        entityManager.persist(userProfile);
+        entityManager.persist(user);
         entityManager.flush();
         
-        String id = userProfile.getId();
+        String id = user.getId();
         
         // Verify it exists
         assertTrue(userProfileRepository.findById(id).isPresent());
@@ -131,7 +131,7 @@ public class UserProfileRepositoryTest {
     @Test
     void testFindByEmail() {
         // Arrange
-        UserProfile userProfile = UserProfile.builder()
+        User user = User.builder()
                 .firstName("Sarah")
                 .lastName("Wilson")
                 .email("sarah.wilson@example.com")
@@ -140,11 +140,11 @@ public class UserProfileRepositoryTest {
                 .nik("8877665544332211")
                 .build();
 
-        entityManager.persist(userProfile);
+        entityManager.persist(user);
         entityManager.flush();
         
         // Act
-        Optional<UserProfile> found = userProfileRepository.findByEmail("sarah.wilson@example.com");
+        Optional<User> found = userProfileRepository.findByEmail("sarah.wilson@example.com");
         
         // Assert
         assertTrue(found.isPresent());

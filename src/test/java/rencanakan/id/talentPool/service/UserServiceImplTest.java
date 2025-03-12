@@ -15,14 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.lang.reflect.Field;
-import java.util.Set;
 
 import rencanakan.id.talentPool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
-import rencanakan.id.talentPool.model.UserProfile;
+import rencanakan.id.talentPool.model.User;
 import rencanakan.id.talentPool.repository.UserProfileRepository;
 
-public class UserProfileServiceImplTest {
+public class UserServiceImplTest {
 
     @Mock
     private UserProfileRepository userProfileRepository;
@@ -34,7 +33,7 @@ public class UserProfileServiceImplTest {
     private UserProfileServiceImpl userProfileService;
 
     @Captor
-    private ArgumentCaptor<UserProfile> userProfileCaptor;
+    private ArgumentCaptor<User> userProfileCaptor;
 
     private static Validator validator;
 
@@ -57,8 +56,8 @@ public class UserProfileServiceImplTest {
         return dto;
     }
 
-    private UserProfile createMockProfile() {
-        return UserProfile.builder()
+    private User createMockProfile() {
+        return User.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@example.com")
@@ -90,14 +89,14 @@ public class UserProfileServiceImplTest {
     @Test
     public void createProfileValid() {
         UserProfileRequestDTO request = createValidRequestDTO();
-        UserProfile expectedProfile = createMockProfile();
+        User expectedProfile = createMockProfile();
 
-        when(userProfileRepository.save(any(UserProfile.class))).thenReturn(expectedProfile);
+        when(userProfileRepository.save(any(User.class))).thenReturn(expectedProfile);
 
-        UserProfile createdProfile = userProfileService.createProfile(request);
+        User createdProfile = userProfileService.createProfile(request);
 
         verify(userProfileRepository).save(userProfileCaptor.capture());
-        UserProfile capturedProfile = userProfileCaptor.getValue();
+        User capturedProfile = userProfileCaptor.getValue();
 
         assertNotNull(createdProfile);
 
@@ -128,20 +127,20 @@ public class UserProfileServiceImplTest {
             userProfileService.createProfile(request);
         });
         assertEquals("Validation failed", exception.getMessage());
-        verify(userProfileRepository, never()).save(any(UserProfile.class));
+        verify(userProfileRepository, never()).save(any(User.class));
     }
 
     @Test
     public void testGetById_Success() {
         // Arrange
         String userId = "user123";
-        UserProfile userProfile = new UserProfile();
-        userProfile.setId(userId);
-        userProfile.setFirstName("John");
-        userProfile.setLastName("Doe");
-        userProfile.setEmail("john.doe@example.com");
+        User user = new User();
+        user.setId(userId);
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setEmail("john.doe@example.com");
 
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // Act
         UserProfileResponseDTO result = userProfileService.getById(userId);
@@ -174,39 +173,39 @@ public class UserProfileServiceImplTest {
         preferredLocations.add("Bogor");
 
         String userId = "user123";
-        UserProfile userProfile = new UserProfile();
-        userProfile.setId(userId);
-        userProfile.setFirstName("John");
-        userProfile.setLastName("Cena");
-        userProfile.setEmail("john.cena12@example.com");
-        userProfile.setPassword("password123");
-        userProfile.setNik("1234567891011121");
+        User user = new User();
+        user.setId(userId);
+        user.setFirstName("John");
+        user.setLastName("Cena");
+        user.setEmail("john.cena12@example.com");
+        user.setPassword("password123");
+        user.setNik("1234567891011121");
 
-        UserProfile newUserProfile = new UserProfile();
-        newUserProfile.setId(userId);
-        newUserProfile.setFirstName("Jane");
-        newUserProfile.setLastName("Doe");
-        newUserProfile.setEmail("jane.doe@example.com");
-        newUserProfile.setPhoneNumber("1234567890");
-        newUserProfile.setPassword("password1234");
-        newUserProfile.setAboutMe("This is me!");
-        newUserProfile.setAddress("Jakarta Street");
-        newUserProfile.setCurrentLocation("New York");
-        newUserProfile.setExperienceYears(6);
-        newUserProfile.setPreferredLocations(preferredLocations);
-        newUserProfile.setJob("Software Engineering");
-        newUserProfile.setSkkLevel("Professional");
-        newUserProfile.setPhoto("photo.jpg");
-        newUserProfile.setNik("1234567891011121");
-        newUserProfile.setNpwp("01122334456789101231");
-        newUserProfile.setPhotoKtp("ktp.jpg");
-        newUserProfile.setPhotoNpwp("npwp.jpg");
-        newUserProfile.setPhotoIjazah("ijazah.jpg");
-        newUserProfile.setSkill("Cooking, Mewing");
+        User newUser = new User();
+        newUser.setId(userId);
+        newUser.setFirstName("Jane");
+        newUser.setLastName("Doe");
+        newUser.setEmail("jane.doe@example.com");
+        newUser.setPhoneNumber("1234567890");
+        newUser.setPassword("password1234");
+        newUser.setAboutMe("This is me!");
+        newUser.setAddress("Jakarta Street");
+        newUser.setCurrentLocation("New York");
+        newUser.setExperienceYears(6);
+        newUser.setPreferredLocations(preferredLocations);
+        newUser.setJob("Software Engineering");
+        newUser.setSkkLevel("Professional");
+        newUser.setPhoto("photo.jpg");
+        newUser.setNik("1234567891011121");
+        newUser.setNpwp("01122334456789101231");
+        newUser.setPhotoKtp("ktp.jpg");
+        newUser.setPhotoNpwp("npwp.jpg");
+        newUser.setPhotoIjazah("ijazah.jpg");
+        newUser.setSkill("Cooking, Mewing");
 
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserProfileResponseDTO editResult = userProfileService.editProfile(userId, newUserProfile);
+        UserProfileResponseDTO editResult = userProfileService.editProfile(userId, newUser);
 
         assertEquals(userId, editResult.getId());
         assertEquals("Jane", editResult.getFirstName());
@@ -217,15 +216,15 @@ public class UserProfileServiceImplTest {
     @Test
     public void testEdit_NoChanges() {
         String userId = "user123";
-        UserProfile userProfile = new UserProfile();
-        userProfile.setId(userId);
-        userProfile.setFirstName("John");
-        userProfile.setLastName("Doe");
-        userProfile.setEmail("john.doe@example.com");
+        User user = new User();
+        user.setId(userId);
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setEmail("john.doe@example.com");
 
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserProfileResponseDTO editResult = userProfileService.editProfile(userId, new UserProfile());
+        UserProfileResponseDTO editResult = userProfileService.editProfile(userId, new User());
 
         assertEquals(userId, editResult.getId());
         assertEquals("John", editResult.getFirstName());
@@ -236,22 +235,22 @@ public class UserProfileServiceImplTest {
     @Test
     public void testEdit_InvalidEmail() throws Exception {
         String userId = "user123";
-        UserProfile userProfile = new UserProfile();
-        userProfile.setId(userId);
-        userProfile.setFirstName("John");
-        userProfile.setLastName("Doe");
-        userProfile.setEmail("john.doe@example.com");
+        User user = new User();
+        user.setId(userId);
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setEmail("john.doe@example.com");
 
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserProfile invalidUserProfile = new UserProfile();
+        User invalidUser = new User();
 
-        Field emailField = UserProfile.class.getDeclaredField("email");
+        Field emailField = User.class.getDeclaredField("email");
         emailField.setAccessible(true);
-        emailField.set(invalidUserProfile, "invalid-email");
+        emailField.set(invalidUser, "invalid-email");
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            userProfileService.editProfile(userId, invalidUserProfile);
+            userProfileService.editProfile(userId, invalidUser);
         });
 
         assertEquals("Invalid email format", exception.getMessage());
@@ -260,24 +259,24 @@ public class UserProfileServiceImplTest {
     @Test
     public void testEdit_InvalidPassword() throws Exception {
         String userId = "user123";
-        UserProfile userProfile = new UserProfile();
-        userProfile.setId(userId);
-        userProfile.setFirstName("John");
-        userProfile.setLastName("Doe");
-        userProfile.setPassword("password123");
+        User user = new User();
+        user.setId(userId);
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setPassword("password123");
 
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserProfile invalidUserProfile = new UserProfile();
+        User invalidUser = new User();
 
-        Field passwordField = UserProfile.class.getDeclaredField("password");
+        Field passwordField = User.class.getDeclaredField("password");
         passwordField.setAccessible(true);
-        passwordField.set(invalidUserProfile, "pass");
+        passwordField.set(invalidUser, "pass");
 
-        invalidUserProfile.setId(userId);
+        invalidUser.setId(userId);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            userProfileService.editProfile(userId, invalidUserProfile);
+            userProfileService.editProfile(userId, invalidUser);
         });
 
         assertEquals("Password must be at least 8 characters", exception.getMessage());
@@ -286,24 +285,24 @@ public class UserProfileServiceImplTest {
     @Test
     public void testEdit_InvalidNIK() throws Exception {
         String userId = "user123";
-        UserProfile userProfile = new UserProfile();
-        userProfile.setId(userId);
-        userProfile.setFirstName("John");
-        userProfile.setLastName("Doe");
-        userProfile.setNik("1234567891011121");
+        User user = new User();
+        user.setId(userId);
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setNik("1234567891011121");
 
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserProfile invalidUserProfile = new UserProfile();
+        User invalidUser = new User();
 
-        Field nikField = UserProfile.class.getDeclaredField("nik");
+        Field nikField = User.class.getDeclaredField("nik");
         nikField.setAccessible(true);
-        nikField.set(invalidUserProfile, "invalid-nik");
+        nikField.set(invalidUser, "invalid-nik");
 
-        invalidUserProfile.setId(userId);
+        invalidUser.setId(userId);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            userProfileService.editProfile(userId, invalidUserProfile);
+            userProfileService.editProfile(userId, invalidUser);
         });
 
         assertEquals("NIK must be exactly 16 digits", exception.getMessage());
@@ -312,14 +311,14 @@ public class UserProfileServiceImplTest {
     @Test
     public void testEdit_UserNotFound() throws Exception {
         String userId = "user123";
-        UserProfile userProfile = new UserProfile();
-        userProfile.setId(userId);
-        userProfile.setFirstName("John");
-        userProfile.setLastName("Doe");
+        User user = new User();
+        user.setId(userId);
+        user.setFirstName("John");
+        user.setLastName("Doe");
 
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserProfileResponseDTO editResult = userProfileService.editProfile("invalid-id", new UserProfile());
+        UserProfileResponseDTO editResult = userProfileService.editProfile("invalid-id", new User());
 
         assertNull(editResult);
     }
@@ -327,24 +326,24 @@ public class UserProfileServiceImplTest {
     @Test
     public void testEdit_CharTooLong() throws Exception {
         String userId = "user123";
-        UserProfile userProfile = new UserProfile();
-        userProfile.setId(userId);
-        userProfile.setFirstName("John");
-        userProfile.setLastName("Doe");
-        userProfile.setEmail("john.doe@example.com");
+        User user = new User();
+        user.setId(userId);
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setEmail("john.doe@example.com");
 
-        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserProfile invalidUserProfile = new UserProfile();
-        invalidUserProfile.setId(userId);
+        User invalidUser = new User();
+        invalidUser.setId(userId);
 
         String longName = "A".repeat(300);
-        Field nameField = UserProfile.class.getDeclaredField("firstName");
+        Field nameField = User.class.getDeclaredField("firstName");
         nameField.setAccessible(true);
-        nameField.set(invalidUserProfile, longName);
+        nameField.set(invalidUser, longName);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            userProfileService.editProfile(userId, invalidUserProfile);
+            userProfileService.editProfile(userId, invalidUser);
         });
 
         assertEquals("First name exceeds maximum length", exception.getMessage());
