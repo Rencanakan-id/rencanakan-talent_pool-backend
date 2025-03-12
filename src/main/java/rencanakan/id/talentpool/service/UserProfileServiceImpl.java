@@ -145,33 +145,33 @@ public class UserProfileServiceImpl implements UserProfileService {
         return dto;
     }
 
-    @Override
-    public User createProfile(UserProfileRequestDTO request) {
-        Set<ConstraintViolation<UserProfileRequestDTO>> violations = validator.validate(request);
-        if (!violations.isEmpty()) {
-            throw new IllegalArgumentException("Validation failed");
-        }
-
-        User newProfile = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .phoneNumber(request.getPhoneNumber())
-                .address(request.getAddress())
-                .job(request.getJob())
-                .photo(request.getPhoto())
-                .aboutMe(request.getAboutMe())
-                .nik(request.getNik())
-                .npwp(request.getNpwp())
-                .photoKtp(request.getPhotoKtp())
-                .photoNpwp(request.getPhotoNpwp())
-                .photoIjazah(request.getPhotoIjazah())
-                .experienceYears(request.getExperienceYears())
-                .skkLevel(request.getSkkLevel())
-                .currentLocation(request.getCurrentLocation())
-                .preferredLocations(request.getPreferredLocations())
-                .skill(request.getSkill())
-                .build();
-        return userProfileRepository.save(newProfile);
-    }
+//    @Override
+//    public User createProfile(UserProfileRequestDTO request) {
+//        Set<ConstraintViolation<UserProfileRequestDTO>> violations = validator.validate(request);
+//        if (!violations.isEmpty()) {
+//            throw new IllegalArgumentException("Validation failed");
+//        }
+//
+//        User newProfile = User.builder()
+//                .firstName(request.getFirstName())
+//                .lastName(request.getLastName())
+//                .email(request.getEmail())
+//                .phoneNumber(request.getPhoneNumber())
+//                .address(request.getAddress())
+//                .job(request.getJob())
+//                .photo(request.getPhoto())
+//                .aboutMe(request.getAboutMe())
+//                .nik(request.getNik())
+//                .npwp(request.getNpwp())
+//                .photoKtp(request.getPhotoKtp())
+//                .photoNpwp(request.getPhotoNpwp())
+//                .photoIjazah(request.getPhotoIjazah())
+//                .experienceYears(request.getExperienceYears())
+//                .skkLevel(request.getSkkLevel())
+//                .currentLocation(request.getCurrentLocation())
+//                .preferredLocations(request.getPreferredLocations())
+//                .skill(request.getSkill())
+//                .build();
+//        return userProfileRepository.save(newProfile);
+//    }
 }

@@ -60,4 +60,6 @@ public class UserProfileRequestDTO {
 
     @NotBlank(message = "Skill is required")
     private String skill;
+
+    private String password;
 }
