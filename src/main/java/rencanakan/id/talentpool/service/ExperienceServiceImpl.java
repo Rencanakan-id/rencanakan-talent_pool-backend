@@ -9,6 +9,9 @@ import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Experience;
 import rencanakan.id.talentpool.repository.ExperienceRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class ExperienceServiceImpl implements ExperienceService {
 
@@ -21,18 +24,44 @@ public class ExperienceServiceImpl implements ExperienceService {
     @Override
     public ExperienceResponseDTO createExperience(@Valid ExperienceRequestDTO request) {
         Experience newExperience = DTOMapper.map(request, Experience.class);
-//        newExperience.setUser(new User(request.getTalentId()));
 
         Experience savedExperience = experienceRepository.save(newExperience);
+
         return DTOMapper.map(savedExperience, ExperienceResponseDTO.class);
     }
 
     @Override
-    public ExperienceResponseDTO editById(Long id, ExperienceRequestDTO dto) {
+    public ExperienceResponseDTO editById(Long id, @Valid ExperienceRequestDTO dto) {
         Experience experience = experienceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Experience not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Experience with ID " + id + " not found"));
 
-        Experience new_exp =  experienceRepository.save(experience);
-        return DTOMapper.map(new_exp, ExperienceResponseDTO.class);
+        experience.setTitle(dto.getTitle());
+        experience.setCompany(dto.getCompany());
+        experience.setEmploymentType(dto.getEmploymentType());
+        experience.setStartDate(dto.getStartDate());
+        experience.setEndDate(dto.getEndDate());
+        experience.setLocation(dto.getLocation());
+        experience.setLocationType(dto.getLocationType());
+
+        Experience updatedExperience = experienceRepository.save(experience);
+
+        return DTOMapper.map(updatedExperience, ExperienceResponseDTO.class);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        Experience experience = experienceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Experience with ID " + id + " not found"));
+
+        experienceRepository.delete(experience);
+    }
+
+    @Override
+    public List<ExperienceResponseDTO> getByTalentId(Long talentId) {
+        List<Experience> experiences = experienceRepository.findByTalentId(talentId);
+
+        return experiences.stream()
+                .map(experience -> DTOMapper.map(experience, ExperienceResponseDTO.class))
+                .collect(Collectors.toList());
     }
 }
