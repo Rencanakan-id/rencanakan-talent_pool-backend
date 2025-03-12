@@ -1,13 +1,13 @@
 package rencanakan.id.talentpool.service;
 
-import rencanakan.id.talentpool.dto.EditExperienceRequestDTO;
-import rencanakan.id.talentpool.dto.ExperienceListResponseDTO;
+import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 
-public interface ExperienceService{
-    ExperienceResponseDTO editById(Long id, EditExperienceRequestDTO dto);
+import java.util.List;
 
-    ExperienceListResponseDTO getByTalentId(Long id);
-
+public interface ExperienceService {
+    ExperienceResponseDTO createExperience(ExperienceRequestDTO request);
+    ExperienceResponseDTO editById(Long id, ExperienceRequestDTO dto);
     void deleteById(Long id);
+    List<ExperienceResponseDTO> getByTalentId(String talentId);
 }

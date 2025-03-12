@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 public class ExperienceResponseDTO {
     private Long id;
@@ -19,5 +20,4 @@ public class ExperienceResponseDTO {
     private LocalDate endDate;
     private String location;
     private LocationType locationType;
-    private Long talentId;
 }
