@@ -2,8 +2,6 @@ package rencanakan.id.talentpool.dto;
 
 import org.junit.jupiter.api.Test;
 
-import rencanakan.id.talentpool.dto.ExperienceListResponseDTO;
-import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 

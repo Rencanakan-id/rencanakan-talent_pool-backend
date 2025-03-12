@@ -10,7 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 import rencanakan.id.talentpool.model.Experience;
-import rencanakan.id.talentpool.repository.ExperienceRepository;
 
 import java.time.LocalDate;
 import java.util.List;

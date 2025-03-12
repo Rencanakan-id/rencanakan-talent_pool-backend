@@ -249,7 +249,7 @@ public class ExperienceControllerTest {
     }
 
     @Test
-    void testGetDeleteByTalentId_MissingAuthorizationHeader() throws Exception {
+    void testDeleteByTalentId_MissingAuthorizationHeader() throws Exception {
         // Arrange
         Long id = 10L;
 
@@ -259,6 +259,6 @@ public class ExperienceControllerTest {
                 .andExpect(status().isUnauthorized());
 
         // Verify service was never called
-        verify(experienceService, never()).getByTalentId(anyLong());
+        verify(experienceService, never()).deleteById(anyLong());
     }
 }
