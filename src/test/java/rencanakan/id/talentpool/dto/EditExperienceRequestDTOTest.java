@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import jakarta.validation.*;
-import rencanakan.id.talentpool.dto.EditExperienceRequestDTO;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 

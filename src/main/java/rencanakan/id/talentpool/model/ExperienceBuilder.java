@@ -1,9 +1,9 @@
 package rencanakan.id.talentpool.model;
 
-import java.time.LocalDate;
-
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
+
+import java.time.LocalDate;
 
 public class ExperienceBuilder {
     private String title;

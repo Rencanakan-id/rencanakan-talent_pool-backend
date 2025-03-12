@@ -1,9 +1,10 @@
 package rencanakan.id.talentpool.dto;
 
-import java.time.LocalDate;
-import lombok.*;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
+
+import java.time.LocalDate;
+import lombok.*;
 
 @NoArgsConstructor
 @Getter
