@@ -14,6 +14,10 @@ public class UserProfileController {
     @Autowired
     private UserProfileService userProfileService;
 
+    public UserProfileController(UserProfileService userProfileService) {
+        this.userProfileService = userProfileService;
+    }
+
     @GetMapping("/{id}")
     public WebResponse<UserProfileResponseDTO> getUserProfileById(@PathVariable String id, @RequestHeader("Authorization") String token) {
         UserProfileResponseDTO resp = userProfileService.getById(id);

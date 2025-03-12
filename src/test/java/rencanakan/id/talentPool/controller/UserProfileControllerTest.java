@@ -4,32 +4,39 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentpool.service.UserProfileService;
 
-@WebMvcTest(UserProfileController.class)
+@ExtendWith(MockitoExtension.class)
 public class UserProfileControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private UserProfileService userProfileService;
 
     private UserProfileResponseDTO userProfileResponseDTO;
+    @SuppressWarnings("unused")
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        // Create a sample UserProfileResponseDTO for testing with correct properties
+        objectMapper = new ObjectMapper();
+        mockMvc = MockMvcBuilders.standaloneSetup(new UserProfileController(userProfileService))
+            .setControllerAdvice()
+            .build();
+        
         userProfileResponseDTO = new UserProfileResponseDTO();
         userProfileResponseDTO.setId("user123");
         userProfileResponseDTO.setFirstName("John");
