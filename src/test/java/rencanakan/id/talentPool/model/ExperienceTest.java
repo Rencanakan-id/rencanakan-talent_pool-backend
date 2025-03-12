@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool.model;
+package rencanakan.id.talentpool.model;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -7,8 +7,8 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import rencanakan.id.talentPool.enums.EmploymentType;
-import rencanakan.id.talentPool.enums.LocationType;
+import rencanakan.id.talentpool.enums.EmploymentType;
+import rencanakan.id.talentpool.enums.LocationType;
 
 import java.time.LocalDate;
 import java.util.Set;

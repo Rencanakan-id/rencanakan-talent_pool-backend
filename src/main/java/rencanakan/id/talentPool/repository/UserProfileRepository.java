@@ -1,8 +1,8 @@
-package rencanakan.id.talentPool.repository;
+package rencanakan.id.talentpool.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import rencanakan.id.talentPool.model.UserProfile;
+import rencanakan.id.talentpool.model.UserProfile;
 
 import java.util.Optional;
 

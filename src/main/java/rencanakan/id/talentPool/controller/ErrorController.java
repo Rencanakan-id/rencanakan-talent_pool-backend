@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool.controller;
+package rencanakan.id.talentpool.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import rencanakan.id.talentPool.dto.WebResponse;
+import rencanakan.id.talentpool.dto.WebResponse;
 
 import java.util.stream.Collectors;
 

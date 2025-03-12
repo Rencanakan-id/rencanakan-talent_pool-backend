@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool.service;
+package rencanakan.id.talentpool.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,9 +12,9 @@ import java.util.Optional;
 import java.util.Arrays;
 import java.util.UUID;
 
-import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
-import rencanakan.id.talentPool.model.UserProfile;
-import rencanakan.id.talentPool.repository.UserProfileRepository;
+import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
+import rencanakan.id.talentpool.model.UserProfile;
+import rencanakan.id.talentpool.repository.UserProfileRepository;
 
 public class UserProfileServiceImplTest {
 

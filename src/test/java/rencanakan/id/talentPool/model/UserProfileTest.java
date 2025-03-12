@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool.model;
+package rencanakan.id.talentpool.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

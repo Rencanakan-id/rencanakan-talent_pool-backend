@@ -1,6 +1,6 @@
-package rencanakan.id.talentPool.service;
+package rencanakan.id.talentpool.service;
 
-import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
+import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
 
 public interface UserProfileService {
     UserProfileResponseDTO getById(String id);

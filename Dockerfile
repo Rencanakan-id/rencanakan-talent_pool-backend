@@ -17,11 +17,11 @@ WORKDIR /app
 USER nonRootUser
 
 # 4. Copy file JAR ke dalam container
-COPY ./talentPool-0.0.1-SNAPSHOT.jar /app
+COPY ./talentpool-0.0.1-SNAPSHOT.jar /app
 
 # 5. Buka port 8080
 EXPOSE 8080
 
 # 6. Jalankan aplikasi
-CMD ["java", "-jar", "talentPool-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "talentpool-0.0.1-SNAPSHOT.jar"]
 

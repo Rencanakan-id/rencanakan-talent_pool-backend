@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool.controller;
+package rencanakan.id.talentpool.controller;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -13,8 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
-import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
-import rencanakan.id.talentPool.service.UserProfileService;
+import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
+import rencanakan.id.talentpool.service.UserProfileService;
 
 @WebMvcTest(UserProfileController.class)
 public class UserProfileControllerTest {

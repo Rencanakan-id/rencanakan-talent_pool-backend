@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool.model;
+package rencanakan.id.talentpool.model;
 
 import jakarta.persistence.*;
 import lombok.*;

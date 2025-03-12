@@ -1,10 +1,10 @@
-package rencanakan.id.talentPool.repository;
+package rencanakan.id.talentpool.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import rencanakan.id.talentPool.model.UserProfile;
+import rencanakan.id.talentpool.model.UserProfile;
 
 import java.util.Arrays;
 import java.util.Optional;

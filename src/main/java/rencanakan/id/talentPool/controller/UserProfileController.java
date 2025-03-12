@@ -1,11 +1,11 @@
-package rencanakan.id.talentPool.controller;
+package rencanakan.id.talentpool.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
-import rencanakan.id.talentPool.dto.WebResponse;
-import rencanakan.id.talentPool.service.UserProfileService;
+import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
+import rencanakan.id.talentpool.dto.WebResponse;
+import rencanakan.id.talentpool.service.UserProfileService;
 
 @RestController
 @RequestMapping("/api/user-profiles")

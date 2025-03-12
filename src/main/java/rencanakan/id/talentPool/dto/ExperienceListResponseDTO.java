@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool.dto;
+package rencanakan.id.talentpool.dto;
 
 import java.util.List;
 import lombok.*;

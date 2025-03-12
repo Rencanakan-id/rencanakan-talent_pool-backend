@@ -1,8 +1,8 @@
-package rencanakan.id.talentPool.service;
+package rencanakan.id.talentpool.service;
 
-import rencanakan.id.talentPool.dto.EditExperienceRequestDTO;
-import rencanakan.id.talentPool.dto.ExperienceListResponseDTO;
-import rencanakan.id.talentPool.dto.ExperienceResponseDTO;
+import rencanakan.id.talentpool.dto.EditExperienceRequestDTO;
+import rencanakan.id.talentpool.dto.ExperienceListResponseDTO;
+import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 
 public interface ExperienceService{
     ExperienceResponseDTO editById(Long id, EditExperienceRequestDTO dto);

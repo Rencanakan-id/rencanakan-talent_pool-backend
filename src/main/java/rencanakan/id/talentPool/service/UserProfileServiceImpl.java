@@ -1,11 +1,11 @@
-package rencanakan.id.talentPool.service;
+package rencanakan.id.talentpool.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import rencanakan.id.talentPool.dto.UserProfileResponseDTO;
-import rencanakan.id.talentPool.model.UserProfile;
-import rencanakan.id.talentPool.repository.UserProfileRepository;
+import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
+import rencanakan.id.talentpool.model.UserProfile;
+import rencanakan.id.talentpool.repository.UserProfileRepository;
 
 import java.util.Optional;
 
