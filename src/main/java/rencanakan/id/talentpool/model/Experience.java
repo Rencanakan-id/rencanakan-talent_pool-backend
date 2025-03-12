@@ -3,6 +3,7 @@ package rencanakan.id.talentpool.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.springframework.security.core.userdetails.User;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 
@@ -12,9 +13,9 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
-@Table(name = "experience")
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "experience")
 public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,10 +53,10 @@ public class Experience {
     @NotNull(message = "Location type is required")
     private LocationType locationType;
 
-    @Column(nullable = false, name = "talent_id")
-    @Positive(message = "Talent ID must be a positive number")
-    @NotNull(message = "Talent ID type is required")
-    private Long talentId;
+    @ManyToOne
+    @JoinColumn(name = "talent_id", nullable = false)
+    @NotNull(message = "Talent (User) is required")
+    private User user;
 
     public static ExperienceBuilder builder() {
         return new ExperienceBuilder();

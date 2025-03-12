@@ -4,9 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 
@@ -14,7 +12,9 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class ExperienceRequestDTO {
     @NotBlank(message = "Title is required")
     @Size(max = 50, message = "Title must not exceed 50 characters")
@@ -38,7 +38,4 @@ public class ExperienceRequestDTO {
 
     @NotNull(message = "Location type is required")
     private LocationType locationType;
-
-    @Positive(message = "Talent ID must be greater than 0")
-    private long talentId;
 }

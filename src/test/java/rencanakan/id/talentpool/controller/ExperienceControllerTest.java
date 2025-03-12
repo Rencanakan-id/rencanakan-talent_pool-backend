@@ -3,6 +3,7 @@ package rencanakan.id.talentpool.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,22 +17,26 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
+import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
+import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
-import rencanakan.id.talentpool.model.Experience;
 import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ExperienceControllerTest {
+
     @Mock
     private ExperienceServiceImpl experienceService;
 
@@ -55,20 +60,7 @@ public class ExperienceControllerTest {
     }
 
     private ExperienceRequestDTO createValidRequestDTO() {
-        ExperienceRequestDTO dto = new ExperienceRequestDTO();
-        dto.setTitle("Lead Construction Project Manager");
-        dto.setCompany("Aman");
-        dto.setEmploymentType(EmploymentType.FULL_TIME);
-        dto.setStartDate(LocalDate.now());
-        dto.setEndDate(LocalDate.now().plusDays(1));
-        dto.setLocation("Depok");
-        dto.setLocationType(LocationType.ON_SITE);
-        dto.setTalentId(1L);
-        return dto;
-    }
-
-    private Experience createMockExperience() {
-        return Experience.builder()
+        return ExperienceRequestDTO.builder()
                 .title("Lead Construction Project Manager")
                 .company("Aman")
                 .employmentType(EmploymentType.FULL_TIME)
@@ -76,50 +68,101 @@ public class ExperienceControllerTest {
                 .endDate(LocalDate.now().plusDays(1))
                 .location("Depok")
                 .locationType(LocationType.ON_SITE)
-                .talentId(1L)
+                .build();
+    }
+
+    private ExperienceResponseDTO createMockResponseDTO() {
+        return ExperienceResponseDTO.builder()
+                .id(1L)
+                .title("Lead Construction Project Manager")
+                .company("Aman")
+                .employmentType(EmploymentType.FULL_TIME)
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusDays(1))
+                .location("Depok")
+                .locationType(LocationType.ON_SITE)
                 .build();
     }
 
     @Nested
     class CreateExperienceTest {
+
         @Test
         void testCreateExperience_Success() throws Exception {
             ExperienceRequestDTO request = createValidRequestDTO();
-            Experience mockSavedExperience = createMockExperience();
+            ExperienceResponseDTO mockResponseDTO = createMockResponseDTO();
 
-            String expectedStartDate = mockSavedExperience.getStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
-            String expectedEndDate = mockSavedExperience.getEndDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String expectedStartDate = mockResponseDTO.getStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String expectedEndDate = mockResponseDTO.getEndDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
             when(experienceService.createExperience(any(ExperienceRequestDTO.class)))
-                    .thenReturn(mockSavedExperience);
+                    .thenReturn(mockResponseDTO);
 
-            mockMvc.perform(post("/experience")
+            mockMvc.perform(post("/experiences")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request))
-                    )
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.title").value("Lead Construction Project Manager"))
-                    .andExpect(jsonPath("$.company").value("Aman"))
-                    .andExpect(jsonPath("$.employmentType").value("FULL_TIME"))
-                    .andExpect(jsonPath("$.startDate").value(expectedStartDate))
-                    .andExpect(jsonPath("$.endDate").value(expectedEndDate))
-                    .andExpect(jsonPath("$.location").value("Depok"))
-                    .andExpect(jsonPath("$.locationType").value("ON_SITE"))
-                    .andExpect(jsonPath("$.talentId").value(1L));
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(jsonPath("$.data.id").value(1L))
+                    .andExpect(jsonPath("$.data.title").value("Lead Construction Project Manager"))
+                    .andExpect(jsonPath("$.data.company").value("Aman"))
+                    .andExpect(jsonPath("$.data.employmentType").value("FULL_TIME"))
+                    .andExpect(jsonPath("$.data.startDate").value(expectedStartDate))
+                    .andExpect(jsonPath("$.data.endDate").value(expectedEndDate))
+                    .andExpect(jsonPath("$.data.location").value("Depok"))
+                    .andExpect(jsonPath("$.data.locationType").value("ON_SITE"));
         }
 
         @Test
         void testCreateExperience_BadRequest() throws Exception {
-            ExperienceRequestDTO request = new ExperienceRequestDTO();
-
-            when(experienceService.createExperience(any(ExperienceRequestDTO.class)))
-                    .thenThrow(new IllegalArgumentException("Invalid experience data"));
+            ExperienceRequestDTO invalidRequest = new ExperienceRequestDTO();
 
             mockMvc.perform(post("/experience")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request))
-                    )
+                            .content(objectMapper.writeValueAsString(invalidRequest)))
                     .andExpect(status().isBadRequest());
         }
+    }
+
+    @Nested
+    class EditExperienceTest {
+
+        @Test
+        void testEditExperience_Success() throws Exception {
+            Long experienceId = 1L;
+            ExperienceRequestDTO request = createValidRequestDTO();
+            ExperienceResponseDTO mockResponseDTO = createMockResponseDTO();
+
+            String expectedStartDate = mockResponseDTO.getStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String expectedEndDate = mockResponseDTO.getEndDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+
+            when(experienceService.editById(eq(experienceId), any(ExperienceRequestDTO.class)))
+                    .thenReturn(mockResponseDTO);
+
+            mockMvc.perform(put("/experiences/" + experienceId)
+                            .header("Authorization", "Bearer sample-token")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.id").value(1L))
+                    .andExpect(jsonPath("$.data.title").value("Lead Construction Project Manager"))
+                    .andExpect(jsonPath("$.data.company").value("Aman"))
+                    .andExpect(jsonPath("$.data.employmentType").value("FULL_TIME"))
+                    .andExpect(jsonPath("$.data.startDate").value(expectedStartDate))
+                    .andExpect(jsonPath("$.data.endDate").value(expectedEndDate))
+                    .andExpect(jsonPath("$.data.location").value("Depok"))
+                    .andExpect(jsonPath("$.data.locationType").value("ON_SITE"));
+        }
+
+        @Test
+        void testEditExperience_BadRequest() throws Exception {
+            Long experienceId = 1L;
+            ExperienceRequestDTO invalidRequest = new ExperienceRequestDTO();
+
+            mockMvc.perform(put("/experiences/" + experienceId)
+                            .header("Authorization", "Bearer sample-token")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidRequest)))
+                    .andExpect(status().isBadRequest());
+        }
+
     }
 }
