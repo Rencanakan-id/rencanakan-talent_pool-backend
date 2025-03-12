@@ -1,10 +1,13 @@
-package rencanakan.id.talentPool.dto;
+package rencanakan.id.talentpool.dto;
 
 import org.junit.jupiter.api.Test;
+
+import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
+import rencanakan.id.talentpool.enums.EmploymentType;
+import rencanakan.id.talentpool.enums.LocationType;
+
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
-import rencanakan.id.talentPool.enums.EmploymentType;
-import rencanakan.id.talentPool.enums.LocationType;
 
 public class ExperienceResponseDTOTest {
 

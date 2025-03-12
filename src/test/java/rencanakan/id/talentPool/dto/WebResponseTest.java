@@ -1,8 +1,9 @@
-package rencanakan.id.talentPool.dto;
+package rencanakan.id.talentpool.dto;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import rencanakan.id.talentpool.dto.WebResponse;
 
 import static org.junit.jupiter.api.Assertions.*;
 
