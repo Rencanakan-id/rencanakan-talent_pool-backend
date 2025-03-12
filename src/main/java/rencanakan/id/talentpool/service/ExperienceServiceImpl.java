@@ -1,21 +1,39 @@
 package rencanakan.id.talentpool.service;
 
+import jakarta.validation.Valid;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rencanakan.id.talentpool.dto.EditExperienceRequestDTO;
+import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
+import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Experience;
 import rencanakan.id.talentpool.repository.ExperienceRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
-public class ExperienceServiceImpl implements  ExperienceService{
-    @Autowired
-    ExperienceRepository experienceRepository;
+public class ExperienceServiceImpl implements ExperienceService {
+
+    private final ExperienceRepository experienceRepository;
+
+    public ExperienceServiceImpl(ExperienceRepository experienceRepository) {
+        this.experienceRepository = experienceRepository;
+    }
+
     @Override
-    public ExperienceResponseDTO editById(Long id, EditExperienceRequestDTO dto) {
+    public ExperienceResponseDTO createExperience(@Valid ExperienceRequestDTO request) {
+        Experience newExperience = DTOMapper.map(request, Experience.class);
+
+        Experience savedExperience = experienceRepository.save(newExperience);
+
+        return DTOMapper.map(savedExperience, ExperienceResponseDTO.class);
+    }
+
+    @Override
+    public ExperienceResponseDTO editById(Long id, @Valid ExperienceRequestDTO dto) {
         Experience experience = experienceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Experience not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Experience with ID " + id + " not found"));
 
         experience.setTitle(dto.getTitle());
         experience.setCompany(dto.getCompany());
@@ -24,24 +42,26 @@ public class ExperienceServiceImpl implements  ExperienceService{
         experience.setEndDate(dto.getEndDate());
         experience.setLocation(dto.getLocation());
         experience.setLocationType(dto.getLocationType());
-        experience.setTalentId(dto.getTalentId());
 
-        Experience new_exp =  experienceRepository.save(experience);
-        return toExperienceResponseDTO(new_exp);
+        Experience updatedExperience = experienceRepository.save(experience);
+
+        return DTOMapper.map(updatedExperience, ExperienceResponseDTO.class);
     }
 
-    public ExperienceResponseDTO toExperienceResponseDTO(Experience experience) {
-        ExperienceResponseDTO dto = new ExperienceResponseDTO();
-        dto.setId(experience.getId());
-        dto.setTitle(experience.getTitle());
-        dto.setCompany(experience.getCompany());
-        dto.setEmploymentType(experience.getEmploymentType());
-        dto.setStartDate(experience.getStartDate());
-        dto.setEndDate(experience.getEndDate());
-        dto.setLocation(experience.getLocation());
-        dto.setLocationType(experience.getLocationType());
-        dto.setTalentId(experience.getTalentId());
-        return dto;
+    @Override
+    public void deleteById(Long id) {
+        Experience experience = experienceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Experience with ID " + id + " not found"));
+
+        experienceRepository.delete(experience);
     }
 
+    @Override
+    public List<ExperienceResponseDTO> getByTalentId(String talentId) {
+        List<Experience> experiences = experienceRepository.findByUserId(talentId);
+
+        return experiences.stream()
+                .map(experience -> DTOMapper.map(experience, ExperienceResponseDTO.class))
+                .collect(Collectors.toList());
+    }
 }

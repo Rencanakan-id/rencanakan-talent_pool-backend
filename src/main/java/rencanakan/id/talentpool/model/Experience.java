@@ -2,8 +2,7 @@ package rencanakan.id.talentpool.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 
@@ -12,6 +11,9 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "experience")
 public class Experience {
     @Id
@@ -50,20 +52,20 @@ public class Experience {
     @NotNull(message = "Location type is required")
     private LocationType locationType;
 
-    @Column(nullable = false, name = "talent_id")
-    @Positive(message = "Talent ID must be a positive number")
-    private Long talentId;
+    @ManyToOne
+    @JoinColumn(name = "talent_id", nullable = false)
+    @NotNull(message = "Talent (User) is required")
+    private User user;
 
     public static ExperienceBuilder builder() {
         return new ExperienceBuilder();
     }
 
-    @SuppressWarnings("unused")
-    @AssertTrue(message = "End date must not be earlier than start date")
-    public boolean isEndDateAfterStartDate() {
+    @AssertFalse(message = "End date must not be earlier than start date")
+    public boolean isEndDateBeforeStartDate() {
         if (endDate == null) {
-            return true;
+            return false;
         }
-        return startDate != null && !endDate.isBefore(startDate);
+        return startDate != null && endDate.isBefore(startDate);
     }
 }
