@@ -1,4 +1,4 @@
-package rencanakan.id.talentPool;
+package rencanakan.id.talentpool;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
