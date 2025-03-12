@@ -1,6 +1,5 @@
 package rencanakan.id.talentpool.service;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,8 +10,6 @@ import rencanakan.id.talentpool.dto.LoginUserDTO;
 import rencanakan.id.talentpool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserProfileRepository;
-
-import java.util.Set;
 
 @Service
 public class AuthenticationService {

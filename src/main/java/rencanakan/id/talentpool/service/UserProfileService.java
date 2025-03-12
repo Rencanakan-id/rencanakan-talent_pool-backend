@@ -1,6 +1,5 @@
 package rencanakan.id.talentpool.service;
 
-import rencanakan.id.talentpool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentpool.model.User;
 

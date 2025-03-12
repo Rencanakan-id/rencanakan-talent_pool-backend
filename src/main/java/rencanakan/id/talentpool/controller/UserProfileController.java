@@ -7,7 +7,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import rencanakan.id.talentpool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.model.User;

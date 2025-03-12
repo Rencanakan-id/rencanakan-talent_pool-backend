@@ -1,17 +1,13 @@
 package rencanakan.id.talentpool.service;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import rencanakan.id.talentpool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserProfileRepository;
 
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UserProfileServiceImpl implements UserProfileService {
