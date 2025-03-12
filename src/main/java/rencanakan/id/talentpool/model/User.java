@@ -37,12 +37,6 @@ public class User implements UserDetails {
     @Column(name = "phone", length = 32, unique = true, nullable = false)
     private String phoneNumber;
 
-    @Column(name = "address", length = 255)
-    private String address;
-
-    @Column(name = "job", length = 64)
-    private String job;
-
     @Column(name = "photo", length = 255)
     private String photo;
 
@@ -80,6 +74,9 @@ public class User implements UserDetails {
 
     @Column(name = "skill", length = 255)
     private String skill;
+
+    @Column(name = "price")
+    private Integer price;
 
     public void setId(String id) {
         this.id = (id == null) ? UUID.randomUUID().toString() : id;

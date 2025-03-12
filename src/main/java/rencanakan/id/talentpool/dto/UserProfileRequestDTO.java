@@ -23,12 +23,6 @@ public class UserProfileRequestDTO {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
-    @NotBlank(message = "Address is required")
-    private String address;
-
-    @NotBlank(message = "Job is required")
-    private String job;
-
     private String photo;
 
     @NotBlank(message = "About me is required")
@@ -62,4 +56,7 @@ public class UserProfileRequestDTO {
     private String skill;
 
     private String password;
+
+    @NotNull(message = "Price is required")
+    private Integer price;
 }

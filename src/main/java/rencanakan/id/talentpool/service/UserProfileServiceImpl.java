@@ -68,12 +68,6 @@ public class UserProfileServiceImpl implements UserProfileService {
                 if (editedProfile.getPhoneNumber() != null) {
                     user.setPhoneNumber(editedProfile.getPhoneNumber());
                 }
-                if (editedProfile.getAddress() != null) {
-                    user.setAddress(editedProfile.getAddress());
-                }
-                if (editedProfile.getJob() != null) {
-                    user.setJob(editedProfile.getJob());
-                }
                 if (editedProfile.getPhoto() != null) {
                     user.setPhoto(editedProfile.getPhoto());
                 }
@@ -121,6 +115,12 @@ public class UserProfileServiceImpl implements UserProfileService {
         return null;
     }
 
+    @Override
+    public User findByEmail(String email) {
+        Optional<User> userProfileOptional = userProfileRepository.findByEmail(email);
+        return userProfileOptional.orElse(null);
+    }
+
     private UserProfileResponseDTO convertToDTO(User user) {
         UserProfileResponseDTO dto = new UserProfileResponseDTO();
         dto.setId(user.getId());
@@ -128,8 +128,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
         dto.setPhoneNumber(user.getPhoneNumber());
-        dto.setAddress(user.getAddress());
-        dto.setJob(user.getJob());
         dto.setPhoto(user.getPhoto());
         dto.setAboutMe(user.getAboutMe());
         dto.setNik(user.getNik());

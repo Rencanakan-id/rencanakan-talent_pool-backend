@@ -2,6 +2,9 @@ package rencanakan.id.talentpool.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import rencanakan.id.talentpool.dto.UserProfileRequestDTO;
@@ -36,6 +39,14 @@ public class UserProfileController {
         return WebResponse.<UserProfileResponseDTO>builder()
                 .data(updatedProfile)
                 .build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<User> authenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails currentUserDetails = (UserDetails) authentication.getPrincipal();
+        User currentUser = userProfileService.findByEmail(currentUserDetails.getUsername());
+        return ResponseEntity.ok(currentUser);
     }
 
 //    @PostMapping()

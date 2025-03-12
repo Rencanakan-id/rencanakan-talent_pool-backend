@@ -25,7 +25,6 @@ public class AuthenticationService {
             UserProfileRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder, Validator validator
-
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
@@ -40,8 +39,6 @@ public class AuthenticationService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
-                .address(request.getAddress())
-                .job(request.getJob())
                 .photo(request.getPhoto())
                 .aboutMe(request.getAboutMe())
                 .nik(request.getNik())
@@ -54,6 +51,7 @@ public class AuthenticationService {
                 .currentLocation(request.getCurrentLocation())
                 .preferredLocations(request.getPreferredLocations())
                 .skill(request.getSkill())
+                .price(request.getPrice())
                 .build();
         return userRepository.save(newProfile);
     }

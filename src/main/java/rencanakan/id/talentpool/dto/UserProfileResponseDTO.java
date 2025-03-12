@@ -17,8 +17,6 @@ public class UserProfileResponseDTO {
     private String lastName;
     private String email;
     private String phoneNumber;
-    private String address;
-    private String job;
     private String photo;
     private String aboutMe;
     private String nik;
@@ -31,4 +29,5 @@ public class UserProfileResponseDTO {
     private String currentLocation;
     private List<String> preferredLocations;
     private String skill;
+    private Integer price;
 }
