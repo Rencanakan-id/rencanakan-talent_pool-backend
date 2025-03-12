@@ -9,6 +9,7 @@ import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.service.ExperienceService;
+import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
 import java.util.List;
 
@@ -16,15 +17,15 @@ import java.util.List;
 @RequestMapping("/experiences")
 public class ExperienceController {
 
-    private final ExperienceService experienceService;
+    private final ExperienceServiceImpl experienceService;
 
-    public ExperienceController(ExperienceService experienceService) {
+    public ExperienceController(ExperienceServiceImpl experienceService) {
         this.experienceService = experienceService;
     }
 
     @GetMapping("/{talent_id}")
     public ResponseEntity<WebResponse<List<ExperienceResponseDTO>>> getExperiencesByTalentId(
-            @PathVariable("talent_id") Long talentId,
+            @PathVariable("talent_id") String talentId,
             @RequestHeader("Authorization") String token) {
 
         List<ExperienceResponseDTO> resp = experienceService.getByTalentId(talentId);

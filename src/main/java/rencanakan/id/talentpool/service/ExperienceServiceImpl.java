@@ -57,8 +57,8 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     @Override
-    public List<ExperienceResponseDTO> getByTalentId(Long talentId) {
-        List<Experience> experiences = experienceRepository.findByTalentId(talentId);
+    public List<ExperienceResponseDTO> getByTalentId(String talentId) {
+        List<Experience> experiences = experienceRepository.findByUserId(talentId);
 
         return experiences.stream()
                 .map(experience -> DTOMapper.map(experience, ExperienceResponseDTO.class))

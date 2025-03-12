@@ -10,5 +10,5 @@ public interface ExperienceService {
     ExperienceResponseDTO createExperience(ExperienceRequestDTO request);
     ExperienceResponseDTO editById(Long id, ExperienceRequestDTO dto);
     void deleteById(Long id);
-    List<ExperienceResponseDTO> getByTalentId(Long talentId);
+    List<ExperienceResponseDTO> getByTalentId(String talentId);
 }

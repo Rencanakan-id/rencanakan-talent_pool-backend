@@ -20,5 +20,4 @@ public class ExperienceResponseDTO {
     private LocalDate endDate;
     private String location;
     private LocationType locationType;
-    private Long talentId;
 }
