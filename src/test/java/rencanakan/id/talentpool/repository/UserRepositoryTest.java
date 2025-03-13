@@ -30,8 +30,6 @@ public class UserRepositoryTest {
                 .email("john.doe@example.com")
                 .password("password123")
                 .phoneNumber("1234567890")
-                .address("123 Main St")
-                .job("Software Engineer")
                 .photo("profile.jpg")
                 .aboutMe("About me text")
                 .nik("1234567890123456")
