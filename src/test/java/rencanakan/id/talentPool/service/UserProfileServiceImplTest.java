@@ -250,4 +250,5 @@ public class UserProfileServiceImplTest {
         assertEquals("First name exceeds maximum length", exception.getMessage());
     }
 
+
 }
