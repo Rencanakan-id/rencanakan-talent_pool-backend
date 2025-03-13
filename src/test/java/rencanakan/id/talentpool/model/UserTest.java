@@ -27,8 +27,6 @@ class UserTest {
                 .email("fernando@example.com")
                 .password("securepassword")
                 .phoneNumber("081234567890")
-                .address("Jakarta, Indonesia")
-                .job("Software Engineer")
                 .photo("profile.jpg")
                 .aboutMe("Saya adalah developer")
                 .nik("3210123456789123")
@@ -79,8 +77,6 @@ class UserTest {
                 .email("fernando@example.com")
                 .password("securepassword")
                 .phoneNumber("081234567890")
-                .address("Jakarta, Indonesia")
-                .job("Software Engineer")
                 .photo("profile.jpg")
                 .aboutMe("Saya adalah developer")
                 .nik("3210123456789123")
@@ -226,20 +222,6 @@ class UserTest {
         int newYears = 10;
         user.setExperienceYears(newYears);
         assertEquals(newYears, user.getExperienceYears());
-    }
-
-    @Test
-    void testSetAddress() {
-        String newAddress = "Bandung, Indonesia";
-        user.setAddress(newAddress);
-        assertEquals(newAddress, user.getAddress());
-    }
-
-    @Test
-    void testSetJob() {
-        String newJob = "Senior Developer";
-        user.setJob(newJob);
-        assertEquals(newJob, user.getJob());
     }
 
     @Test
