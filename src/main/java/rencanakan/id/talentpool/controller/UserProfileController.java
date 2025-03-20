@@ -40,14 +40,6 @@ public class UserProfileController {
                 .build();
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<User> authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails currentUserDetails = (UserDetails) authentication.getPrincipal();
-        User currentUser = userService.findByEmail(currentUserDetails.getUsername());
-        return ResponseEntity.ok(currentUser);
-    }
-
 //    @PostMapping()
 //    public ResponseEntity<User> createExperience(@RequestBody UserProfileRequestDTO request) {
 //        try {
