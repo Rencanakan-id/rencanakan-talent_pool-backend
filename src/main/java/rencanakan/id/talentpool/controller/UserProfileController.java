@@ -7,22 +7,21 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import rencanakan.id.talentpool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.model.User;
-import rencanakan.id.talentpool.service.UserProfileService;
+import rencanakan.id.talentpool.service.UserService;
 
 @RestController
 @RequestMapping("/users")
 public class UserProfileController {
 
     @Autowired
-    private UserProfileService userProfileService;
+    private UserService userService;
 
     @GetMapping("/{id}")
     public WebResponse<UserProfileResponseDTO> getUserProfileById(@PathVariable String id, @RequestHeader("Authorization") String token) {
-        UserProfileResponseDTO resp = userProfileService.getById(id);
+        UserProfileResponseDTO resp = userService.getById(id);
         return WebResponse.<UserProfileResponseDTO>builder()
                 .data(resp)
                 .build();
@@ -34,7 +33,7 @@ public class UserProfileController {
             @RequestBody User editedProfile,
             @RequestHeader("Authorization") String token) {
 
-        UserProfileResponseDTO updatedProfile = userProfileService.editProfile(id, editedProfile);
+        UserProfileResponseDTO updatedProfile = userService.editProfile(id, editedProfile);
 
         return WebResponse.<UserProfileResponseDTO>builder()
                 .data(updatedProfile)
@@ -45,7 +44,7 @@ public class UserProfileController {
     public ResponseEntity<User> authenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails currentUserDetails = (UserDetails) authentication.getPrincipal();
-        User currentUser = userProfileService.findByEmail(currentUserDetails.getUsername());
+        User currentUser = userService.findByEmail(currentUserDetails.getUsername());
         return ResponseEntity.ok(currentUser);
     }
 

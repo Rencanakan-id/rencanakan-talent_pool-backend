@@ -1,31 +1,27 @@
 package rencanakan.id.talentpool.service;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import rencanakan.id.talentpool.dto.UserProfileRequestDTO;
 import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentpool.model.User;
-import rencanakan.id.talentpool.repository.UserProfileRepository;
+import rencanakan.id.talentpool.repository.UserRepository;
 
 import java.util.Optional;
-import java.util.Set;
 
 @Service
-public class UserProfileServiceImpl implements UserProfileService {
-    private final UserProfileRepository userProfileRepository;
+public class UserServiceImpl implements UserService {
+    private final UserRepository userRepository;
     private final Validator validator;
 
-    public UserProfileServiceImpl(UserProfileRepository userProfileRepository, Validator validator) {
-        this.userProfileRepository = userProfileRepository;
+    public UserServiceImpl(UserRepository userRepository, Validator validator) {
+        this.userRepository = userRepository;
         this.validator = validator;
     }
 
     @Override
     public UserProfileResponseDTO getById(String id) {
-        Optional<User> userProfileOptional = userProfileRepository.findById(id);
+        Optional<User> userProfileOptional = userRepository.findById(id);
         
         if (userProfileOptional.isPresent()) {
             User user = userProfileOptional.get();
@@ -37,7 +33,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserProfileResponseDTO editProfile(String id, User editedProfile) {
-        Optional<User> userProfileOptional = userProfileRepository.findById(id);
+        Optional<User> userProfileOptional = userRepository.findById(id);
 
         if (userProfileOptional.isPresent()) {
             User user = userProfileOptional.get();
@@ -105,7 +101,7 @@ public class UserProfileServiceImpl implements UserProfileService {
                     user.setSkill(editedProfile.getSkill());
                 }
 
-                userProfileRepository.save(user);
+                userRepository.save(user);
                 return convertToDTO(user);
             } catch (IllegalArgumentException e) {
                 throw e;
@@ -117,7 +113,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public User findByEmail(String email) {
-        Optional<User> userProfileOptional = userProfileRepository.findByEmail(email);
+        Optional<User> userProfileOptional = userRepository.findByEmail(email);
         return userProfileOptional.orElse(null);
     }
 
