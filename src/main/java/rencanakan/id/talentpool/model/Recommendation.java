@@ -12,6 +12,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "recommendation")
 public class Recommendation {
 
