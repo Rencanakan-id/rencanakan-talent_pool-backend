@@ -58,6 +58,13 @@ class RecommendationTest {
     @Nested
     class IdTests {
         @Test
+        void testNullIdGeneratesUUID() {
+            recommendation.setId(null);
+            assertNotNull(recommendation.getId(), "ID should be auto-generated when null");
+            assertEquals(36, recommendation.getId().length(), "Generated ID should be a valid UUID");
+        }
+
+        @Test
         void testCustomIdIsPreserved() {
             String customId = "custom-id-123";
             recommendation.setId(customId);
@@ -86,6 +93,15 @@ class RecommendationTest {
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
                     .anyMatch(v -> v.getMessage().equals("Contractor ID is required")));
+        }
+
+        @Test
+        void testEmptyContractorName() {
+            recommendation.setContractorName("");
+            Set<ConstraintViolation<Recommendation>> violations = validator.validate(recommendation);
+            assertFalse(violations.isEmpty());
+            assertTrue(violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Contractor name is required")));
         }
 
         @Test
@@ -124,6 +140,24 @@ class RecommendationTest {
             recommendation.setMessage(maxLengthMessage);
             Set<ConstraintViolation<Recommendation>> violations = validator.validate(recommendation);
             assertTrue(violations.isEmpty(), "Message at max length should be valid");
+        }
+
+        @Test
+        void testMessageExactlyBelowMaxLength() {
+            String validLengthMessage = "A".repeat(3999);
+            recommendation.setMessage(validLengthMessage);
+            Set<ConstraintViolation<Recommendation>> violations = validator.validate(recommendation);
+            assertTrue(violations.isEmpty(), "Message below max length should be valid");
+        }
+
+        @Test
+        void testMessageExceedingMaxLength() {
+            String tooLongMessage = "A".repeat(4001);
+            recommendation.setMessage(tooLongMessage);
+            Set<ConstraintViolation<Recommendation>> violations = validator.validate(recommendation);
+            assertFalse(violations.isEmpty());
+            assertTrue(violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Message cannot exceed 4000 characters")));
         }
     }
 
