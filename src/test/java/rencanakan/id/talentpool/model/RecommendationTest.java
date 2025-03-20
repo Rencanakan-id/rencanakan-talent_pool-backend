@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rencanakan.id.talentpool.enums.StatusType;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
