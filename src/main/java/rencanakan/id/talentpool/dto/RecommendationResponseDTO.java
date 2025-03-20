@@ -8,6 +8,7 @@ import rencanakan.id.talentpool.model.User;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class RecommendationResponseDTO {
     private String id;
     private User talent;
@@ -15,6 +16,4 @@ public class RecommendationResponseDTO {
     private String contractorName;
     private String message;
     private StatusType status;
-
-    public RecommendationResponseDTO() { }
 }
