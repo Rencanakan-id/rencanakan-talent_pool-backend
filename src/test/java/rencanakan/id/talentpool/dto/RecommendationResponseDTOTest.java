@@ -14,7 +14,7 @@ class RecommendationResponseDTOTest {
     void testNoArgsConstructorDefaults() {
         RecommendationResponseDTO dto = new RecommendationResponseDTO();
         assertNull(dto.getId());
-        assertNull(dto.getTalent());
+        assertNull(dto.getTalentId());
         assertNull(dto.getContractorId());
         assertNull(dto.getContractorName());
         assertNull(dto.getMessage());
@@ -36,14 +36,14 @@ class RecommendationResponseDTOTest {
 
         RecommendationResponseDTO dto = new RecommendationResponseDTO(
                 id,
-                mockTalent,
+                mockTalent.getId(),
                 1L,
                 "Contractor Name",
                 "Test message",
                 StatusType.PENDING);
 
         assertEquals(id, dto.getId());
-        assertEquals(mockTalent, dto.getTalent());
+        assertEquals(mockTalent, dto.getTalentId());
         assertEquals(1L, dto.getContractorId());
         assertEquals("Contractor Name", dto.getContractorName());
         assertEquals("Test message", dto.getMessage());
@@ -65,7 +65,7 @@ class RecommendationResponseDTOTest {
 
         RecommendationResponseDTO dto = RecommendationResponseDTO.builder()
                 .id(id)
-                .talent(mockTalent)
+                .talentId(mockTalent.getId())
                 .contractorId(2L)
                 .contractorName("Builder Contractor")
                 .message("Test builder message")
@@ -73,7 +73,7 @@ class RecommendationResponseDTOTest {
                 .build();
 
         assertEquals(id, dto.getId());
-        assertEquals(mockTalent, dto.getTalent());
+        assertEquals(mockTalent, dto.getTalentId());
         assertEquals(2L, dto.getContractorId());
         assertEquals("Builder Contractor", dto.getContractorName());
         assertEquals("Test builder message", dto.getMessage());
@@ -95,14 +95,14 @@ class RecommendationResponseDTOTest {
 
         RecommendationResponseDTO dto = new RecommendationResponseDTO();
         dto.setId(id);
-        dto.setTalent(mockTalent);
+        dto.setTalentId(mockTalent.getId());
         dto.setContractorId(3L);
         dto.setContractorName("Setter Contractor");
         dto.setMessage("Test setter message");
         dto.setStatus(StatusType.DECLINED);
 
         assertEquals(id, dto.getId());
-        assertEquals(mockTalent, dto.getTalent());
+        assertEquals(mockTalent, dto.getTalentId());
         assertEquals(3L, dto.getContractorId());
         assertEquals("Setter Contractor", dto.getContractorName());
         assertEquals("Test setter message", dto.getMessage());
@@ -142,13 +142,11 @@ class RecommendationResponseDTOTest {
                 .build();
 
         RecommendationResponseDTO dto = RecommendationResponseDTO.builder()
-                .talent(mockTalent)
+                .talentId(mockTalent.getId())
                 .build();
 
-        assertEquals(userId, dto.getTalent().getId());
-        assertEquals("John", dto.getTalent().getFirstName());
-        assertEquals("Doe", dto.getTalent().getLastName());
-        assertEquals("john.doe@example.com", dto.getTalent().getEmail());
+
+        assertEquals(userId, dto.getTalentId());
     }
 
     @Test
@@ -161,7 +159,7 @@ class RecommendationResponseDTOTest {
                 .build();
 
         assertNull(dto.getId());
-        assertNull(dto.getTalent());
+        assertNull(dto.getTalentId());
         assertNotNull(dto.getContractorId());
         assertNotNull(dto.getContractorName());
         assertNotNull(dto.getMessage());
