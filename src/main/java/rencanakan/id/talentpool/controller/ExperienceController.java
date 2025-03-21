@@ -25,8 +25,8 @@ public class ExperienceController {
 
     @GetMapping("/{talent_id}")
     public ResponseEntity<WebResponse<List<ExperienceResponseDTO>>> getExperiencesByTalentId(
-            @PathVariable("talent_id") String talentId,
-            @RequestHeader("Authorization") String token) {
+            @PathVariable("talent_id") String talentId
+            ) {
 
         List<ExperienceResponseDTO> resp = experienceService.getByTalentId(talentId);
         return ResponseEntity.ok(WebResponse.<List<ExperienceResponseDTO>>builder()
