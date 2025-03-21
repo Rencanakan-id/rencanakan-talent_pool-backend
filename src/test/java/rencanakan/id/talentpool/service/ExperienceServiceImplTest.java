@@ -29,169 +29,169 @@
 //@ExtendWith(MockitoExtension.class)
 //public class ExperienceServiceImplTest {
 //
-//    @Mock
-//    private ExperienceRepository experienceRepository;
+//   @Mock
+//   private ExperienceRepository experienceRepository;
 //
-//    @InjectMocks
-//    private ExperienceServiceImpl experienceService;
+//   @InjectMocks
+//   private ExperienceServiceImpl experienceService;
 //
-//    private Experience experience;
-//    private EditExperienceRequestDTO requestDTO;
-//    private List<Experience> experienceList;
+//   private Experience experience;
+//   private EditExperienceRequestDTO requestDTO;
+//   private List<Experience> experienceList;
 //
-//    @BeforeEach
-//    void setUp() {
-//        experience = new Experience();
-//        experience.setId(1L);
-//        experience.setTitle("Software Engineer");
-//        experience.setCompany("Tech Corp");
-//        experience.setEmploymentType(EmploymentType.FULL_TIME);
-//        experience.setStartDate(LocalDate.of(2023, 1, 1));
-//        experience.setEndDate(LocalDate.of(2023, 12, 31));
-//        experience.setLocation("Jakarta");
-//        experience.setLocationType(LocationType.HYBRID);
-//        experience.setTalentId(100L);
+//   @BeforeEach
+//   void setUp() {
+//       experience = new Experience();
+//       experience.setId(1L);
+//       experience.setTitle("Software Engineer");
+//       experience.setCompany("Tech Corp");
+//       experience.setEmploymentType(EmploymentType.FULL_TIME);
+//       experience.setStartDate(LocalDate.of(2023, 1, 1));
+//       experience.setEndDate(LocalDate.of(2023, 12, 31));
+//       experience.setLocation("Jakarta");
+//       experience.setLocationType(LocationType.HYBRID);
+//       experience.setTalentId(100L);
 //
-//        requestDTO = new EditExperienceRequestDTO();
-//        requestDTO.setTitle("Senior Software Engineer");
-//        requestDTO.setCompany("Tech Innovators");
-//        requestDTO.setEmploymentType(EmploymentType.FULL_TIME);
-//        requestDTO.setStartDate(LocalDate.of(2024, 1, 1));
-//        requestDTO.setEndDate(LocalDate.of(2024, 12, 31));
-//        requestDTO.setLocation("Bali");
-//        requestDTO.setLocationType(LocationType.HYBRID);
-//        requestDTO.setTalentId(101L);
+//       requestDTO = new EditExperienceRequestDTO();
+//       requestDTO.setTitle("Senior Software Engineer");
+//       requestDTO.setCompany("Tech Innovators");
+//       requestDTO.setEmploymentType(EmploymentType.FULL_TIME);
+//       requestDTO.setStartDate(LocalDate.of(2024, 1, 1));
+//       requestDTO.setEndDate(LocalDate.of(2024, 12, 31));
+//       requestDTO.setLocation("Bali");
+//       requestDTO.setLocationType(LocationType.HYBRID);
+//       requestDTO.setTalentId(101L);
 //
-//        // Create a second experience for testing lists
-//        Experience experience2 = new Experience();
-//        experience2.setId(2L);
-//        experience2.setTitle("Product Manager");
-//        experience2.setCompany("Digital Solutions");
-//        experience2.setEmploymentType(EmploymentType.PART_TIME);
-//        experience2.setStartDate(LocalDate.of(2022, 6, 1));
-//        experience2.setEndDate(LocalDate.of(2023, 5, 31));
-//        experience2.setLocation("Bandung");
-//        experience2.setLocationType(LocationType.HYBRID);
-//        experience2.setTalentId(100L);
+//       // Create a second experience for testing lists
+//       Experience experience2 = new Experience();
+//       experience2.setId(2L);
+//       experience2.setTitle("Product Manager");
+//       experience2.setCompany("Digital Solutions");
+//       experience2.setEmploymentType(EmploymentType.PART_TIME);
+//       experience2.setStartDate(LocalDate.of(2022, 6, 1));
+//       experience2.setEndDate(LocalDate.of(2023, 5, 31));
+//       experience2.setLocation("Bandung");
+//       experience2.setLocationType(LocationType.HYBRID);
+//       experience2.setTalentId(100L);
 //
-//        experienceList = Arrays.asList(experience, experience2);
-//    }
+//       experienceList = Arrays.asList(experience, experience2);
+//   }
 //
-//    @Test
-//    void testEditById_Success() {
+//   @Test
+//   void testEditById_Success() {
 //
-//        when(experienceRepository.findById(1L)).thenReturn(Optional.of(experience));
-//        when(experienceRepository.save(any(Experience.class))).thenAnswer(invocation -> invocation.getArgument(0));
-//
-//
-//        ExperienceResponseDTO responseDTO = experienceService.editById(1L, requestDTO);
+//       when(experienceRepository.findById(1L)).thenReturn(Optional.of(experience));
+//       when(experienceRepository.save(any(Experience.class))).thenAnswer(invocation -> invocation.getArgument(0));
 //
 //
-//        assertNotNull(responseDTO);
-//        assertEquals(requestDTO.getTitle(), responseDTO.getTitle());
-//        assertEquals(requestDTO.getCompany(), responseDTO.getCompany());
-//        assertEquals(requestDTO.getStartDate(), responseDTO.getStartDate());
-//        assertEquals(requestDTO.getEndDate(), responseDTO.getEndDate());
-//        assertEquals(requestDTO.getLocation(), responseDTO.getLocation());
-//        assertEquals(requestDTO.getLocationType(), responseDTO.getLocationType());
-//        assertEquals(requestDTO.getTalentId(), responseDTO.getTalentId());
-//
-//        verify(experienceRepository, times(1)).findById(1L);
-//        verify(experienceRepository, times(1)).save(any(Experience.class));
-//    }
-//
-//    @Test
-//    void testEditById_EntityNotFoundException() {
-//
-//        when(experienceRepository.findById(2L)).thenReturn(Optional.empty());
+//       ExperienceResponseDTO responseDTO = experienceService.editById(1L, requestDTO);
 //
 //
-//        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-//            experienceService.editById(2L, requestDTO);
-//        });
+//       assertNotNull(responseDTO);
+//       assertEquals(requestDTO.getTitle(), responseDTO.getTitle());
+//       assertEquals(requestDTO.getCompany(), responseDTO.getCompany());
+//       assertEquals(requestDTO.getStartDate(), responseDTO.getStartDate());
+//       assertEquals(requestDTO.getEndDate(), responseDTO.getEndDate());
+//       assertEquals(requestDTO.getLocation(), responseDTO.getLocation());
+//       assertEquals(requestDTO.getLocationType(), responseDTO.getLocationType());
+//       assertEquals(requestDTO.getTalentId(), responseDTO.getTalentId());
 //
-//        assertEquals("Experience not found", exception.getMessage());
+//       verify(experienceRepository, times(1)).findById(1L);
+//       verify(experienceRepository, times(1)).save(any(Experience.class));
+//   }
+//
+//   @Test
+//   void testEditById_EntityNotFoundException() {
+//
+//       when(experienceRepository.findById(2L)).thenReturn(Optional.empty());
 //
 //
-//        verify(experienceRepository, times(1)).findById(2L);
-//        verify(experienceRepository, never()).save(any(Experience.class));
-//    }
+//       EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+//           experienceService.editById(2L, requestDTO);
+//       });
 //
-//    @Test
-//    void testGetByTalentId_Success() {
-//        // Arrange
-//        Long talentId = 100L;
-//        when(experienceRepository.findByTalentId(talentId)).thenReturn(experienceList);
+//       assertEquals("Experience not found", exception.getMessage());
 //
-//        // Act
-//        ExperienceListResponseDTO responseDTO = experienceService.getByTalentId(talentId);
 //
-//        // Assert
-//        assertNotNull(responseDTO);
-//        assertEquals(2, responseDTO.getExperiences().size());
+//       verify(experienceRepository, times(1)).findById(2L);
+//       verify(experienceRepository, never()).save(any(Experience.class));
+//   }
 //
-//        // Verify first experience
-//        ExperienceResponseDTO firstExp = responseDTO.getExperiences().get(0);
-//        assertEquals(1L, firstExp.getId());
-//        assertEquals("Software Engineer", firstExp.getTitle());
-//        assertEquals("Tech Corp", firstExp.getCompany());
-//        assertEquals(EmploymentType.FULL_TIME, firstExp.getEmploymentType());
-//        assertEquals(LocalDate.of(2023, 1, 1), firstExp.getStartDate());
-//        assertEquals(LocalDate.of(2023, 12, 31), firstExp.getEndDate());
-//        assertEquals("Jakarta", firstExp.getLocation());
-//        assertEquals(LocationType.HYBRID, firstExp.getLocationType());
-//        assertEquals(100L, firstExp.getTalentId());
+//   @Test
+//   void testGetByTalentId_Success() {
+//       // Arrange
+//       Long talentId = 100L;
+//       when(experienceRepository.findByTalentId(talentId)).thenReturn(experienceList);
 //
-//        // Verify second experience
-//        ExperienceResponseDTO secondExp = responseDTO.getExperiences().get(1);
-//        assertEquals(2L, secondExp.getId());
-//        assertEquals("Product Manager", secondExp.getTitle());
-//        assertEquals("Digital Solutions", secondExp.getCompany());
+//       // Act
+//       ExperienceListResponseDTO responseDTO = experienceService.getByTalentId(talentId);
 //
-//        // Verify repository was called with correct parameters
-//        verify(experienceRepository, times(1)).findByTalentId(talentId);
-//    }
+//       // Assert
+//       assertNotNull(responseDTO);
+//       assertEquals(2, responseDTO.getExperiences().size());
 //
-//    @Test
-//    void testGetByTalentId_EmptyList_ThrowsEntityNotFoundException() {
-//        // Arrange
-//        Long talentId = 999L;
-//        when(experienceRepository.findByTalentId(talentId)).thenReturn(Collections.emptyList());
+//       // Verify first experience
+//       ExperienceResponseDTO firstExp = responseDTO.getExperiences().get(0);
+//       assertEquals(1L, firstExp.getId());
+//       assertEquals("Software Engineer", firstExp.getTitle());
+//       assertEquals("Tech Corp", firstExp.getCompany());
+//       assertEquals(EmploymentType.FULL_TIME, firstExp.getEmploymentType());
+//       assertEquals(LocalDate.of(2023, 1, 1), firstExp.getStartDate());
+//       assertEquals(LocalDate.of(2023, 12, 31), firstExp.getEndDate());
+//       assertEquals("Jakarta", firstExp.getLocation());
+//       assertEquals(LocationType.HYBRID, firstExp.getLocationType());
+//       assertEquals(100L, firstExp.getTalentId());
 //
-//        // Act & Assert
-//        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-//            experienceService.getByTalentId(talentId);
-//        });
+//       // Verify second experience
+//       ExperienceResponseDTO secondExp = responseDTO.getExperiences().get(1);
+//       assertEquals(2L, secondExp.getId());
+//       assertEquals("Product Manager", secondExp.getTitle());
+//       assertEquals("Digital Solutions", secondExp.getCompany());
 //
-//        assertEquals("Experience is empty", exception.getMessage());
-//        verify(experienceRepository, times(1)).findByTalentId(talentId);
-//    }
+//       // Verify repository was called with correct parameters
+//       verify(experienceRepository, times(1)).findByTalentId(talentId);
+//   }
 //
-//    @Test
-//    void testDeleteById_Success() {
-//        // Arrange
-//        when(experienceRepository.findById(1L)).thenReturn(Optional.of(experience));
+//   @Test
+//   void testGetByTalentId_EmptyList_ThrowsEntityNotFoundException() {
+//       // Arrange
+//       Long talentId = 999L;
+//       when(experienceRepository.findByTalentId(talentId)).thenReturn(Collections.emptyList());
 //
-//        // Act
-//        experienceService.deleteById(1L);
+//       // Act & Assert
+//       EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+//           experienceService.getByTalentId(talentId);
+//       });
 //
-//        // Assert
-//        verify(experienceRepository, times(1)).findById(1L);
-//        verify(experienceRepository, times(1)).delete(experience);
-//    }
+//       assertEquals("Experience is empty", exception.getMessage());
+//       verify(experienceRepository, times(1)).findByTalentId(talentId);
+//   }
 //
-//    @Test
-//    void testDeleteById_EntityNotFoundException() {
-//        // Arrange
-//        when(experienceRepository.findById(2L)).thenReturn(Optional.empty());
+//   @Test
+//   void testDeleteById_Success() {
+//       // Arrange
+//       when(experienceRepository.findById(1L)).thenReturn(Optional.of(experience));
 //
-//        // Act & Assert
-//        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-//            experienceService.deleteById(2L);
-//        });
+//       // Act
+//       experienceService.deleteById(1L);
 //
-//        assertEquals("Experience by id " + 2L + " not found", exception.getMessage());
-//        verify(experienceRepository, times(1)).findById(2L);
-//        verify(experienceRepository, never()).delete(any(Experience.class));
-//    }
+//       // Assert
+//       verify(experienceRepository, times(1)).findById(1L);
+//       verify(experienceRepository, times(1)).delete(experience);
+//   }
+//
+//   @Test
+//   void testDeleteById_EntityNotFoundException() {
+//       // Arrange
+//       when(experienceRepository.findById(2L)).thenReturn(Optional.empty());
+//
+//       // Act & Assert
+//       EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+//           experienceService.deleteById(2L);
+//       });
+//
+//       assertEquals("Experience by id " + 2L + " not found", exception.getMessage());
+//       verify(experienceRepository, times(1)).findById(2L);
+//       verify(experienceRepository, never()).delete(any(Experience.class));
+//   }
 //}
