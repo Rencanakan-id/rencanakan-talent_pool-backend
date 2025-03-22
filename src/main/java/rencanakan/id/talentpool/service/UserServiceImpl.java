@@ -27,90 +27,64 @@ public class UserServiceImpl implements UserService {
         }
         
         return null;
-    }
+        }
 
-    @Override
-    public UserResponseDTO editUser(String id, User edited) {
-        Optional<User> userOptional = userRepository.findById(id);
+        @Override
+        public UserResponseDTO editUser(String id, User edited) throws IllegalArgumentException {
+            Optional<User> userOptional = userRepository.findById(id);
 
-        if (userOptional.isPresent()) {
+            if (userOptional.isEmpty()) {
+                return null;
+            }
+
             User user = userOptional.get();
-
             try {
-                if (edited.getEmail() != null) {
-                    user.setEmail(edited.getEmail());
-                }
-                if (edited.getPassword() != null) {
-                    user.setPassword(edited.getPassword());
-                }
-                if (edited.getNik() != null) {
-                    user.setNik(edited.getNik());
-                }
-
-                if (edited.getFirstName() != null) {
-                    user.setFirstName(edited.getFirstName());
-                }
-                if (edited.getLastName() != null) {
-                    user.setLastName(edited.getLastName());
-                }
-                if (edited.getEmail() != null) {
-                    user.setEmail(edited.getEmail());
-                }
-                if (edited.getPassword() != null) {
-                    user.setPassword(edited.getPassword());
-                }
-                if (edited.getPhoneNumber() != null) {
-                    user.setPhoneNumber(edited.getPhoneNumber());
-                }
-                if (edited.getPhoto() != null) {
-                    user.setPhoto(edited.getPhoto());
-                }
-                if (edited.getAboutMe() != null) {
-                    user.setAboutMe(edited.getAboutMe());
-                }
-                if (edited.getNik() != null) {
-                    user.setNik(edited.getNik());
-                }
-                if (edited.getNpwp() != null) {
-                    user.setNpwp(edited.getNpwp());
-                }
-                if (edited.getPhotoKtp() != null) {
-                    user.setPhotoKtp(edited.getPhotoKtp());
-                }
-                if (edited.getPhotoNpwp() != null) {
-                    user.setPhotoNpwp(edited.getPhotoNpwp());
-                }
-                if (edited.getPhotoIjazah() != null) {
-                    user.setPhotoIjazah(edited.getPhotoIjazah());
-                }
-                if (edited.getExperienceYears() != null) {
-                    user.setExperienceYears(edited.getExperienceYears());
-                }
-                if (edited.getSkkLevel() != null) {
-                    user.setSkkLevel(edited.getSkkLevel());
-                }
-                if (edited.getCurrentLocation() != null) {
-                    user.setCurrentLocation(edited.getCurrentLocation());
-                }
-                if (edited.getPreferredLocations() != null) {
-                    user.setPreferredLocations(edited.getPreferredLocations());
-                }
-                if (edited.getSkill() != null) {
-                    user.setSkill(edited.getSkill());
-                }
-
+                updateUserFields(user, edited);
                 userRepository.save(user);
                 return convertToDTO(user);
             } catch (IllegalArgumentException e) {
-                throw e;
+                throw new IllegalArgumentException("Failed to update user");
             }
         }
 
-        return null;
-    }
+        private void updateUserFields(User user, User edited) {
+            updateBasicInfo(user, edited);
+            updatePersonalInfo(user, edited);
+            updateDocuments(user, edited);
+            updateProfessionalInfo(user, edited);
+        }
 
-    @Override
-    public User findByEmail(String email) {
+        private void updateBasicInfo(User user, User edited) {
+            if (edited.getEmail() != null) user.setEmail(edited.getEmail());
+            if (edited.getPassword() != null) user.setPassword(edited.getPassword());
+            if (edited.getFirstName() != null) user.setFirstName(edited.getFirstName());
+            if (edited.getLastName() != null) user.setLastName(edited.getLastName());
+            if (edited.getPhoneNumber() != null) user.setPhoneNumber(edited.getPhoneNumber());
+        }
+
+        private void updatePersonalInfo(User user, User edited) {
+            if (edited.getPhoto() != null) user.setPhoto(edited.getPhoto());
+            if (edited.getAboutMe() != null) user.setAboutMe(edited.getAboutMe());
+            if (edited.getNik() != null) user.setNik(edited.getNik());
+            if (edited.getNpwp() != null) user.setNpwp(edited.getNpwp());
+        }
+
+        private void updateDocuments(User user, User edited) {
+            if (edited.getPhotoKtp() != null) user.setPhotoKtp(edited.getPhotoKtp());
+            if (edited.getPhotoNpwp() != null) user.setPhotoNpwp(edited.getPhotoNpwp());
+            if (edited.getPhotoIjazah() != null) user.setPhotoIjazah(edited.getPhotoIjazah());
+        }
+
+        private void updateProfessionalInfo(User user, User edited) {
+            if (edited.getExperienceYears() != null) user.setExperienceYears(edited.getExperienceYears());
+            if (edited.getSkkLevel() != null) user.setSkkLevel(edited.getSkkLevel());
+            if (edited.getCurrentLocation() != null) user.setCurrentLocation(edited.getCurrentLocation());
+            if (edited.getPreferredLocations() != null) user.setPreferredLocations(edited.getPreferredLocations());
+            if (edited.getSkill() != null) user.setSkill(edited.getSkill());
+        }
+
+        @Override
+        public User findByEmail(String email) {
         Optional<User> userOptional = userRepository.findByEmail(email);
         return userOptional.orElse(null);
     }

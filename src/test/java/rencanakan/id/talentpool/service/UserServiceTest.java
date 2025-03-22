@@ -21,7 +21,7 @@ import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -35,13 +35,13 @@ public class UserServiceTest {
     @Captor
     private ArgumentCaptor<User> userCaptor;
 
-    private final String TEST_USER_ID = "user123";
+    private String testUserId = "user123";
     private User testUser;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         testUser = new User();
-        testUser.setId(TEST_USER_ID);
+        testUser.setId(testUserId);
         testUser.setFirstName("John");
         testUser.setLastName("Doe");
         testUser.setEmail("john.doe@example.com");
@@ -52,23 +52,23 @@ public class UserServiceTest {
     @Nested
     class ReadUserTests {
         @Test
-        public void getById_WithValidId_ReturnsUser() {
+        void getById_WithValidId_ReturnsUser() {
             // Arrange
-            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
 
             // Act
-            UserResponseDTO result = userService.getById(TEST_USER_ID);
+            UserResponseDTO result = userService.getById(testUserId);
 
             // Assert
             assertNotNull(result);
-            assertEquals(TEST_USER_ID, result.getId());
+            assertEquals(testUserId, result.getId());
             assertEquals("John", result.getFirstName());
             assertEquals("Doe", result.getLastName());
-            verify(userRepository, times(1)).findById(TEST_USER_ID);
+            verify(userRepository, times(1)).findById(testUserId);
         }
 
         @Test
-        public void getById_WithNonExistentId_ReturnsNull() {
+        void getById_WithNonExistentId_ReturnsNull() {
             // Arrange
             String nonExistentId = "nonexistent";
             when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
@@ -82,7 +82,7 @@ public class UserServiceTest {
         }
         
         @Test
-        public void getById_WithEmptyId_ReturnsNull() {
+        void getById_WithEmptyId_ReturnsNull() {
             // Arrange
             String emptyId = "";
             when(userRepository.findById(emptyId)).thenReturn(Optional.empty());
@@ -96,7 +96,7 @@ public class UserServiceTest {
         }
         
         @Test
-        public void findByEmail_WithValidEmail_ReturnsUser() {
+        void findByEmail_WithValidEmail_ReturnsUser() {
             // Arrange
             String testEmail = "john.doe@example.com";
             when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(testUser));
@@ -106,7 +106,7 @@ public class UserServiceTest {
 
             // Assert
             assertNotNull(result);
-            assertEquals(TEST_USER_ID, result.getId());
+            assertEquals(testUserId, result.getId());
             assertEquals("John", result.getFirstName());
             assertEquals("Doe", result.getLastName());
             assertEquals(testEmail, result.getEmail());
@@ -114,7 +114,7 @@ public class UserServiceTest {
         }
 
         @Test
-        public void findByEmail_WithNonExistentEmail_ReturnsNull() {
+        void findByEmail_WithNonExistentEmail_ReturnsNull() {
             // Arrange
             String nonExistentEmail = "nonexistent@example.com";
             when(userRepository.findByEmail(nonExistentEmail)).thenReturn(Optional.empty());
@@ -128,7 +128,7 @@ public class UserServiceTest {
         }
         
         @Test
-        public void findByEmail_WithEmptyEmail_ReturnsNull() {
+        void findByEmail_WithEmptyEmail_ReturnsNull() {
             // Arrange
             String emptyEmail = "";
             when(userRepository.findByEmail(emptyEmail)).thenReturn(Optional.empty());
@@ -156,7 +156,7 @@ public class UserServiceTest {
             preferredLocations.add("Bogor");
             
             updatedUserData = new User();
-            updatedUserData.setId(TEST_USER_ID);
+            updatedUserData.setId(testUserId);
             updatedUserData.setFirstName("Jane");
             updatedUserData.setLastName("Doe");
             updatedUserData.setEmail("jane.doe@example.com");
@@ -179,44 +179,44 @@ public class UserServiceTest {
         }
         
         @Test
-        public void editUser_WithValidData_UpdatesSuccessfully() {
+        void editUser_WithValidData_UpdatesSuccessfully() {
             // Arrange
-            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             
             // Act
-            UserResponseDTO editResult = userService.editUser(TEST_USER_ID, updatedUserData);
+            UserResponseDTO editResult = userService.editUser(testUserId, updatedUserData);
 
             // Assert
             assertNotNull(editResult);
-            assertEquals(TEST_USER_ID, editResult.getId());
+            assertEquals(testUserId, editResult.getId());
             assertEquals("Jane", editResult.getFirstName());
             assertEquals("Doe", editResult.getLastName());
             assertEquals("jane.doe@example.com", editResult.getEmail());
             
             // Verify the repository was called to find the user
-            verify(userRepository, times(1)).findById(TEST_USER_ID);
+            verify(userRepository, times(1)).findById(testUserId);
         }
 
         @Test
-        public void editUser_WithNoChanges_RetainsOriginalValues() {
+        void editUser_WithNoChanges_RetainsOriginalValues() {
             // Arrange
-            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User emptyUpdateData = new User();
 
             // Act
-            UserResponseDTO editResult = userService.editUser(TEST_USER_ID, emptyUpdateData);
+            UserResponseDTO editResult = userService.editUser(testUserId, emptyUpdateData);
 
             // Assert
-            assertEquals(TEST_USER_ID, editResult.getId());
+            assertEquals(testUserId, editResult.getId());
             assertEquals("John", editResult.getFirstName());
             assertEquals("Doe", editResult.getLastName());
             assertEquals("john.doe@example.com", editResult.getEmail());
         }
 
         @Test
-        public void editUser_WithInvalidEmail_ThrowsException() throws Exception {
+        void editUser_WithInvalidEmail_ThrowsException() throws Exception {
             // Arrange
-            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             Field emailField = User.class.getDeclaredField("email");
             emailField.setAccessible(true);
@@ -224,47 +224,47 @@ public class UserServiceTest {
 
             // Act & Assert
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-                userService.editUser(TEST_USER_ID, invalidUser);
+                userService.editUser(testUserId, invalidUser);
             });
             assertEquals("Invalid email format", exception.getMessage());
         }
 
         @Test
-        public void editUser_WithShortPassword_ThrowsException() throws Exception {
+        void editUser_WithShortPassword_ThrowsException() throws Exception {
             // Arrange
-            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             Field passwordField = User.class.getDeclaredField("password");
             passwordField.setAccessible(true);
             passwordField.set(invalidUser, "pass");
-            invalidUser.setId(TEST_USER_ID);
+            invalidUser.setId(testUserId);
 
             // Act & Assert
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-                userService.editUser(TEST_USER_ID, invalidUser);
+                userService.editUser(testUserId, invalidUser);
             });
             assertEquals("Password must be at least 8 characters", exception.getMessage());
         }
 
         @Test
-        public void editUser_WithInvalidNIK_ThrowsException() throws Exception {
+        void editUser_WithInvalidNIK_ThrowsException() throws Exception {
             // Arrange
-            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             Field nikField = User.class.getDeclaredField("nik");
             nikField.setAccessible(true);
             nikField.set(invalidUser, "invalid-nik");
-            invalidUser.setId(TEST_USER_ID);
+            invalidUser.setId(testUserId);
 
             // Act & Assert
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-                userService.editUser(TEST_USER_ID, invalidUser);
+                userService.editUser(testUserId, invalidUser);
             });
             assertEquals("NIK must be exactly 16 digits", exception.getMessage());
         }
 
         @Test
-        public void editUser_WithNonExistentId_ReturnsNull() {
+        void editUser_WithNonExistentId_ReturnsNull() {
             // Arrange
             when(userRepository.findById("invalid-id")).thenReturn(Optional.empty());
 
@@ -276,11 +276,11 @@ public class UserServiceTest {
         }
 
         @Test
-        public void editUser_WithNameTooLong_ThrowsException() throws Exception {
+        void editUser_WithNameTooLong_ThrowsException() throws Exception {
             // Arrange
-            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
-            invalidUser.setId(TEST_USER_ID);
+            invalidUser.setId(testUserId);
             
             String longName = "A".repeat(300);
             Field nameField = User.class.getDeclaredField("firstName");
@@ -289,7 +289,7 @@ public class UserServiceTest {
 
             // Act & Assert
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-                userService.editUser(TEST_USER_ID, invalidUser);
+                userService.editUser(testUserId, invalidUser);
             });
             assertEquals("First name exceeds maximum length", exception.getMessage());
         }

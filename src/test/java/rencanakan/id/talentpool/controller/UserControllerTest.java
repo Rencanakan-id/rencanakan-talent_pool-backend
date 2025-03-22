@@ -38,7 +38,7 @@ import rencanakan.id.talentpool.service.UserService;
 import rencanakan.id.talentpool.model.User;
 
 @ExtendWith(MockitoExtension.class)
-public class UserControllerTest {
+class UserControllerTest {
 
     @Mock
     private UserService userService;
