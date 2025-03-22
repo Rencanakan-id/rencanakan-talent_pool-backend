@@ -24,7 +24,7 @@ import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationServiceTest {
+class AuthenticationServiceTest {
     
     @Mock
     private UserRepository userRepository;
