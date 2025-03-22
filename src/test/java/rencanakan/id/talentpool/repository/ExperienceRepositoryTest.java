@@ -97,7 +97,6 @@ public class ExperienceRepositoryTest {
                     "Deleting non-existent experience should not throw an exception");
         }
 
-        @SuppressWarnings("null")
         @Test
         void deleteById_ShouldThrowException_WhenExperienceIdIsNull() {
             // Act & Assert
