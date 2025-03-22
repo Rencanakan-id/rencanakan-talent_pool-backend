@@ -3,7 +3,7 @@ package rencanakan.id.talentpool.service;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
-import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
+import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
 
@@ -20,7 +20,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileResponseDTO getById(String id) {
+    public UserResponseDTO getById(String id) {
         Optional<User> userProfileOptional = userRepository.findById(id);
         
         if (userProfileOptional.isPresent()) {
@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileResponseDTO editProfile(String id, User editedProfile) {
+    public UserResponseDTO editProfile(String id, User editedProfile) {
         Optional<User> userProfileOptional = userRepository.findById(id);
 
         if (userProfileOptional.isPresent()) {
@@ -117,8 +117,8 @@ public class UserServiceImpl implements UserService {
         return userProfileOptional.orElse(null);
     }
 
-    private UserProfileResponseDTO convertToDTO(User user) {
-        UserProfileResponseDTO dto = new UserProfileResponseDTO();
+    private UserResponseDTO convertToDTO(User user) {
+        UserResponseDTO dto = new UserResponseDTO();
         dto.setId(user.getId());
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
