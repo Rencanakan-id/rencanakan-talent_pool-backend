@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 
+import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Experience;
+import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.ExperienceRepository;
 
 import java.util.List;
@@ -17,17 +19,22 @@ import java.util.stream.Collectors;
 public class ExperienceServiceImpl implements ExperienceService {
 
     private final ExperienceRepository experienceRepository;
+    private final UserService userService;
 
-    public ExperienceServiceImpl(ExperienceRepository experienceRepository) {
+    public ExperienceServiceImpl(ExperienceRepository experienceRepository, UserService userService) {
         this.experienceRepository = experienceRepository;
+        this.userService = userService;
     }
 
     @Override
     public ExperienceResponseDTO createExperience(@Valid ExperienceRequestDTO request) {
+        UserResponseDTO userResponse = userService.getById(request.getUserId());
+        User user = DTOMapper.map(userResponse, User.class);
+
         Experience newExperience = DTOMapper.map(request, Experience.class);
+        newExperience.setUser(user);
 
         Experience savedExperience = experienceRepository.save(newExperience);
-
         return DTOMapper.map(savedExperience, ExperienceResponseDTO.class);
     }
 

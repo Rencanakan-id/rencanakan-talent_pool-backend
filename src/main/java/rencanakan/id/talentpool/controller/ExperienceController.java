@@ -36,7 +36,7 @@ public class ExperienceController {
 
     @PostMapping
     public ResponseEntity<WebResponse<ExperienceResponseDTO>> createExperience(
-            @RequestBody @Valid ExperienceRequestDTO request) {
+            @Valid @RequestBody ExperienceRequestDTO request) {
 
         ExperienceResponseDTO createdExperience = experienceService.createExperience(request);
         return ResponseEntity.status(HttpStatus.CREATED)
