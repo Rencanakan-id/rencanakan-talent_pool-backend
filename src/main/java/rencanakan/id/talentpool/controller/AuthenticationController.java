@@ -1,10 +1,7 @@
 package rencanakan.id.talentpool.controller;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentpool.dto.LoginRequestDTO;
 import rencanakan.id.talentpool.dto.LoginResponseDTO;
