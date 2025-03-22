@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentpool.dto.LoginResponseDTO;
 import rencanakan.id.talentpool.dto.LoginUserDTO;
-import rencanakan.id.talentpool.dto.UserProfileRequestDTO;
+import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.AuthenticationService;
 import rencanakan.id.talentpool.service.JwtService;
@@ -26,7 +26,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody UserProfileRequestDTO registerUserDto) {
+    public ResponseEntity<User> register(@RequestBody UserRequestDTO registerUserDto) {
         User registeredUser = authenticationService.signup(registerUserDto);
         return ResponseEntity.ok(registeredUser);
     }

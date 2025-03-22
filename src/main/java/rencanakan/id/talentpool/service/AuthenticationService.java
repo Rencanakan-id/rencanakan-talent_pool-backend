@@ -8,21 +8,21 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rencanakan.id.talentpool.dto.LoginUserDTO;
-import rencanakan.id.talentpool.dto.UserProfileRequestDTO;
+import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.model.User;
-import rencanakan.id.talentpool.repository.UserProfileRepository;
+import rencanakan.id.talentpool.repository.UserRepository;
 
 import java.util.Set;
 
 @Service
 public class AuthenticationService {
-    private final UserProfileRepository userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final Validator validator;
 
     public AuthenticationService(
-            UserProfileRepository userRepository,
+            UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder, Validator validator
     ) {
@@ -32,8 +32,8 @@ public class AuthenticationService {
         this.validator = validator;
     }
 
-    public User signup(@Valid UserProfileRequestDTO request) {
-        User newProfile = User.builder()
+    public User signup(@Valid UserRequestDTO request) {
+        User newUser = User.builder()
                 .firstName(request.getFirstName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .lastName(request.getLastName())
@@ -53,7 +53,7 @@ public class AuthenticationService {
                 .skill(request.getSkill())
                 .price(request.getPrice())
                 .build();
-        return userRepository.save(newProfile);
+        return userRepository.save(newUser);
     }
 
     public User authenticate(LoginUserDTO input) {
