@@ -4,7 +4,9 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,6 +20,7 @@ import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
 
+@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
     @Mock
@@ -32,15 +35,11 @@ public class UserServiceTest {
     @Captor
     private ArgumentCaptor<User> userCaptor;
 
-    // Common test data
     private final String TEST_USER_ID = "user123";
     private User testUser;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        
-        // Create a basic test user for reuse across tests
         testUser = new User();
         testUser.setId(TEST_USER_ID);
         testUser.setFirstName("John");

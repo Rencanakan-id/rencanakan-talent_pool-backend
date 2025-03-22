@@ -62,7 +62,6 @@ public class UserControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
             .standaloneSetup(userController)
-            .setControllerAdvice(new GlobalExceptionHandler()) // Add a global exception handler
             .build();
     }
     
@@ -72,7 +71,7 @@ public class UserControllerTest {
         SecurityContextHolder.clearContext();
     }
 
-    private UserResponseDTO createSampleResponseDTO() {
+    private UserResponseDTO createUserResponseDTO() {
         UserResponseDTO dto = new UserResponseDTO();
         dto.setId("user123");
         dto.setFirstName("John");
@@ -95,7 +94,7 @@ public class UserControllerTest {
         return dto;
     }
 
-    private User createMockUser() {
+    private User createUser() {
         return User.builder()
                 .id("user123")
                 .firstName("John")
@@ -128,7 +127,7 @@ public class UserControllerTest {
         void testGetUserById_Success() throws Exception {
             // Arrange
             String userId = "user123";
-            UserResponseDTO responseDTO = createSampleResponseDTO();
+            UserResponseDTO responseDTO = createUserResponseDTO();
             when(userService.getById(userId)).thenReturn(responseDTO);
 
             // Act & Assert
@@ -176,7 +175,7 @@ public class UserControllerTest {
         @DisplayName("Should return authenticated user details")
         void testGetAuthenticatedUser() throws Exception {
             // Setup mock security context
-            User mockUser = createMockUser();
+            User mockUser = createUser();
             
             // Configure security context with mocks
             when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -253,11 +252,11 @@ public class UserControllerTest {
         void testUpdateUser_Success() throws Exception {
             // Arrange
             String userId = "user123";
-            User updatedUser = createMockUser();
+            User updatedUser = createUser();
             updatedUser.setFirstName("Jane");
             updatedUser.setLastName("Smith");
             
-            UserResponseDTO responseDTO = createSampleResponseDTO();
+            UserResponseDTO responseDTO = createUserResponseDTO();
             responseDTO.setFirstName("Jane");
             responseDTO.setLastName("Smith");
             
@@ -282,7 +281,7 @@ public class UserControllerTest {
         void testUpdateUser_UserNotFound() throws Exception {
             // Arrange
             String userId = "nonexistent";
-            User updatedUser = createMockUser();
+            User updatedUser = createUser();
             
             when(userService.editUser(eq(userId), any(User.class)))
                     .thenReturn(null);
