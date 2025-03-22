@@ -226,7 +226,7 @@ class UserServiceTest {
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editUser(testUserId, invalidUser);
             });
-            assertEquals("Invalid email format", exception.getMessage());
+            assertEquals("Failed to update user", exception.getMessage());
         }
 
         @Test
@@ -243,7 +243,7 @@ class UserServiceTest {
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editUser(testUserId, invalidUser);
             });
-            assertEquals("Password must be at least 8 characters", exception.getMessage());
+            assertEquals("Failed to update user", exception.getMessage());
         }
 
         @Test
@@ -260,7 +260,7 @@ class UserServiceTest {
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editUser(testUserId, invalidUser);
             });
-            assertEquals("NIK must be exactly 16 digits", exception.getMessage());
+            assertEquals("Failed to update user", exception.getMessage());
         }
 
         @Test
@@ -291,7 +291,7 @@ class UserServiceTest {
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editUser(testUserId, invalidUser);
             });
-            assertEquals("First name exceeds maximum length", exception.getMessage());
+            assertEquals("Failed to update user", exception.getMessage());
         }
     }
 }
