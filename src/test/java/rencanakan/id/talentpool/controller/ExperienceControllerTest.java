@@ -61,7 +61,7 @@ public class ExperienceControllerTest {
         
     }
 
-    private ExperienceRequestDTO createValidRequestDTO() {
+    private ExperienceRequestDTO createExperienceRequestDTO() {
         return ExperienceRequestDTO.builder()
             .title("Lead Construction Project Manager")
             .company("Aman")
@@ -73,7 +73,7 @@ public class ExperienceControllerTest {
             .build();
     }
 
-    private ExperienceResponseDTO createMockResponseDTO() {
+    private ExperienceResponseDTO createExperienceResponseDTO() {
         return ExperienceResponseDTO.builder()
             .id(1L)
             .title("Lead Construction Project Manager")
@@ -91,14 +91,14 @@ public class ExperienceControllerTest {
 
         @Test
         void testCreateExperience_Success() throws Exception {
-            ExperienceRequestDTO request = createValidRequestDTO();
-            ExperienceResponseDTO mockResponseDTO = createMockResponseDTO();
+            ExperienceRequestDTO request = createExperienceRequestDTO();
+            ExperienceResponseDTO response = createExperienceResponseDTO();
 
-            String expectedStartDate = mockResponseDTO.getStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
-            String expectedEndDate = mockResponseDTO.getEndDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String expectedStartDate = response.getStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String expectedEndDate = response.getEndDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
             when(experienceService.createExperience(any(ExperienceRequestDTO.class)))
-                .thenReturn(mockResponseDTO);
+                .thenReturn(response);
 
             mockMvc.perform(post("/experiences")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -130,14 +130,14 @@ public class ExperienceControllerTest {
         @Test
         void testEditExperience_Success() throws Exception {
             Long experienceId = 1L;
-            ExperienceRequestDTO request = createValidRequestDTO();
-            ExperienceResponseDTO mockResponseDTO = createMockResponseDTO();
+            ExperienceRequestDTO request = createExperienceRequestDTO();
+            ExperienceResponseDTO response = createExperienceResponseDTO();
 
-            String expectedStartDate = mockResponseDTO.getStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
-            String expectedEndDate = mockResponseDTO.getEndDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String expectedStartDate = response.getStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String expectedEndDate = response.getEndDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
             when(experienceService.editById(eq(experienceId), any(ExperienceRequestDTO.class)))
-                    .thenReturn(mockResponseDTO);
+                    .thenReturn(response);
 
             mockMvc.perform(put("/experiences/" + experienceId)
                         .header("Authorization", "Bearer sample-token")

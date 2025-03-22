@@ -34,10 +34,10 @@ class ExperienceServiceTest {
 
     @BeforeEach
     void setUp() {
-        experience = createValidExperienceModel();
+        experience = createExperience();
     }
 
-    private Experience createValidExperienceModel() {
+    private Experience createExperience() {
         return Experience.builder()
             .id(1L)
             .title("Old Title")
