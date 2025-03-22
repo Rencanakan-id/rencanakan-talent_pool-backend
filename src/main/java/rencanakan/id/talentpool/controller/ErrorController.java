@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,6 +36,12 @@ public class ErrorController {
     public ResponseEntity<WebResponse<String>> handleMissingHeader(MissingRequestHeaderException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(WebResponse.<String>builder().errors("Unauthorized").build());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<WebResponse<String>> handleBadCredentialsException(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(WebResponse.<String>builder().errors("Invalid email or password").build());
     }
 
 
