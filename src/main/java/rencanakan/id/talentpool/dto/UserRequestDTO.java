@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class UserProfileRequestDTO {
+public class UserRequestDTO {
 
     @NotBlank(message = "First name is required")
     private String firstName;

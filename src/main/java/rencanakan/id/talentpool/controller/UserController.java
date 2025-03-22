@@ -1,41 +1,37 @@
 package rencanakan.id.talentpool.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
+import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.UserService;
 
 @RestController
 @RequestMapping("/users")
-public class UserProfileController {
+public class UserController {
 
     @Autowired
     private UserService userService;
 
     @GetMapping("/{id}")
-    public WebResponse<UserProfileResponseDTO> getUserProfileById(@PathVariable String id, @RequestHeader("Authorization") String token) {
-        UserProfileResponseDTO resp = userService.getById(id);
-        return WebResponse.<UserProfileResponseDTO>builder()
+    public WebResponse<UserResponseDTO> getUserProfileById(@PathVariable String id, @RequestHeader("Authorization") String token) {
+        UserResponseDTO resp = userService.getById(id);
+        return WebResponse.<UserResponseDTO>builder()
                 .data(resp)
                 .build();
     }
 
     @PutMapping("/{id}")
-    public WebResponse<UserProfileResponseDTO> editUserProfile(
+    public WebResponse<UserResponseDTO> editUserProfile(
             @PathVariable String id,
             @RequestBody User editedProfile,
             @RequestHeader("Authorization") String token) {
 
-        UserProfileResponseDTO updatedProfile = userService.editProfile(id, editedProfile);
+        UserResponseDTO updatedProfile = userService.editProfile(id, editedProfile);
 
-        return WebResponse.<UserProfileResponseDTO>builder()
+        return WebResponse.<UserResponseDTO>builder()
                 .data(updatedProfile)
                 .build();
     }
