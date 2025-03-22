@@ -175,11 +175,14 @@ public class UserServiceTest {
             updatedUserData.setPhotoIjazah("ijazah.jpg");
             updatedUserData.setSkill("Cooking, Mewing");
             
-            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+            // Removing the unnecessary stubbing from here
         }
         
         @Test
         public void editUser_WithValidData_UpdatesSuccessfully() {
+            // Arrange
+            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+            
             // Act
             UserResponseDTO editResult = userService.editUser(TEST_USER_ID, updatedUserData);
 
@@ -197,6 +200,7 @@ public class UserServiceTest {
         @Test
         public void editUser_WithNoChanges_RetainsOriginalValues() {
             // Arrange
+            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
             User emptyUpdateData = new User();
 
             // Act
@@ -212,6 +216,7 @@ public class UserServiceTest {
         @Test
         public void editUser_WithInvalidEmail_ThrowsException() throws Exception {
             // Arrange
+            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             Field emailField = User.class.getDeclaredField("email");
             emailField.setAccessible(true);
@@ -227,6 +232,7 @@ public class UserServiceTest {
         @Test
         public void editUser_WithShortPassword_ThrowsException() throws Exception {
             // Arrange
+            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             Field passwordField = User.class.getDeclaredField("password");
             passwordField.setAccessible(true);
@@ -243,6 +249,7 @@ public class UserServiceTest {
         @Test
         public void editUser_WithInvalidNIK_ThrowsException() throws Exception {
             // Arrange
+            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             Field nikField = User.class.getDeclaredField("nik");
             nikField.setAccessible(true);
@@ -271,6 +278,7 @@ public class UserServiceTest {
         @Test
         public void editUser_WithNameTooLong_ThrowsException() throws Exception {
             // Arrange
+            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             invalidUser.setId(TEST_USER_ID);
             
