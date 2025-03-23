@@ -3,6 +3,7 @@ package rencanakan.id.talentpool.service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,7 +40,6 @@ class ExperienceServiceTest {
 
     @BeforeEach
    void setUp() {
-       MockitoAnnotations.openMocks(this);
        request = createExperienceRequestDTO();
        response= createExperienceResponseDTO();
        experience = createExperience();
@@ -122,59 +122,63 @@ class ExperienceServiceTest {
        verify(experienceRepository, times(1)).save(any(Experience.class));
    }
 
-   @Test
-   void testEditById_Success() {
-       // Arrange
-       Long experienceId = 1L;
+    @Nested
+    class EditExperienceTest {
+        @Test
+        void testEditById_Success() {
+            // Arrange
+            Long experienceId = 1L;
 
-       when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+            when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
 
-       Experience updatedExperience = Experience.builder()
-               .id(experienceId)
-               .title("Updated Title")
-               .company("Updated Company")
-               .employmentType(EmploymentType.FULL_TIME)
-               .startDate(LocalDate.of(2021, 1, 1))
-               .endDate(LocalDate.of(2023, 12, 31))
-               .location("Updated Location")
-               .locationType(LocationType.ON_SITE)
-               .build();
+            Experience updatedExperience = Experience.builder()
+                    .id(experienceId)
+                    .title("Updated Title")
+                    .company("Updated Company")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.of(2021, 1, 1))
+                    .endDate(LocalDate.of(2023, 12, 31))
+                    .location("Updated Location")
+                    .locationType(LocationType.ON_SITE)
+                    .build();
 
-       when(experienceRepository.save(any(Experience.class))).thenReturn(updatedExperience);
-
-
-       ExperienceResponseDTO response = experienceService.editById(experienceId, request);
-
-
-       assertNotNull(response);
-       assertEquals("Updated Title", response.getTitle());
-       assertEquals("Updated Company", response.getCompany());
-       assertEquals(EmploymentType.FULL_TIME, response.getEmploymentType());
-       assertEquals(LocalDate.of(2021, 1, 1), response.getStartDate());
-       assertEquals(LocalDate.of(2023, 12, 31), response.getEndDate());
-       assertEquals("Updated Location", response.getLocation());
-       assertEquals(LocationType.ON_SITE, response.getLocationType());
-
-       verify(experienceRepository, times(1)).findById(experienceId);
-       verify(experienceRepository, times(1)).save(any(Experience.class));
-   }
-
-   @Test
-   void testEditById_EntityNotFound() {
-
-       Long nonExistentId = 999L;
-       when(experienceRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+            when(experienceRepository.save(any(Experience.class))).thenReturn(updatedExperience);
 
 
-       EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-           experienceService.editById(nonExistentId, request);
-       });
+            ExperienceResponseDTO response = experienceService.editById(experienceId, request);
 
-       assertEquals("Experience with ID 999 not found", exception.getMessage());
 
-       verify(experienceRepository, times(1)).findById(nonExistentId);
-       verify(experienceRepository, never()).save(any(Experience.class));
-   }
+            assertNotNull(response);
+            assertEquals("Updated Title", response.getTitle());
+            assertEquals("Updated Company", response.getCompany());
+            assertEquals(EmploymentType.FULL_TIME, response.getEmploymentType());
+            assertEquals(LocalDate.of(2021, 1, 1), response.getStartDate());
+            assertEquals(LocalDate.of(2023, 12, 31), response.getEndDate());
+            assertEquals("Updated Location", response.getLocation());
+            assertEquals(LocationType.ON_SITE, response.getLocationType());
+
+            verify(experienceRepository, times(1)).findById(experienceId);
+            verify(experienceRepository, times(1)).save(any(Experience.class));
+        }
+
+        @Test
+        void testEditById_EntityNotFound() {
+
+            Long nonExistentId = 999L;
+            when(experienceRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                experienceService.editById(nonExistentId, request);
+            });
+
+            assertEquals("Experience with ID 999 not found", exception.getMessage());
+
+            verify(experienceRepository, times(1)).findById(nonExistentId);
+            verify(experienceRepository, never()).save(any(Experience.class));
+        }
+    }
+
 
 //    @Test
 //    void testValidationFailure_CreateExperience() {
