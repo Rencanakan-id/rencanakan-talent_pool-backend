@@ -46,8 +46,4 @@ public class Recommendation {
     public static RecommendationBuilder builder() {
         return new RecommendationBuilder();
     }
-
-    public void setId(String id) {
-        this.id = (id == null) ? UUID.randomUUID().toString() : id;
-    }
 }
