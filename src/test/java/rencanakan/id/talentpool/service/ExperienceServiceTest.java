@@ -4,9 +4,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 import rencanakan.id.talentpool.enums.EmploymentType;
@@ -22,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class ExperienceServiceTest {
 
    @Mock
@@ -37,11 +40,11 @@ class ExperienceServiceTest {
     @BeforeEach
    void setUp() {
        MockitoAnnotations.openMocks(this);
-       request = createValidRequestDTO();
-       response= createMockResponseDTO();
-       experience = createValidExperienceModel();
+       request = createExperienceRequestDTO();
+       response= createExperienceResponseDTO();
+       experience = createExperience();
    }
-    private ExperienceRequestDTO createValidRequestDTO() {
+    private ExperienceRequestDTO createExperienceRequestDTO() {
         return ExperienceRequestDTO.builder()
                 .title("Lead Construction Project Manager")
                 .company("Aman")
@@ -53,7 +56,7 @@ class ExperienceServiceTest {
                 .build();
     }
 
-    private ExperienceResponseDTO createMockResponseDTO() {
+    private ExperienceResponseDTO createExperienceResponseDTO() {
         return ExperienceResponseDTO.builder()
                 .id(1L)
                 .title("Lead Construction Project Manager")
@@ -65,7 +68,7 @@ class ExperienceServiceTest {
                 .locationType(LocationType.ON_SITE)
                 .build();
     }
-    private Experience createValidExperienceModel() {
+    private Experience createExperience() {
         return Experience.builder()
                 .id(1L)
                 .title("Old Title")
