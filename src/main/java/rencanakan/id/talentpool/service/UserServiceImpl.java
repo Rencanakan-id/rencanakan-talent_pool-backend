@@ -1,6 +1,5 @@
 package rencanakan.id.talentpool.service;
 
-import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
 import rencanakan.id.talentpool.dto.UserResponseDTO;
@@ -13,7 +12,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository, Validator validator) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
