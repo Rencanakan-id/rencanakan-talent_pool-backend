@@ -55,7 +55,7 @@ class CertificateTest {
 
     @Test
     void testTitleTooLong() {
-        Certificate certificate = certificateBuilder.title("A".repeat(101)).build();
+        Certificate certificate = certificateBuilder.title("A".repeat(51)).build();
         Set<ConstraintViolation<Certificate>> violations = validator.validate(certificate);
         assertFalse(violations.isEmpty());
     }
