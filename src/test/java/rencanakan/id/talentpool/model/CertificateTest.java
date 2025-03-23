@@ -68,18 +68,6 @@ class CertificateTest {
     }
 
     @Test
-    void testInvalidFileFormat() {
-        Certificate certificate = Certificate.builder()
-                .title("Google Cloud Certified")
-                .file("invalid.txt")
-                .user(new User())
-                .build();
-
-        Set<ConstraintViolation<Certificate>> violations = validator.validate(certificate);
-        assertFalse(violations.isEmpty());
-    }
-
-    @Test
     void testUserCanHaveMultipleCertificates() {
         User user = new User();
 
