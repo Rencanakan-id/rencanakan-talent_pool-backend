@@ -5,15 +5,13 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentpool.dto.*;
-import rencanakan.id.talentpool.repository.RecommendationRepository;
 import rencanakan.id.talentpool.service.RecommendationServiceImpl;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/recommendations")
 public class RecommendationController {
-    private RecommendationServiceImpl recommendationService;
+    private final RecommendationServiceImpl recommendationService;
 
     public RecommendationController(RecommendationServiceImpl recommendationService) {
         this.recommendationService = recommendationService;
