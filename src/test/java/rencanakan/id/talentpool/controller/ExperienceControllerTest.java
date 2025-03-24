@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -86,7 +85,7 @@ public class ExperienceControllerTest {
 
             List<ExperienceResponseDTO> experiences = Arrays.asList(experience1, experience2);
 
-            when(experienceService.getByTalentId(eq(talentId))).thenReturn(experiences);
+            when(experienceService.getByTalentId(talentId)).thenReturn(experiences);
 
             // Act & Assert
             mockMvc.perform(get("/experiences/" + talentId)
@@ -110,7 +109,7 @@ public class ExperienceControllerTest {
             String talentId = "talent-456";
             String token = "Bearer sample-token";
 
-            when(experienceService.getByTalentId(eq(talentId))).thenReturn(Collections.emptyList());
+            when(experienceService.getByTalentId(talentId)).thenReturn(Collections.emptyList());
 
             // Act & Assert
             mockMvc.perform(get("/experiences/" + talentId)
@@ -130,7 +129,7 @@ public class ExperienceControllerTest {
             String talentId = "non-existent-talent";
             String token = "Bearer sample-token";
 
-            when(experienceService.getByTalentId(eq(talentId)))
+            when(experienceService.getByTalentId(talentId))
                     .thenThrow(new EntityNotFoundException("Talent with id " + talentId + " not found"));
 
             // Act & Assert
