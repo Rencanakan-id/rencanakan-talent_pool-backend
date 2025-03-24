@@ -23,6 +23,11 @@ class RecommendationStatusRequestDTOTest {
         validator = factory.getValidator();
     }
     @Test
+    void testNoArgsConstructor() {
+        RecommendationStatusRequestDTO dto = new RecommendationStatusRequestDTO();
+        assertThat(dto.getStatus()).isNull();
+    }
+    @Test
     void testAllArgsConstructor() {
 
         RecommendationStatusRequestDTO dto = new RecommendationStatusRequestDTO(StatusType.ACCEPTED);
