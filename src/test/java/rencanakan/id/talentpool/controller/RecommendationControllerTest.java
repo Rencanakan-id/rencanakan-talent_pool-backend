@@ -1,7 +1,6 @@
 package rencanakan.id.talentpool.controller;
 
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -12,20 +11,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
 import rencanakan.id.talentpool.dto.RecommendationStatusRequestDTO;
-import rencanakan.id.talentpool.controller.RecommendationController;
 import rencanakan.id.talentpool.service.RecommendationService;
-import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.enums.StatusType;
 
 @ExtendWith(MockitoExtension.class)
-public class RecommendationControllerTest {
+class RecommendationControllerTest {
 
     @Mock
     private RecommendationService recommendationService;

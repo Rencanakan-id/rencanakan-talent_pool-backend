@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
 import rencanakan.id.talentpool.dto.RecommendationStatusRequestDTO;
 import rencanakan.id.talentpool.enums.StatusType;

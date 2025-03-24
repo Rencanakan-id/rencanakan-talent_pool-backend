@@ -18,8 +18,7 @@ public class ErrorController {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<WebResponse<String>> handleEntityNotFoundException(EntityNotFoundException exception) {
-        System.out.println("EntityNotFoundException caught: " + exception.getMessage());  // Debugging
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(WebResponse.<String>builder().errors(exception.getMessage()).build());
     }
     @ExceptionHandler(MethodArgumentNotValidException.class)
