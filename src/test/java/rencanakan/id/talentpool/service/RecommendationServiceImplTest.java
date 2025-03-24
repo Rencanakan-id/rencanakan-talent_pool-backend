@@ -13,9 +13,8 @@ import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
-import rencanakan.id.talentpool.repository.UserRepository;
-import rencanakan.id.talentpool.dto.RecommendationRequest;
-import rencanakan.id.talentpool.exception.ResourceNotFoundException;
+import rencanakan.id.talentpool.repository.UserProfileRepository;
+import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
 
 import java.util.Optional;
 import java.util.Set;
@@ -35,7 +34,7 @@ class RecommendationServiceImplTest {
     private RecommendationRepository recommendationRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserProfileRepository userRepository;
 
     private RecommendationServiceImpl recommendationService;
 
@@ -49,10 +48,8 @@ class RecommendationServiceImplTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        recommendationService = new RecommendationServiceImpl(recommendationRepository, userRepository);
-
         mockTalent = User.builder()
-                .id(1L)
+                .id("user123")
                 .firstName("Test")
                 .lastName("Talent")
                 .email("test@example.com")
@@ -76,13 +73,12 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationSuccess() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
-        request.setTalentId(1L);
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setContractorId(1L);
         request.setContractorName("Test Contractor");
         request.setMessage("Test recommendation message");
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(mockTalent));
+        when(userRepository.findById("user123")).thenReturn(Optional.of(mockTalent));
         when(recommendationRepository.save(any(Recommendation.class))).thenReturn(recommendation);
 
         // Act
@@ -101,7 +97,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithMinimumMessageLength() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(1L);
         request.setContractorName("Test Contractor");
@@ -133,7 +129,7 @@ class RecommendationServiceImplTest {
     void testCreateRecommendationWithMaxMessageLength() {
         // Arrange
         String maxLengthMessage = "A".repeat(4000);
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(1L);
         request.setContractorName("Test Contractor");
@@ -166,7 +162,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationTalentNotFound() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(999L);
         request.setContractorId(1L);
         request.setContractorName("Test Contractor");
@@ -195,7 +191,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithNoTalentId() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setContractorId(1L);
         request.setContractorName("Test Contractor");
         request.setMessage("Test recommendation message");
@@ -211,7 +207,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithNoContractorId() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorName("Test Contractor");
         request.setMessage("Test recommendation message");
@@ -227,7 +223,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithNoContractorName() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(1L);
         request.setMessage("Test recommendation message");
@@ -243,7 +239,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithEmptyContractorName() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(1L);
         request.setContractorName("");
@@ -260,7 +256,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithNoMessage() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(1L);
         request.setContractorName("Test Contractor");
@@ -276,7 +272,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithEmptyMessage() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(1L);
         request.setContractorName("Test Contractor");
@@ -296,7 +292,7 @@ class RecommendationServiceImplTest {
     void testCreateRecommendationWithMessageExceedingMaxLength() {
         // Arrange
         String tooLongMessage = "A".repeat(4001); // Exceeds max length by one character
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(1L);
         request.setContractorName("Test Contractor");
@@ -315,7 +311,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithZeroContractorId() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(0L);
         request.setContractorName("Test Contractor");
@@ -332,7 +328,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithNegativeContractorId() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(-1L);
         request.setContractorName("Test Contractor");
@@ -349,7 +345,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithSameContractorAndTalentId() {
         // Arrange
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(1L); // Same as talent ID
         request.setContractorName("Test Contractor");
@@ -369,7 +365,7 @@ class RecommendationServiceImplTest {
     void testCreateRecommendationWithExactlyMaxMessageLength() {
         // Arrange
         String maxLengthMessage = "A".repeat(4000);
-        RecommendationRequest request = new RecommendationRequest();
+        RecommendationRequestDTO request = new RecommendationRequestDTO();
         request.setTalentId(1L);
         request.setContractorId(2L);
         request.setContractorName("Test Contractor");
