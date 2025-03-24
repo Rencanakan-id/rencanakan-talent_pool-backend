@@ -3,14 +3,10 @@ package rencanakan.id.talentpool.service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
-import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
-import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
-import rencanakan.id.talentpool.model.Experience;
 import rencanakan.id.talentpool.model.Recommendation;
-import rencanakan.id.talentpool.repository.ExperienceRepository;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
 
 @Service
