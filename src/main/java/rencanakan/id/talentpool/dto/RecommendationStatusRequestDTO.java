@@ -10,6 +10,7 @@ import rencanakan.id.talentpool.enums.StatusType;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class RecommendationStatusRequestDTO {
 
     @NotNull(message = "Status is required")
