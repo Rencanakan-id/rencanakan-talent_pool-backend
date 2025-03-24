@@ -23,33 +23,49 @@ public class RecommendationController {
     public WebResponse<RecommendationResponseDTO> getRecommendationById(
             @PathVariable String id, 
             @RequestHeader("Authorization") String token) {
-        return null;
+        RecommendationResponseDTO resp = recommendationService.getById(id);
+        return WebResponse.<RecommendationResponseDTO>builder()
+                .data(resp)
+                .build();
     }
     
     @GetMapping
     public WebResponse<List<RecommendationResponseDTO>> getAllRecommendations(
             @RequestHeader("Authorization") String token) {
-        return null;
+        List<RecommendationResponseDTO> recommendations = recommendationService.getAll();
+        return WebResponse.<List<RecommendationResponseDTO>>builder()
+                .data(recommendations)
+                .build();
     }
     
     @GetMapping("/by-status/{status}")
     public WebResponse<List<RecommendationResponseDTO>> getRecommendationsByStatus(
             @PathVariable StatusType status,
             @RequestHeader("Authorization") String token) {
-        return null;
+        List<RecommendationResponseDTO> recommendations = recommendationService.getByStatus(status);
+        return WebResponse.<List<RecommendationResponseDTO>>builder()
+                .data(recommendations)
+                .build();
     }
     
     @GetMapping("/grouped-by-status")
     public WebResponse<Map<StatusType, List<RecommendationResponseDTO>>> getRecommendationsGroupedByStatus(
             @RequestHeader("Authorization") String token) {
-        return null;
+        Map<StatusType, List<RecommendationResponseDTO>> groupedRecommendations = 
+                recommendationService.getAllGroupedByStatus();
+        return WebResponse.<Map<StatusType, List<RecommendationResponseDTO>>>builder()
+                .data(groupedRecommendations)
+                .build();
     }
     
     @GetMapping("/talent/{talentId}")
     public WebResponse<List<RecommendationResponseDTO>> getRecommendationsByTalentId(
             @PathVariable String talentId,
             @RequestHeader("Authorization") String token) {
-        return null;
+        List<RecommendationResponseDTO> recommendations = recommendationService.getByTalentId(talentId);
+        return WebResponse.<List<RecommendationResponseDTO>>builder()
+                .data(recommendations)
+                .build();
     }
     
     @GetMapping("/talent/{talentId}/status/{status}")
@@ -57,13 +73,21 @@ public class RecommendationController {
             @PathVariable String talentId,
             @PathVariable StatusType status,
             @RequestHeader("Authorization") String token) {
-        return null;
+        List<RecommendationResponseDTO> recommendations = 
+                recommendationService.getByTalentIdAndStatus(talentId, status);
+        return WebResponse.<List<RecommendationResponseDTO>>builder()
+                .data(recommendations)
+                .build();
     }
     
     @GetMapping("/talent/{talentId}/grouped-by-status")
     public WebResponse<Map<StatusType, List<RecommendationResponseDTO>>> getRecommendationsByTalentIdGroupedByStatus(
             @PathVariable String talentId,
             @RequestHeader("Authorization") String token) {
-        return null;
+        Map<StatusType, List<RecommendationResponseDTO>> groupedRecommendations = 
+                recommendationService.getByTalentIdAndGroupedByStatus(talentId);
+        return WebResponse.<Map<StatusType, List<RecommendationResponseDTO>>>builder()
+                .data(groupedRecommendations)
+                .build();
     }
 }
