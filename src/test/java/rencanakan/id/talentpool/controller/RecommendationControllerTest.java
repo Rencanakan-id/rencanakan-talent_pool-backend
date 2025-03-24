@@ -14,7 +14,11 @@ import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
 import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.service.RecommendationService;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.verify;
@@ -23,7 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RecommendationControllerTest {
+class RecommendationControllerTest {
 
     private MockMvc mockMvc;
 
@@ -76,7 +80,7 @@ public class RecommendationControllerTest {
 
         allRecommendations = Arrays.asList(recommendation1, recommendation2, recommendation3);
 
-        groupedRecommendations = new HashMap<>();
+        groupedRecommendations = new EnumMap<>(StatusType.class);
         groupedRecommendations.put(StatusType.PENDING, Collections.singletonList(recommendation1));
         groupedRecommendations.put(StatusType.ACCEPTED, Collections.singletonList(recommendation2));
         groupedRecommendations.put(StatusType.DECLINED, Collections.singletonList(recommendation3));
@@ -194,7 +198,7 @@ public class RecommendationControllerTest {
         @Test
         void getRecommendationsByTalentIdGroupedByStatus_ExistingTalent_ReturnsGroupedRecommendations() throws Exception {
             String talentId = "user-id-1";
-            Map<StatusType, List<RecommendationResponseDTO>> groupedByTalent = new HashMap<>();
+            Map<StatusType, List<RecommendationResponseDTO>> groupedByTalent = new EnumMap<>(StatusType.class);
             groupedByTalent.put(StatusType.PENDING, Collections.singletonList(recommendation1));
             groupedByTalent.put(StatusType.ACCEPTED, Collections.singletonList(recommendation2));
             groupedByTalent.put(StatusType.DECLINED, Collections.emptyList());
@@ -294,7 +298,7 @@ public class RecommendationControllerTest {
         
         @Test
         void getRecommendationsGroupedByStatus_EmptyResults_ReturnsEmptyMaps() throws Exception {
-            Map<StatusType, List<RecommendationResponseDTO>> emptyGroupedRecommendations = new HashMap<>();
+            Map<StatusType, List<RecommendationResponseDTO>> emptyGroupedRecommendations = new EnumMap<>(StatusType.class);
             emptyGroupedRecommendations.put(StatusType.PENDING, Collections.emptyList());
             emptyGroupedRecommendations.put(StatusType.ACCEPTED, Collections.emptyList());
             emptyGroupedRecommendations.put(StatusType.DECLINED, Collections.emptyList());
@@ -315,7 +319,7 @@ public class RecommendationControllerTest {
         @Test
         void getRecommendationsByTalentIdGroupedByStatus_NoRecommendations_ReturnsEmptyGroups() throws Exception {
             String talentId = "user-id-with-no-recommendations";
-            Map<StatusType, List<RecommendationResponseDTO>> emptyGroupedByTalent = new HashMap<>();
+            Map<StatusType, List<RecommendationResponseDTO>> emptyGroupedByTalent = new EnumMap<>(StatusType.class);
             emptyGroupedByTalent.put(StatusType.PENDING, Collections.emptyList());
             emptyGroupedByTalent.put(StatusType.ACCEPTED, Collections.emptyList());
             emptyGroupedByTalent.put(StatusType.DECLINED, Collections.emptyList());

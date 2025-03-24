@@ -15,15 +15,13 @@ import rencanakan.id.talentpool.repository.RecommendationRepository;
 import rencanakan.id.talentpool.repository.UserProfileRepository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RecommendationServiceTest {
+class RecommendationServiceTest {
 
     @Mock
     private RecommendationRepository recommendationRepository;
@@ -265,7 +263,7 @@ public class RecommendationServiceTest {
             assertNotNull(result);
             assertEquals(2, result.size());
             
-            List<String> recommendationIds = result.stream().map(RecommendationResponseDTO::getId).collect(Collectors.toList());
+            List<String> recommendationIds = result.stream().map(RecommendationResponseDTO::getId).toList();
             assertTrue(recommendationIds.contains(recommendation1.getId()));
             assertTrue(recommendationIds.contains(recommendation2.getId()));
             
@@ -330,11 +328,11 @@ public class RecommendationServiceTest {
 
             String talentId = "user-id-1";
             when(userRepository.findById(talentId)).thenReturn(Optional.of(talent1));
-            when(recommendationRepository.findByTalentAndStatus(eq(talent1), eq(StatusType.PENDING)))
+            when(recommendationRepository.findByTalentAndStatus(talent1, StatusType.PENDING))
                     .thenReturn(talent1PendingRecommendations);
-            when(recommendationRepository.findByTalentAndStatus(eq(talent1), eq(StatusType.ACCEPTED)))
+            when(recommendationRepository.findByTalentAndStatus(talent1, StatusType.ACCEPTED))
                     .thenReturn(Collections.singletonList(recommendation2));
-            when(recommendationRepository.findByTalentAndStatus(eq(talent1), eq(StatusType.DECLINED)))
+            when(recommendationRepository.findByTalentAndStatus(talent1, StatusType.DECLINED))
                     .thenReturn(Collections.emptyList());
 
             Map<StatusType, List<RecommendationResponseDTO>> result = 
