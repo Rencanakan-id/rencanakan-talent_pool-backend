@@ -6,11 +6,11 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 class CertificateTest {
     private Validator validator;
     private Certificate.CertificateBuilder certificateBuilder;
