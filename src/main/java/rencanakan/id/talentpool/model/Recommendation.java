@@ -40,8 +40,4 @@ public class Recommendation {
     @Column(name = "status_type", nullable = false)
     @NotNull(message = "Status is required")
     private StatusType status;
-
-    public static RecommendationBuilder builder() {
-        return new RecommendationBuilder();
-    }
 }
