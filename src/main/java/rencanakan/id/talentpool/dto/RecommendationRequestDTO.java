@@ -12,6 +12,9 @@ import rencanakan.id.talentpool.enums.StatusType;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RecommendationRequestDTO {
+    @NotNull(message = "Talent ID is required")
+    private String talentId;
+    
     @NotNull(message = "Contractor ID is required")
     private Long contractorId;
     
