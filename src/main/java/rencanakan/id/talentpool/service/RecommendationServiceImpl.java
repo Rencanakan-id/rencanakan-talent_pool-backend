@@ -14,7 +14,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final Validator validator;
 
     public RecommendationServiceImpl(RecommendationRepository recommendationRepository, Validator validator) {
-        this.recommendationRepository = recommendationRepositoryRepository;
+        this.recommendationRepository = recommendationRepository;
         this.validator = validator;
     }
 
