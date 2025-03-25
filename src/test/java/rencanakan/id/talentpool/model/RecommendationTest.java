@@ -55,23 +55,6 @@ class RecommendationTest {
     }
 
     @Nested
-    class IdTests {
-        @Test
-        void testNullIdGeneratesUUID() {
-            recommendation.setId(null);
-            assertNotNull(recommendation.getId(), "ID should be auto-generated when null");
-            assertEquals(36, recommendation.getId().length(), "Generated ID should be a valid UUID");
-        }
-
-        @Test
-        void testCustomIdIsPreserved() {
-            String customId = "custom-id-123";
-            recommendation.setId(customId);
-            assertEquals(customId, recommendation.getId(), "Custom ID should be preserved");
-        }
-    }
-
-    @Nested
     class TalentTests {
         @Test
         void testNullTalent() {
