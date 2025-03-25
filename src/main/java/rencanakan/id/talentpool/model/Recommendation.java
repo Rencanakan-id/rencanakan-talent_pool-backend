@@ -5,8 +5,6 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import rencanakan.id.talentpool.enums.StatusType;
 
-import java.util.UUID;
-
 @Entity
 @Getter
 @Setter
