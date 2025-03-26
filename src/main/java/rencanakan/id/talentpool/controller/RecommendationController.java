@@ -32,5 +32,15 @@ public class RecommendationController {
         return ResponseEntity.ok(response);
 
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
+            @PathVariable String id){
+        RecommendationResponseDTO res = this.recommendationService.deleteById(id);
+        WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
+                .data(res)
+                .build();
+        return ResponseEntity.ok(response);
+
+    }
 
 }
