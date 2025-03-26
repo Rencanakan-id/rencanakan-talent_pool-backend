@@ -29,4 +29,14 @@ public class RecommendationServiceImpl implements RecommendationService{
         recommendationRepository.save(recommendation);
         return  DTOMapper.map(recommendation, RecommendationResponseDTO.class);
     }
+
+    @Override
+    public RecommendationResponseDTO deleteById(String id) {
+        Recommendation recommendation = recommendationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Recommendation with id " + id + " not found."));
+
+        recommendationRepository.deleteById(id);
+        return  DTOMapper.map(recommendation, RecommendationResponseDTO.class);
+
+    }
 }
