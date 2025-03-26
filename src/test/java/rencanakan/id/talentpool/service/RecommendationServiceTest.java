@@ -16,6 +16,8 @@ import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
 
+import java.util.Optional;
+
 @ExtendWith(MockitoExtension.class)
 class RecommendationServiceTest {
 
@@ -59,5 +61,29 @@ class RecommendationServiceTest {
             recommendationService.editStatusById("1", requestDTO);
         });
         assertEquals("Recommendation with ID 1 not found", exception.getMessage());
+    }
+    @Test
+    void deleteById_Success() {
+        when(recommendationRepository.findById("1")).thenReturn(Optional.of(recommendation));
+
+        RecommendationResponseDTO response = recommendationService.deleteById("1");
+
+        verify(recommendationRepository, times(1)).deleteById("1");
+
+        assertNotNull(response);
+        assertEquals("1", response.getId());
+        assertEquals(StatusType.PENDING, response.getStatus());
+    }
+    @Test
+    void deleteById_NotFound_ThrowsException() {
+
+        when(recommendationRepository.findById("999")).thenReturn(Optional.empty());
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            recommendationService.deleteById("999");
+        });
+
+        assertEquals("Recommendation with id 999 not found.", exception.getMessage());
+
+        verify(recommendationRepository, never()).deleteById("999");
     }
 }
