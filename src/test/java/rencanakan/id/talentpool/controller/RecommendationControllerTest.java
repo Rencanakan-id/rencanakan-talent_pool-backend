@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -97,5 +98,32 @@ class RecommendationControllerTest {
                 .andExpect(jsonPath("$.data.message").value(modifiedResponseDTO.getMessage()))
                 .andExpect(jsonPath("$.data.status").value(modifiedResponseDTO.getStatus().toString()))
                 .andExpect(jsonPath("$.errors").isEmpty());
+    }
+
+    @Test
+    void deleteByStatusId_NotFound_ShouldReturn404() throws Exception {
+        String notFoundId = "999";
+        doThrow(new EntityNotFoundException("Recommendation with id " + notFoundId + " not found."))
+                .when(recommendationService).deleteById(notFoundId);
+
+        mockMvc.perform(delete("/recommendations/{id}", notFoundId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors").value("Recommendation with id " + notFoundId + " not found."));
+
+    }
+    @Test
+    void deleteByStatusId_Success_ShouldReturn200() throws Exception {
+        when(recommendationService.deleteById(id)).thenReturn(responseDTO);
+        mockMvc.perform(delete("/recommendations/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()) // Harus 200 OK
+                .andExpect(jsonPath("$.data.id").value(id))
+                .andExpect(jsonPath("$.data.talentId").value("talentId"))
+                .andExpect(jsonPath("$.data.contractorId").value(123L))
+                .andExpect(jsonPath("$.data.contractorName").value("contractorName"))
+                .andExpect(jsonPath("$.data.message").value("Some message"))
+                .andExpect(jsonPath("$.data.status").value("ACCEPTED"));
+
     }
 }
