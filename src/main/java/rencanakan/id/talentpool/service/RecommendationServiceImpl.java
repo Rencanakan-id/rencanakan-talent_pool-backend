@@ -1,6 +1,8 @@
 package rencanakan.id.talentpool.service;
 
+import jakarta.validation.Valid;
 import jakarta.validation.Validator;
+import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
 import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.model.User;
@@ -19,7 +21,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public RecommendationResponseDTO createRecommendation(Recommendation recommendation) {
+    public RecommendationResponseDTO createRecommendation(@Valid RecommendationRequestDTO recommendation) {
         return null;
     }
 }
