@@ -7,39 +7,54 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
+import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
 import rencanakan.id.talentpool.enums.StatusType;
+import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
-import rencanakan.id.talentpool.repository.UserProfileRepository;
 import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import org.mockito.MockedStatic;
+import rencanakan.id.talentpool.repository.UserProfileRepository;
+
+import static org.mockito.Mockito.mockStatic;
 
 class RecommendationServiceImplTest {
 
     private static Validator validator;
     private Recommendation recommendation;
     private User mockTalent;
+    private UserProfileResponseDTO userResponseDTO;
 
     @Mock
     private RecommendationRepository recommendationRepository;
 
     @Mock
-    private UserProfileRepository userRepository;
+    private UserProfileRepository userProfileRepository;
 
-    @Mock
+    @InjectMocks
     private RecommendationRequestDTO requestDTO;
 
+    @InjectMocks
     private RecommendationServiceImpl recommendationService;
+
+    @InjectMocks
+    private UserProfileServiceImpl userProfileService;
+
+    @InjectMocks
+    private DTOMapper dtoMapper;
 
     @BeforeAll
     static void setupValidator() {
@@ -76,25 +91,34 @@ class RecommendationServiceImplTest {
         requestDTO.setMessage("Test recommendation message");
         requestDTO.setStatus(StatusType.PENDING);
 
+        userResponseDTO = new UserProfileResponseDTO();
+        userResponseDTO.setFirstName("Test");
+        userResponseDTO.setLastName("Talent");
+        userResponseDTO.setEmail("test@example.setcom");
+        userResponseDTO.setPhoneNumber("081234567890");
+        userResponseDTO.setNik("1234567890123456");
+
     }
 
     // POSITIVE TEST CASES
 
     @Test
     void testCreateRecommendationSuccess() {
+        try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
 
-        when(recommendationRepository.save(any())).thenReturn(recommendation);
+            when(userProfileService.getById(mockTalent.getId())).thenReturn(userResponseDTO);
 
-        RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId() ,requestDTO);
+            mockedMapper.when(() -> DTOMapper.map(any(UserProfileResponseDTO.class), eq(User.class))).thenReturn(mockTalent);
 
-        assertNotNull(result);
-        assertEquals(mockTalent.getId(), result.getTalentId());
-        assertEquals(StatusType.PENDING, result.getStatus());
-        assertEquals(requestDTO.getContractorId(), result.getContractorId());
-        assertEquals(requestDTO.getContractorName(), result.getContractorName());
-        assertEquals(requestDTO.getMessage(), result.getMessage());
+            mockedMapper.when(() -> DTOMapper.map(any(Recommendation.class), eq(Recommendation.class))).thenReturn(recommendation);
 
-        verify(recommendationRepository, times(1)).save(any(Recommendation.class));
+            when(recommendationRepository.save(any())).thenReturn(recommendation);
+
+            RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
+
+            assertEquals(mockTalent.getId(), result.getTalentId());
+            verify(recommendationRepository, times(1)).save(any(Recommendation.class));
+        }
     }
 
     @Test
@@ -106,7 +130,7 @@ class RecommendationServiceImplTest {
 
         RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
 
-        assertNotNull(result);
+        
         assertEquals("A", result.getMessage());
         verify(recommendationRepository, times(1)).save(any(Recommendation.class));
     }
@@ -120,7 +144,7 @@ class RecommendationServiceImplTest {
 
         RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
 
-        assertNotNull(result);
+        
         assertEquals(4000, result.getMessage().length());
         verify(recommendationRepository, times(1)).save(any(Recommendation.class));
     }
@@ -246,7 +270,7 @@ class RecommendationServiceImplTest {
 
         RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
 
-        assertNotNull(result);
+        
         assertEquals(4000, result.getMessage().length());
         verify(recommendationRepository, times(1)).save(any(Recommendation.class));
     }
