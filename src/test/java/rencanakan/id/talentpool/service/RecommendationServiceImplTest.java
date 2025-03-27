@@ -85,7 +85,7 @@ class RecommendationServiceImplTest {
 
         when(recommendationRepository.save(any())).thenReturn(recommendation);
 
-        RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent ,requestDTO);
+        RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId() ,requestDTO);
 
         assertNotNull(result);
         assertEquals(mockTalent.getId(), result.getTalentId());
@@ -104,7 +104,7 @@ class RecommendationServiceImplTest {
 
         when(recommendationRepository.save(any(Recommendation.class))).thenReturn(recommendation);
 
-        RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent, requestDTO);
+        RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
 
         assertNotNull(result);
         assertEquals("A", result.getMessage());
@@ -118,7 +118,7 @@ class RecommendationServiceImplTest {
 
         when(recommendationRepository.save(any(Recommendation.class))).thenReturn(recommendation);
 
-        RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent, requestDTO);
+        RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
 
         assertNotNull(result);
         assertEquals(4000, result.getMessage().length());
@@ -143,7 +143,7 @@ class RecommendationServiceImplTest {
         requestDTO.setContractorId(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> recommendationService.createRecommendation(mockTalent, requestDTO));
+                () -> recommendationService.createRecommendation(mockTalent.getId(), requestDTO));
 
         assertEquals("Contractor ID is required", exception.getMessage());
         verify(recommendationRepository, never()).save(any(Recommendation.class));
@@ -155,7 +155,7 @@ class RecommendationServiceImplTest {
         requestDTO.setContractorName(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> recommendationService.createRecommendation(mockTalent, requestDTO));
+                () -> recommendationService.createRecommendation(mockTalent.getId(), requestDTO));
 
         assertEquals("Contractor name is required", exception.getMessage());
         verify(recommendationRepository, never()).save(any(Recommendation.class));
@@ -167,7 +167,7 @@ class RecommendationServiceImplTest {
         requestDTO.setContractorName("");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> recommendationService.createRecommendation(mockTalent, requestDTO));
+                () -> recommendationService.createRecommendation(mockTalent.getId(), requestDTO));
 
         assertEquals("Contractor name cannot be empty", exception.getMessage());
         verify(recommendationRepository, never()).save(any(Recommendation.class));
@@ -179,7 +179,7 @@ class RecommendationServiceImplTest {
         requestDTO.setMessage("");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> recommendationService.createRecommendation(mockTalent, requestDTO));
+                () -> recommendationService.createRecommendation(mockTalent.getId(), requestDTO));
 
         assertEquals("Recommendation message is required", exception.getMessage());
         verify(recommendationRepository, never()).save(any(Recommendation.class));
@@ -191,7 +191,7 @@ class RecommendationServiceImplTest {
         requestDTO.setMessage("");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> recommendationService.createRecommendation(mockTalent, requestDTO));
+                () -> recommendationService.createRecommendation(mockTalent.getId(), requestDTO));
 
         assertEquals("Recommendation message cannot be empty", exception.getMessage());
         verify(recommendationRepository, never()).save(any(Recommendation.class));
@@ -206,7 +206,7 @@ class RecommendationServiceImplTest {
         requestDTO.setMessage(tooLongMessage);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> recommendationService.createRecommendation(mockTalent, requestDTO));
+                () -> recommendationService.createRecommendation(mockTalent.getId(), requestDTO));
 
         assertEquals("Message cannot exceed 4000 characters", exception.getMessage());
         verify(recommendationRepository, never()).save(any(Recommendation.class));
@@ -218,7 +218,7 @@ class RecommendationServiceImplTest {
         requestDTO.setContractorId(0L);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> recommendationService.createRecommendation(mockTalent, requestDTO));
+                () -> recommendationService.createRecommendation(mockTalent.getId(), requestDTO));
 
         assertEquals("Contractor ID must be greater than 0", exception.getMessage());
         verify(recommendationRepository, never()).save(any(Recommendation.class));
@@ -230,7 +230,7 @@ class RecommendationServiceImplTest {
         requestDTO.setContractorId(-1L);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> recommendationService.createRecommendation(mockTalent, requestDTO));
+                () -> recommendationService.createRecommendation(mockTalent.getId(), requestDTO));
 
         assertEquals("Contractor ID must be greater than 0", exception.getMessage());
         verify(recommendationRepository, never()).save(any(Recommendation.class));
@@ -244,7 +244,7 @@ class RecommendationServiceImplTest {
 
         when(recommendationRepository.save(any(Recommendation.class))).thenReturn(recommendation);
 
-        RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent, requestDTO);
+        RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
 
         assertNotNull(result);
         assertEquals(4000, result.getMessage().length());

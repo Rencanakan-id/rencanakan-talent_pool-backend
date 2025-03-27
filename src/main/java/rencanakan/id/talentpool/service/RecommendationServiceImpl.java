@@ -21,7 +21,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public RecommendationResponseDTO createRecommendation(User talent, @Valid RecommendationRequestDTO recommendation) {
+    public RecommendationResponseDTO createRecommendation(String talentId, @Valid RecommendationRequestDTO recommendation) {
         return null;
     }
 }
