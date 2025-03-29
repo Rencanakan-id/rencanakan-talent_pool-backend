@@ -38,6 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@ExtendWith(MockitoExtension.class)
 public class RecommendationControllerTest {
 
     @Mock
@@ -102,27 +103,33 @@ public class RecommendationControllerTest {
             RecommendationRequestDTO request = createValidRequestDTO();
             RecommendationResponseDTO mockResponseDTO = createMockResponseDTO();
 
-            when(recommendationService.createRecommendation(mockTalent, any(RecommendationRequestDTO.class)))
+            when(recommendationService.createRecommendation(eq(mockTalent), any(RecommendationRequestDTO.class)))
                     .thenReturn(mockResponseDTO);
 
             mockMvc.perform(post("/recommendations")
                             .contentType(MediaType.APPLICATION_JSON)
+                            .requestAttr("currentUser", mockTalent)
                             .content(mapper.writeValueAsString(request)))
-                    .andExpect(jsonPath("$.data.id").value("recommendation123"))
-                    .andExpect(jsonPath("$.data.talent").value(mockTalent))
-                    .andExpect(jsonPath("$.data.contractorId").value(1L))
-                    .andExpect(jsonPath("$.data.contractorName").value("Contractor name"))
-                    .andExpect(jsonPath("$.data.message").value("Test controller message"))
-                    .andExpect(jsonPath("$.data.status").value(StatusType.PENDING));
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value("recommendation123")) // Change from $.data.id
+                    .andExpect(jsonPath("$.talent.id").value("user123"))
+                    .andExpect(jsonPath("$.contractorId").value(1L))
+                    .andExpect(jsonPath("$.contractorName").value("Contractor name"))
+                    .andExpect(jsonPath("$.message").value("Test controller message"))
+                    .andExpect(jsonPath("$.status").value("PENDING"));
+
         }
 
         @Test
         void testCreateRecommendation_BadRequest() throws Exception {
             RecommendationRequestDTO invalidRequest = new RecommendationRequestDTO();
 
-            mockMvc.perform(post("/experience")
+            mockMvc.perform(post("/recommendations")
                             .contentType(MediaType.APPLICATION_JSON)
+                            .requestAttr("currentUser", mockTalent)
                             .content(mapper.writeValueAsString(invalidRequest)))
+                    .andDo(print())
                     .andExpect(status().isBadRequest());
         }
     }
