@@ -26,12 +26,12 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public UserProfileResponseDTO getById(String id) {
         Optional<User> userProfileOptional = userProfileRepository.findById(id);
-        
+
         if (userProfileOptional.isPresent()) {
             User user = userProfileOptional.get();
             return convertToDTO(user);
         }
-        
+
         return null;
     }
 
