@@ -51,8 +51,8 @@ public class ErrorController {
                 .body(WebResponse.<String>builder().errors(ex.getMessage()).build());
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<WebResponse<String>> handleGeneralException(IllegalArgumentException ex) {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<WebResponse<String>> handleIlegalArgumentException(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(WebResponse.<String>builder().errors(ex.getMessage()).build());
     }

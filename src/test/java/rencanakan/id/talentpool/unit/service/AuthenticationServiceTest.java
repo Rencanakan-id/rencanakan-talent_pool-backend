@@ -18,6 +18,7 @@ import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
 import rencanakan.id.talentpool.service.AuthenticationService;
+import rencanakan.id.talentpool.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,9 @@ class AuthenticationServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserService userService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
