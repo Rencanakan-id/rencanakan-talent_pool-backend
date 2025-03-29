@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -141,20 +142,7 @@ class UserServiceTest {
             updatedUserData.setFirstName("Jane");
             updatedUserData.setLastName("Doe");
             updatedUserData.setEmail("jane.doe@example.com");
-            updatedUserData.setPhoneNumber("1234567890");
-            updatedUserData.setPassword("password1234");
-            updatedUserData.setAboutMe("This is me!");
-            updatedUserData.setCurrentLocation("New York");
-            updatedUserData.setExperienceYears(6);
-            updatedUserData.setPreferredLocations(preferredLocations);
-            updatedUserData.setSkkLevel("Professional");
-            updatedUserData.setPhoto("photo.jpg");
             updatedUserData.setNik("1234567891011121");
-            updatedUserData.setNpwp("01122334456789101231");
-            updatedUserData.setPhotoKtp("ktp.jpg");
-            updatedUserData.setPhotoNpwp("npwp.jpg");
-            updatedUserData.setPhotoIjazah("ijazah.jpg");
-            updatedUserData.setSkill("Cooking, Mewing");
         }
         
         @Test
@@ -170,6 +158,7 @@ class UserServiceTest {
             assertEquals("jane.doe@example.com", editResult.getEmail());
             
             verify(userRepository, times(1)).findById(testUserId);
+            verify(userRepository, times(1)).save(any(User.class));
         }
 
         @Test
@@ -183,6 +172,7 @@ class UserServiceTest {
             assertEquals("John", editResult.getFirstName());
             assertEquals("Doe", editResult.getLastName());
             assertEquals("john.doe@example.com", editResult.getEmail());
+            verify(userRepository, times(1)).save(any(User.class));
         }
 
         @Test
@@ -217,9 +207,10 @@ class UserServiceTest {
         @Test
         void editUser_WithNonExistentId_ThrowsEntityNotFoundException() {
             when(userRepository.findById("invalid-id")).thenReturn(Optional.empty());
+            User invalidUser = new User();
 
             Exception exception = assertThrows(RuntimeException.class, () -> 
-                userService.editUser("invalid-id", new User())
+                userService.editUser("invalid-id", invalidUser)
             );
             assertTrue(exception instanceof EntityNotFoundException || exception instanceof RuntimeException);
             assertEquals("User with ID invalid-id not found", exception.getMessage());
