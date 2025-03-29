@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RecommendationControllerTest {
+class RecommendationControllerTest {
 
     @Mock
     private RecommendationServiceImpl recommendationService;
