@@ -13,7 +13,6 @@ import rencanakan.id.talentpool.enums.StatusType;
 @NoArgsConstructor
 @Table(name = "recommendation")
 public class Recommendation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
