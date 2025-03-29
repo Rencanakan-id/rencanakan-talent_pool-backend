@@ -1,6 +1,7 @@
 package rencanakan.id.talentpool.controller;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.apache.coyote.BadRequestException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +45,15 @@ public class ErrorController {
                 .body(WebResponse.<String>builder().errors("Invalid email or password").build());
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<WebResponse<String>> handleBadRequestException(BadRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(WebResponse.<String>builder().errors(ex.getMessage()).build());
+    }
 
-
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<WebResponse<String>> handleIlegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(WebResponse.<String>builder().errors(ex.getMessage()).build());
+    }
 }

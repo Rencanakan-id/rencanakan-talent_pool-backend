@@ -21,19 +21,27 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
 
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            UserService userService
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     public User signup(@Valid UserRequestDTO request) {
-        User newProfile = User.builder()
+        User checkUser = userService.findByEmail(request.getEmail());
+        if (checkUser != null) {
+            throw new IllegalArgumentException("User with email " + request.getEmail() + " already exists.");
+        }
+
+        User newUser = User.builder()
                 .firstName(request.getFirstName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .lastName(request.getLastName())
@@ -53,7 +61,7 @@ public class AuthenticationService {
                 .skill(request.getSkill())
                 .price(request.getPrice())
                 .build();
-        return userRepository.save(newProfile);
+        return userRepository.save(newUser);
     }
 
     public User authenticate(LoginRequestDTO input) {

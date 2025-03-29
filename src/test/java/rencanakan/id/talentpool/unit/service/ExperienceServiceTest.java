@@ -1,5 +1,9 @@
 package rencanakan.id.talentpool.unit.service;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
@@ -22,7 +25,7 @@ import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 import rencanakan.id.talentpool.service.UserService;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,18 +43,22 @@ class ExperienceServiceTest {
     private ExperienceServiceImpl experienceService;
 
     private Experience experience;
-    private ExperienceRequestDTO requestDTO;
     private User user;
+    private ExperienceRequestDTO experienceRequestDTO;
     private UserResponseDTO userResponseDTO;
-    private ExperienceResponseDTO responseDTO;
+    private ExperienceResponseDTO experienceResponseDTO;
+    private static Validator validator;
 
     @BeforeEach
     void setUp() {
         user = createUser();
         userResponseDTO = createUserResponseDTO();
         experience = createExperience();
-        requestDTO = createExperienceRequestDTO();
-        responseDTO = createExperienceResponseDTO();
+        experienceRequestDTO = createExperienceRequestDTO();
+        experienceResponseDTO = createExperienceResponseDTO();
+
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
 
     private User createUser() {
@@ -116,150 +123,71 @@ class ExperienceServiceTest {
     @Test
     void testCreateExperience_Success() {
         try (MockedStatic<DTOMapper> mockedStatic = Mockito.mockStatic(DTOMapper.class)) {
-            when(userService.getById("1")).thenReturn(userResponseDTO);
             mockedStatic.when(() -> DTOMapper.map(userResponseDTO, User.class)).thenReturn(user);
-            mockedStatic.when(() -> DTOMapper.map(requestDTO, Experience.class)).thenReturn(experience);
-            mockedStatic.when(() -> DTOMapper.map(experience, ExperienceResponseDTO.class)).thenReturn(responseDTO);
+            mockedStatic.when(() -> DTOMapper.map(experienceRequestDTO, Experience.class)).thenReturn(experience);
+            mockedStatic.when(() -> DTOMapper.map(experience, ExperienceResponseDTO.class)).thenReturn(experienceResponseDTO);
             when(experienceRepository.save(any(Experience.class))).thenReturn(experience);
 
-            ExperienceResponseDTO result = experienceService.createExperience(requestDTO);
+            ExperienceResponseDTO result = experienceService.createExperience(user.getId(), experienceRequestDTO);
 
             assertNotNull(result);
             assertEquals(1L, result.getId());
             assertEquals("Software Engineer", result.getTitle());
             assertEquals("TechCorp", result.getCompany());
             assertEquals(EmploymentType.FULL_TIME, result.getEmploymentType());
-
-            verify(userService).getById("1");
-            verify(experienceRepository).save(any(Experience.class));
         }
     }
 
     @Test
-    void testCreateExperience_WithNullFields() {
+    void testCreateExperience_WithNullEndDate_Success() {
         try (MockedStatic<DTOMapper> mockedStatic = Mockito.mockStatic(DTOMapper.class)) {
-            requestDTO.setEndDate(null);
+            experienceRequestDTO.setEndDate(null);
+            experience.setEndDate(null);
+            experienceResponseDTO.setEndDate(null);
 
-            Experience modifiedExperience = createModifiedExperienceWithNullEndDate();
-            ExperienceResponseDTO modifiedResponse = createModifiedResponseWithNullEndDate();
-
-            when(userService.getById("1")).thenReturn(userResponseDTO);
             mockedStatic.when(() -> DTOMapper.map(userResponseDTO, User.class)).thenReturn(user);
-            mockedStatic.when(() -> DTOMapper.map(requestDTO, Experience.class)).thenReturn(modifiedExperience);
-            mockedStatic.when(() -> DTOMapper.map(modifiedExperience, ExperienceResponseDTO.class)).thenReturn(modifiedResponse);
-            when(experienceRepository.save(any(Experience.class))).thenReturn(modifiedExperience);
+            mockedStatic.when(() -> DTOMapper.map(experienceRequestDTO, Experience.class)).thenReturn(experience);
+            mockedStatic.when(() -> DTOMapper.map(experience, ExperienceResponseDTO.class)).thenReturn(experienceResponseDTO);
+            when(experienceRepository.save(any(Experience.class))).thenReturn(experience);
 
-            ExperienceResponseDTO result = experienceService.createExperience(requestDTO);
+            ExperienceResponseDTO result = experienceService.createExperience(user.getId(), experienceRequestDTO);
 
             assertNotNull(result);
             assertEquals(1L, result.getId());
             assertEquals("Software Engineer", result.getTitle());
             assertNull(result.getEndDate());
-
-            verify(userService).getById("1");
-            verify(experienceRepository).save(any(Experience.class));
         }
-    }
-
-    private Experience createModifiedExperienceWithNullEndDate() {
-        return Experience.builder()
-                .id(experience.getId())
-                .title(experience.getTitle())
-                .company(experience.getCompany())
-                .employmentType(experience.getEmploymentType())
-                .startDate(experience.getStartDate())
-                .endDate(null)
-                .location(experience.getLocation())
-                .locationType(experience.getLocationType())
-                .user(experience.getUser())
-                .build();
-    }
-
-    private ExperienceResponseDTO createModifiedResponseWithNullEndDate() {
-        return ExperienceResponseDTO.builder()
-                .id(responseDTO.getId())
-                .title(responseDTO.getTitle())
-                .company(responseDTO.getCompany())
-                .employmentType(responseDTO.getEmploymentType())
-                .startDate(responseDTO.getStartDate())
-                .endDate(null)
-                .location(responseDTO.getLocation())
-                .locationType(responseDTO.getLocationType())
-                .build();
     }
 
     @Test
     void testCreateExperience_WithMaxLengthFields() {
         try (MockedStatic<DTOMapper> mockedStatic = Mockito.mockStatic(DTOMapper.class)) {
             String maxLengthString = "A".repeat(100);
-            requestDTO.setTitle(maxLengthString);
-            requestDTO.setCompany(maxLengthString);
-            requestDTO.setLocation(maxLengthString);
+            experienceRequestDTO.setTitle(maxLengthString);
+            experienceRequestDTO.setCompany(maxLengthString);
+            experienceRequestDTO.setLocation(maxLengthString);
 
-            Experience modifiedExperience = createModifiedExperienceWithMaxLengthFields(maxLengthString);
-            ExperienceResponseDTO modifiedResponse = createModifiedResponseWithMaxLengthFields(maxLengthString);
-
-            when(userService.getById("1")).thenReturn(userResponseDTO);
-            mockedStatic.when(() -> DTOMapper.map(userResponseDTO, User.class)).thenReturn(user);
-            mockedStatic.when(() -> DTOMapper.map(requestDTO, Experience.class)).thenReturn(modifiedExperience);
-            mockedStatic.when(() -> DTOMapper.map(modifiedExperience, ExperienceResponseDTO.class)).thenReturn(modifiedResponse);
-            when(experienceRepository.save(any(Experience.class))).thenReturn(modifiedExperience);
-
-            ExperienceResponseDTO result = experienceService.createExperience(requestDTO);
-
-            assertNotNull(result);
-            assertEquals(maxLengthString, result.getTitle());
-            assertEquals(maxLengthString, result.getCompany());
-            assertEquals(maxLengthString, result.getLocation());
-
-            verify(userService).getById("1");
-            verify(experienceRepository).save(any(Experience.class));
+            Set<ConstraintViolation<ExperienceRequestDTO>> violations = validator.validate(experienceRequestDTO);
+            assertFalse(violations.isEmpty());
         }
-    }
-
-    private Experience createModifiedExperienceWithMaxLengthFields(String maxLengthString) {
-        return Experience.builder()
-                .id(experience.getId())
-                .title(maxLengthString)
-                .company(maxLengthString)
-                .employmentType(experience.getEmploymentType())
-                .startDate(experience.getStartDate())
-                .endDate(experience.getEndDate())
-                .location(maxLengthString)
-                .locationType(experience.getLocationType())
-                .user(experience.getUser())
-                .build();
-    }
-
-    private ExperienceResponseDTO createModifiedResponseWithMaxLengthFields(String maxLengthString) {
-        return ExperienceResponseDTO.builder()
-                .id(responseDTO.getId())
-                .title(maxLengthString)
-                .company(maxLengthString)
-                .employmentType(responseDTO.getEmploymentType())
-                .startDate(responseDTO.getStartDate())
-                .endDate(responseDTO.getEndDate())
-                .location(maxLengthString)
-                .locationType(responseDTO.getLocationType())
-                .build();
     }
 
     @Test
     void testCreateExperience_WithDifferentLocationTypes() {
         try (MockedStatic<DTOMapper> mockedStatic = Mockito.mockStatic(DTOMapper.class)) {
             for (LocationType locationType : LocationType.values()) {
-                requestDTO.setLocationType(locationType);
+                experienceRequestDTO.setLocationType(locationType);
 
                 Experience modifiedExperience = createModifiedExperienceWithLocationType(locationType);
                 ExperienceResponseDTO modifiedResponse = createModifiedResponseWithLocationType(locationType);
 
                 when(userService.getById("1")).thenReturn(userResponseDTO);
                 mockedStatic.when(() -> DTOMapper.map(userResponseDTO, User.class)).thenReturn(user);
-                mockedStatic.when(() -> DTOMapper.map(requestDTO, Experience.class)).thenReturn(modifiedExperience);
+                mockedStatic.when(() -> DTOMapper.map(experienceRequestDTO, Experience.class)).thenReturn(modifiedExperience);
                 mockedStatic.when(() -> DTOMapper.map(modifiedExperience, ExperienceResponseDTO.class)).thenReturn(modifiedResponse);
                 when(experienceRepository.save(any(Experience.class))).thenReturn(modifiedExperience);
 
-                ExperienceResponseDTO result = experienceService.createExperience(requestDTO);
+                ExperienceResponseDTO result = experienceService.createExperience(user.getId(), experienceRequestDTO);
 
                 assertNotNull(result);
                 assertEquals(locationType, result.getLocationType());
@@ -285,13 +213,13 @@ class ExperienceServiceTest {
 
     private ExperienceResponseDTO createModifiedResponseWithLocationType(LocationType locationType) {
         return ExperienceResponseDTO.builder()
-                .id(responseDTO.getId())
-                .title(responseDTO.getTitle())
-                .company(responseDTO.getCompany())
-                .employmentType(responseDTO.getEmploymentType())
-                .startDate(responseDTO.getStartDate())
-                .endDate(responseDTO.getEndDate())
-                .location(responseDTO.getLocation())
+                .id(experienceResponseDTO.getId())
+                .title(experienceResponseDTO.getTitle())
+                .company(experienceResponseDTO.getCompany())
+                .employmentType(experienceResponseDTO.getEmploymentType())
+                .startDate(experienceResponseDTO.getStartDate())
+                .endDate(experienceResponseDTO.getEndDate())
+                .location(experienceResponseDTO.getLocation())
                 .locationType(locationType)
                 .build();
     }
@@ -300,18 +228,18 @@ class ExperienceServiceTest {
     void testCreateExperience_WithDifferentEmploymentTypes() {
         try (MockedStatic<DTOMapper> mockedStatic = Mockito.mockStatic(DTOMapper.class)) {
             for (EmploymentType employmentType : EmploymentType.values()) {
-                requestDTO.setEmploymentType(employmentType);
+                experienceRequestDTO.setEmploymentType(employmentType);
 
                 Experience modifiedExperience = createModifiedExperienceWithEmploymentType(employmentType);
                 ExperienceResponseDTO modifiedResponse = createModifiedResponseWithEmploymentType(employmentType);
 
                 when(userService.getById("1")).thenReturn(userResponseDTO);
                 mockedStatic.when(() -> DTOMapper.map(userResponseDTO, User.class)).thenReturn(user);
-                mockedStatic.when(() -> DTOMapper.map(requestDTO, Experience.class)).thenReturn(modifiedExperience);
+                mockedStatic.when(() -> DTOMapper.map(experienceRequestDTO, Experience.class)).thenReturn(modifiedExperience);
                 mockedStatic.when(() -> DTOMapper.map(modifiedExperience, ExperienceResponseDTO.class)).thenReturn(modifiedResponse);
                 when(experienceRepository.save(any(Experience.class))).thenReturn(modifiedExperience);
 
-                ExperienceResponseDTO result = experienceService.createExperience(requestDTO);
+                ExperienceResponseDTO result = experienceService.createExperience(user.getId(), experienceRequestDTO);
 
                 assertNotNull(result);
                 assertEquals(employmentType, result.getEmploymentType());
@@ -337,14 +265,14 @@ class ExperienceServiceTest {
 
     private ExperienceResponseDTO createModifiedResponseWithEmploymentType(EmploymentType employmentType) {
         return ExperienceResponseDTO.builder()
-                .id(responseDTO.getId())
-                .title(responseDTO.getTitle())
-                .company(responseDTO.getCompany())
+                .id(experienceResponseDTO.getId())
+                .title(experienceResponseDTO.getTitle())
+                .company(experienceResponseDTO.getCompany())
                 .employmentType(employmentType)
-                .startDate(responseDTO.getStartDate())
-                .endDate(responseDTO.getEndDate())
-                .location(responseDTO.getLocation())
-                .locationType(responseDTO.getLocationType())
+                .startDate(experienceResponseDTO.getStartDate())
+                .endDate(experienceResponseDTO.getEndDate())
+                .location(experienceResponseDTO.getLocation())
+                .locationType(experienceResponseDTO.getLocationType())
                 .build();
     }
 }

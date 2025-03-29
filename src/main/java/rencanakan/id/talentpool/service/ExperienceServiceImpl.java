@@ -19,20 +19,15 @@ import java.util.stream.Collectors;
 public class ExperienceServiceImpl implements ExperienceService {
 
     private final ExperienceRepository experienceRepository;
-    private final UserService userService;
 
-    public ExperienceServiceImpl(ExperienceRepository experienceRepository, UserService userService) {
+    public ExperienceServiceImpl(ExperienceRepository experienceRepository) {
         this.experienceRepository = experienceRepository;
-        this.userService = userService;
     }
 
     @Override
-    public ExperienceResponseDTO createExperience(@Valid ExperienceRequestDTO request) {
-        UserResponseDTO userResponse = userService.getById(request.getUserId());
-        User user = DTOMapper.map(userResponse, User.class);
-
+    public ExperienceResponseDTO createExperience(String userId, @Valid ExperienceRequestDTO request) {
         Experience newExperience = DTOMapper.map(request, Experience.class);
-        newExperience.setUser(user);
+        newExperience.setUser(User.builder().id(userId).build());
 
         Experience savedExperience = experienceRepository.save(newExperience);
         return DTOMapper.map(savedExperience, ExperienceResponseDTO.class);

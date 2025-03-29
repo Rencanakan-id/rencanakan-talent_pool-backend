@@ -1,6 +1,9 @@
 package rencanakan.id.talentpool.service;
 
 import jakarta.validation.Validator;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import rencanakan.id.talentpool.dto.UserResponseDTO;
@@ -10,7 +13,7 @@ import rencanakan.id.talentpool.repository.UserRepository;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final Validator validator;
     private final JwtService jwtService;
@@ -141,5 +144,9 @@ public class UserServiceImpl implements UserService {
         return dto;
     }
 
-
+    @Override
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
 }
