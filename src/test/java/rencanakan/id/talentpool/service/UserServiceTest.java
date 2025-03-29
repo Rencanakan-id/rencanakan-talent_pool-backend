@@ -218,9 +218,9 @@ class UserServiceTest {
         void editUser_WithNonExistentId_ThrowsEntityNotFoundException() {
             when(userRepository.findById("invalid-id")).thenReturn(Optional.empty());
 
-            Exception exception = assertThrows(EntityNotFoundException.class, () -> {
-                userService.editUser("invalid-id", new User());
-            });
+            Exception exception = assertThrows(EntityNotFoundException.class, () -> 
+                userService.editUser("invalid-id", new User())
+            );
             assertEquals("User with ID invalid-id not found", exception.getMessage());
         }
 
