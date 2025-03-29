@@ -34,7 +34,6 @@ class RecommendationRequestDTOTest {
     @Test
     void testAllArgsConstructor() {
         RecommendationRequestDTO dto = new RecommendationRequestDTO(
-                "id",
                 1L,
                 "Contractor Name",
                 "Test message",
@@ -49,7 +48,6 @@ class RecommendationRequestDTOTest {
     @Test
     void testBuilder() {
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorId(2L)
                 .contractorName("Builder Contractor")
                 .message("Test builder message")
@@ -80,7 +78,6 @@ class RecommendationRequestDTOTest {
     @Test
     void testValidDTO() {
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorId(1L)
                 .contractorName("Valid Contractor")
                 .message("Valid message")
@@ -94,7 +91,6 @@ class RecommendationRequestDTOTest {
     @Test
     void testNullContractorId() {
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorName("Valid Contractor")
                 .message("Valid message")
                 .status(StatusType.PENDING)
@@ -109,7 +105,6 @@ class RecommendationRequestDTOTest {
     @Test
     void testEmptyContractorName() {
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorId(1L)
                 .contractorName("")
                 .message("Valid message")
@@ -125,7 +120,6 @@ class RecommendationRequestDTOTest {
     @Test
     void testNullContractorName() {
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorId(1L)
                 .message("Valid message")
                 .status(StatusType.PENDING)
@@ -140,7 +134,6 @@ class RecommendationRequestDTOTest {
     @Test
     void testEmptyMessage() {
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorId(1L)
                 .contractorName("Valid Contractor")
                 .message("")
@@ -156,7 +149,6 @@ class RecommendationRequestDTOTest {
     @Test
     void testNullMessage() {
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorId(1L)
                 .contractorName("Valid Contractor")
                 .status(StatusType.PENDING)
@@ -172,7 +164,6 @@ class RecommendationRequestDTOTest {
     void testMessageMaxLength() {
         String maxLengthMessage = "A".repeat(4000);
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorId(1L)
                 .contractorName("Valid Contractor")
                 .message(maxLengthMessage)
@@ -187,7 +178,6 @@ class RecommendationRequestDTOTest {
     void testMessageExactlyBelowMaxLength() {
         String maxLengthMessage = "A".repeat(3999);
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorId(1L)
                 .contractorName("Valid Contractor")
                 .message(maxLengthMessage)
@@ -202,7 +192,6 @@ class RecommendationRequestDTOTest {
     void testMessageExceedingMaxLength() {
         String tooLongMessage = "A".repeat(4001);
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorId(1L)
                 .contractorName("Valid Contractor")
                 .message(tooLongMessage)
@@ -218,7 +207,6 @@ class RecommendationRequestDTOTest {
     @Test
     void testNullStatus() {
         RecommendationRequestDTO dto = RecommendationRequestDTO.builder()
-                .talentId("id")
                 .contractorId(1L)
                 .contractorName("Valid Contractor")
                 .message("Valid message")
