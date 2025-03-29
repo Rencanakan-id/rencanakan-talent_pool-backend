@@ -39,9 +39,6 @@ class RecommendationServiceImplTest {
     @Mock
     private RecommendationRepository recommendationRepository;
 
-    @Mock
-    private UserProfileRepository userProfileRepository;
-
     @InjectMocks
     private RecommendationRequestDTO requestDTO;
 
@@ -50,9 +47,6 @@ class RecommendationServiceImplTest {
 
     @InjectMocks
     private RecommendationServiceImpl recommendationService;
-
-    @InjectMocks
-    private UserProfileServiceImpl userProfileService;
 
     @InjectMocks
     private DTOMapper dtoMapper;
