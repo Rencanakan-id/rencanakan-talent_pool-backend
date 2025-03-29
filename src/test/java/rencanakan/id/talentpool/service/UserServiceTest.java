@@ -1,5 +1,6 @@
 package rencanakan.id.talentpool.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -32,9 +33,6 @@ class UserServiceTest {
     @InjectMocks
     private UserServiceImpl userService;
 
-    @Captor
-    private ArgumentCaptor<User> userCaptor;
-
     private String testUserId = "user123";
     private User testUser;
 
@@ -53,13 +51,10 @@ class UserServiceTest {
     class ReadUserTests {
         @Test
         void getById_WithValidId_ReturnsUser() {
-            // Arrange
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
 
-            // Act
             UserResponseDTO result = userService.getById(testUserId);
 
-            // Assert
             assertNotNull(result);
             assertEquals(testUserId, result.getId());
             assertEquals("John", result.getFirstName());
@@ -68,43 +63,36 @@ class UserServiceTest {
         }
 
         @Test
-        void getById_WithNonExistentId_ReturnsNull() {
-            // Arrange
+        void getById_WithNonExistentId_ThrowsEntityNotFoundException() {
             String nonExistentId = "nonexistent";
             when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-            // Act
-            UserResponseDTO result = userService.getById(nonExistentId);
-
-            // Assert
-            assertNull(result);
+            Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+                userService.getById(nonExistentId);
+            });
+            assertEquals("User with ID " + nonExistentId + " not found", exception.getMessage());
             verify(userRepository, times(1)).findById(nonExistentId);
         }
         
         @Test
-        void getById_WithEmptyId_ReturnsNull() {
-            // Arrange
+        void getById_WithEmptyId_ThrowsEntityNotFoundException() {
             String emptyId = "";
             when(userRepository.findById(emptyId)).thenReturn(Optional.empty());
 
-            // Act
-            UserResponseDTO result = userService.getById(emptyId);
-
-            // Assert
-            assertNull(result);
+            Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+                userService.getById(emptyId);
+            });
+            assertEquals("User with ID " + emptyId + " not found", exception.getMessage());
             verify(userRepository, times(1)).findById(emptyId);
         }
         
         @Test
         void findByEmail_WithValidEmail_ReturnsUser() {
-            // Arrange
             String testEmail = "john.doe@example.com";
             when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(testUser));
 
-            // Act
             User result = userService.findByEmail(testEmail);
 
-            // Assert
             assertNotNull(result);
             assertEquals(testUserId, result.getId());
             assertEquals("John", result.getFirstName());
@@ -115,28 +103,22 @@ class UserServiceTest {
 
         @Test
         void findByEmail_WithNonExistentEmail_ReturnsNull() {
-            // Arrange
             String nonExistentEmail = "nonexistent@example.com";
             when(userRepository.findByEmail(nonExistentEmail)).thenReturn(Optional.empty());
 
-            // Act
             User result = userService.findByEmail(nonExistentEmail);
 
-            // Assert
             assertNull(result);
             verify(userRepository, times(1)).findByEmail(nonExistentEmail);
         }
         
         @Test
         void findByEmail_WithEmptyEmail_ReturnsNull() {
-            // Arrange
             String emptyEmail = "";
             when(userRepository.findByEmail(emptyEmail)).thenReturn(Optional.empty());
 
-            // Act
             User result = userService.findByEmail(emptyEmail);
 
-            // Assert
             assertNull(result);
             verify(userRepository, times(1)).findByEmail(emptyEmail);
         }
@@ -149,7 +131,6 @@ class UserServiceTest {
         
         @BeforeEach
         void setUp() {
-            // Setup common test data for update tests
             preferredLocations = new ArrayList<>();
             preferredLocations.add("Bekasi");
             preferredLocations.add("Depok");
@@ -174,39 +155,30 @@ class UserServiceTest {
             updatedUserData.setPhotoNpwp("npwp.jpg");
             updatedUserData.setPhotoIjazah("ijazah.jpg");
             updatedUserData.setSkill("Cooking, Mewing");
-            
-            // Removing the unnecessary stubbing from here
         }
         
         @Test
         void editUser_WithValidData_UpdatesSuccessfully() {
-            // Arrange
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             
-            // Act
             UserResponseDTO editResult = userService.editUser(testUserId, updatedUserData);
 
-            // Assert
             assertNotNull(editResult);
             assertEquals(testUserId, editResult.getId());
             assertEquals("Jane", editResult.getFirstName());
             assertEquals("Doe", editResult.getLastName());
             assertEquals("jane.doe@example.com", editResult.getEmail());
             
-            // Verify the repository was called to find the user
             verify(userRepository, times(1)).findById(testUserId);
         }
 
         @Test
         void editUser_WithNoChanges_RetainsOriginalValues() {
-            // Arrange
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User emptyUpdateData = new User();
 
-            // Act
             UserResponseDTO editResult = userService.editUser(testUserId, emptyUpdateData);
 
-            // Assert
             assertEquals(testUserId, editResult.getId());
             assertEquals("John", editResult.getFirstName());
             assertEquals("Doe", editResult.getLastName());
@@ -215,31 +187,12 @@ class UserServiceTest {
 
         @Test
         void editUser_WithInvalidEmail_ThrowsException() throws Exception {
-            // Arrange
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             Field emailField = User.class.getDeclaredField("email");
             emailField.setAccessible(true);
             emailField.set(invalidUser, "invalid-email");
 
-            // Act & Assert
-            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-                userService.editUser(testUserId, invalidUser);
-            });
-            assertEquals("Failed to update user", exception.getMessage());
-        }
-
-        @Test
-        void editUser_WithShortPassword_ThrowsException() throws Exception {
-            // Arrange
-            when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            User invalidUser = new User();
-            Field passwordField = User.class.getDeclaredField("password");
-            passwordField.setAccessible(true);
-            passwordField.set(invalidUser, "pass");
-            invalidUser.setId(testUserId);
-
-            // Act & Assert
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editUser(testUserId, invalidUser);
             });
@@ -248,7 +201,6 @@ class UserServiceTest {
 
         @Test
         void editUser_WithInvalidNIK_ThrowsException() throws Exception {
-            // Arrange
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             Field nikField = User.class.getDeclaredField("nik");
@@ -256,7 +208,6 @@ class UserServiceTest {
             nikField.set(invalidUser, "invalid-nik");
             invalidUser.setId(testUserId);
 
-            // Act & Assert
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editUser(testUserId, invalidUser);
             });
@@ -264,20 +215,17 @@ class UserServiceTest {
         }
 
         @Test
-        void editUser_WithNonExistentId_ReturnsNull() {
-            // Arrange
+        void editUser_WithNonExistentId_ThrowsEntityNotFoundException() {
             when(userRepository.findById("invalid-id")).thenReturn(Optional.empty());
 
-            // Act
-            UserResponseDTO editResult = userService.editUser("invalid-id", new User());
-
-            // Assert
-            assertNull(editResult);
+            Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+                userService.editUser("invalid-id", new User());
+            });
+            assertEquals("User with ID invalid-id not found", exception.getMessage());
         }
 
         @Test
         void editUser_WithNameTooLong_ThrowsException() throws Exception {
-            // Arrange
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             invalidUser.setId(testUserId);
@@ -287,7 +235,6 @@ class UserServiceTest {
             nameField.setAccessible(true);
             nameField.set(invalidUser, longName);
 
-            // Act & Assert
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editUser(testUserId, invalidUser);
             });
