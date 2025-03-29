@@ -3,11 +3,13 @@ package rencanakan.id.talentpool.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentpool.dto.ExperienceListResponseDTO;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 import rencanakan.id.talentpool.dto.WebResponse;
+import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.ExperienceService;
 import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
@@ -36,13 +38,21 @@ public class ExperienceController {
 
     @PostMapping
     public ResponseEntity<WebResponse<ExperienceResponseDTO>> createExperience(
-            @RequestBody @Valid ExperienceRequestDTO request) {
-
-        ExperienceResponseDTO createdExperience = experienceService.createExperience(request);
+            @RequestBody @Valid ExperienceRequestDTO request,
+            @AuthenticationPrincipal User user
+    ) {
+        ExperienceResponseDTO createdExperience = experienceService.createExperience(user.getId(), request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(WebResponse.<ExperienceResponseDTO>builder()
                         .data(createdExperience)
                         .build());
+    }
+
+    @GetMapping
+    public ResponseEntity<Object> createExperiences(
+    ) {
+        System.out.println(1111111111);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @PutMapping("/{id}")

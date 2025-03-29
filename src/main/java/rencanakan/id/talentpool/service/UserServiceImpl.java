@@ -1,6 +1,9 @@
 package rencanakan.id.talentpool.service;
 
 import jakarta.validation.Validator;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import rencanakan.id.talentpool.dto.UserResponseDTO;
@@ -10,7 +13,7 @@ import rencanakan.id.talentpool.repository.UserRepository;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final Validator validator;
 
@@ -139,33 +142,9 @@ public class UserServiceImpl implements UserService {
         return dto;
     }
 
-//    @Override
-//    public User createProfile(UserProfileRequestDTO request) {
-//        Set<ConstraintViolation<UserProfileRequestDTO>> violations = validator.validate(request);
-//        if (!violations.isEmpty()) {
-//            throw new IllegalArgumentException("Validation failed");
-//        }
-//
-//        User newProfile = User.builder()
-//                .firstName(request.getFirstName())
-//                .lastName(request.getLastName())
-//                .email(request.getEmail())
-//                .phoneNumber(request.getPhoneNumber())
-//                .address(request.getAddress())
-//                .job(request.getJob())
-//                .photo(request.getPhoto())
-//                .aboutMe(request.getAboutMe())
-//                .nik(request.getNik())
-//                .npwp(request.getNpwp())
-//                .photoKtp(request.getPhotoKtp())
-//                .photoNpwp(request.getPhotoNpwp())
-//                .photoIjazah(request.getPhotoIjazah())
-//                .experienceYears(request.getExperienceYears())
-//                .skkLevel(request.getSkkLevel())
-//                .currentLocation(request.getCurrentLocation())
-//                .preferredLocations(request.getPreferredLocations())
-//                .skill(request.getSkill())
-//                .build();
-//        return userProfileRepository.save(newProfile);
-//    }
+    @Override
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
 }
