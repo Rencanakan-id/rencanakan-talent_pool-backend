@@ -252,7 +252,7 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationWithNoMessage() {
 
-        requestDTO.setMessage("");
+        requestDTO.setMessage(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> recommendationService.createRecommendation(mockTalent, requestDTO));

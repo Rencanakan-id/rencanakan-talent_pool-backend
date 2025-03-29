@@ -26,6 +26,29 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Override
     public RecommendationResponseDTO createRecommendation(User talent, @Valid RecommendationRequestDTO recommendation) {
+        if (recommendation == null || talent == null) {
+            throw new IllegalArgumentException("Recommendation request cannot be null");
+        }
+
+        if (recommendation.getContractorId() == null) {
+            throw new IllegalArgumentException("Contractor ID is required");
+        }
+
+        if (recommendation.getContractorName() == null) {
+            throw new IllegalArgumentException("Contractor name is required");
+        }
+
+        if (recommendation.getContractorName().isEmpty()) {
+            throw new IllegalArgumentException("Contractor name cannot be empty");
+        }
+
+        if (recommendation.getMessage() == null) {
+            throw new IllegalArgumentException("Recommendation message is required");
+        }
+
+        if (recommendation.getMessage().isEmpty()) {
+            throw new IllegalArgumentException("Recommendation message cannot be empty");
+        }
 
         Recommendation newRecommendation = DTOMapper.map(recommendation, Recommendation.class);
         newRecommendation.setTalent(talent);
@@ -34,6 +57,6 @@ public class RecommendationServiceImpl implements RecommendationService {
         System.out.println(savedRecommendation.getMessage());
 
         return DTOMapper.map(savedRecommendation, RecommendationResponseDTO.class);
-
     }
+
 }
