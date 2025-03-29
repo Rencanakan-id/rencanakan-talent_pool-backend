@@ -19,9 +19,7 @@ import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
 import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
 
-import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -314,17 +312,38 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithExactlyMaxMessageLength() {
+        try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
 
-        String maxLengthMessage = "A".repeat(4000);
-        requestDTO.setMessage(maxLengthMessage);
+            String maxLengthMessage = "A".repeat(4000);
+            requestDTO.setMessage(maxLengthMessage);
 
-        when(recommendationRepository.save(any(Recommendation.class))).thenReturn(recommendation);
+            RecommendationResponseDTO modifiedResponseDTO = new RecommendationResponseDTO();
+            modifiedResponseDTO.setId("recommendation123");
+            modifiedResponseDTO.setContractorId(1L);
+            modifiedResponseDTO.setContractorName("Test Contractor");
+            modifiedResponseDTO.setMessage(maxLengthMessage);
+            modifiedResponseDTO.setStatus(StatusType.PENDING);
 
-        RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent, requestDTO);
+            Recommendation modifiedRecommendation = new Recommendation();
+            modifiedRecommendation.setId(recommendation.getId());
+            modifiedRecommendation.setContractorId(recommendation.getContractorId());
+            modifiedRecommendation.setContractorName(recommendation.getContractorName());
+            modifiedRecommendation.setMessage(maxLengthMessage);
+            modifiedRecommendation.setStatus(recommendation.getStatus());
+            modifiedRecommendation.setTalent(recommendation.getTalent());
 
-        
-        assertEquals(4000, result.getMessage().length());
-        verify(recommendationRepository, times(1)).save(any(Recommendation.class));
+
+            mockedMapper.when(() -> DTOMapper.map(requestDTO, Recommendation.class)).thenReturn(modifiedRecommendation);
+            mockedMapper.when(() -> DTOMapper.map(modifiedRecommendation, RecommendationResponseDTO.class)).thenReturn(modifiedResponseDTO);
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(modifiedRecommendation);
+
+            RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent, requestDTO);
+
+            assertEquals(4000, result.getMessage().length());
+            verify(recommendationRepository, times(1)).save(any(Recommendation.class));
+
+        }
+
     }
 
     @Test

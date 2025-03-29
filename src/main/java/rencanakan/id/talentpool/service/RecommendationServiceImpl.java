@@ -50,6 +50,15 @@ public class RecommendationServiceImpl implements RecommendationService {
             throw new IllegalArgumentException("Recommendation message cannot be empty");
         }
 
+        if (recommendation.getMessage().length() > 4000) {
+            throw new IllegalArgumentException("Message cannot exceed 4000 characters");
+        }
+
+        if (recommendation.getContractorId() <= 0L) {
+            throw new IllegalArgumentException("Contractor ID must be greater than 0");
+        }
+
+
         Recommendation newRecommendation = DTOMapper.map(recommendation, Recommendation.class);
         newRecommendation.setTalent(talent);
 
