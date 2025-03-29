@@ -52,12 +52,8 @@ public class ErrorController {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<WebResponse<String>> handleGeneralException(Exception ex) {
-        // Log exception untuk troubleshooting
-        // logger.error("Unexpected error", ex);
-        System.err.println(ex.getMessage());
-
+    public ResponseEntity<WebResponse<String>> handleGeneralException(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(WebResponse.<String>builder().errors("Bad request").build());
+                .body(WebResponse.<String>builder().errors(ex.getMessage()).build());
     }
 }
