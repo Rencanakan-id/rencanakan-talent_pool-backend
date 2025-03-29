@@ -15,13 +15,9 @@ import java.util.Optional;
 public class RecommendationServiceImpl implements RecommendationService {
 
     private final RecommendationRepository recommendationRepository;
-    private final UserProfileRepository userProfileRepository;
-    private final Validator validator;
 
-    public RecommendationServiceImpl(RecommendationRepository recommendationRepository, UserProfileRepository userProfileRepository, Validator validator) {
+    public RecommendationServiceImpl(RecommendationRepository recommendationRepository) {
         this.recommendationRepository = recommendationRepository;
-        this.userProfileRepository = userProfileRepository;
-        this.validator = validator;
     }
 
     @Override
@@ -63,7 +59,6 @@ public class RecommendationServiceImpl implements RecommendationService {
         newRecommendation.setTalent(talent);
 
         Recommendation savedRecommendation = recommendationRepository.save(newRecommendation);
-        System.out.println(savedRecommendation.getMessage());
 
         return DTOMapper.map(savedRecommendation, RecommendationResponseDTO.class);
     }

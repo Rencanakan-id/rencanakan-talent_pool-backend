@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import org.mockito.MockedStatic;
-import rencanakan.id.talentpool.repository.UserProfileRepository;
 
 import static org.mockito.Mockito.mockStatic;
 

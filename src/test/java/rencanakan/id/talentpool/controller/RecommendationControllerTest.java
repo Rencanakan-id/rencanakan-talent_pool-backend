@@ -3,7 +3,6 @@ package rencanakan.id.talentpool.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,24 +16,14 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import rencanakan.id.talentpool.dto.*;
-import rencanakan.id.talentpool.enums.EmploymentType;
-import rencanakan.id.talentpool.enums.LocationType;
 import rencanakan.id.talentpool.enums.StatusType;
-import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.model.User;
-import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 import rencanakan.id.talentpool.service.RecommendationServiceImpl;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
