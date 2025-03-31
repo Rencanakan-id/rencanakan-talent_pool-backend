@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import rencanakan.id.talentpool.controller.ExperienceController;
@@ -76,6 +77,7 @@ public class ExperienceControllerTest {
         return ExperienceRequestDTO.builder()
                 .title("Lead Construction Project Manager")
                 .company("Aman")
+                .companyImage("https://eternalsunshine.png")
                 .employmentType(EmploymentType.FULL_TIME)
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.now().plusDays(1))
@@ -107,12 +109,14 @@ public class ExperienceControllerTest {
             String expectedStartDate = mockResponseDTO.getStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
             String expectedEndDate = mockResponseDTO.getEndDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
-            when(experienceService.createExperience(user.getId(), request))
+            when(experienceService.createExperience(any(), any(ExperienceRequestDTO.class)))
                     .thenReturn(mockResponseDTO);
 
             mockMvc.perform(post("/experiences")
                             .contentType(MediaType.APPLICATION_JSON)
+                            .with(SecurityMockMvcRequestPostProcessors.user(user))
                             .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.data.title").value("Lead Construction Project Manager"))
                     .andExpect(jsonPath("$.data.company").value("Aman"))
                     .andExpect(jsonPath("$.data.employmentType").value("FULL_TIME"))
@@ -126,7 +130,7 @@ public class ExperienceControllerTest {
         void testCreateExperience_BadRequest() throws Exception {
             ExperienceRequestDTO invalidRequest = new ExperienceRequestDTO();
 
-            mockMvc.perform(post("/experience")
+            mockMvc.perform(post("/experiences")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidRequest)))
                     .andExpect(status().isBadRequest());
