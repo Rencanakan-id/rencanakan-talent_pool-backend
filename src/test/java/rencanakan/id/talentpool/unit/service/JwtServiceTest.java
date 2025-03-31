@@ -88,10 +88,6 @@ class JwtServiceTest {
         Map<String, Object> claims = new HashMap<>();
         long shortExpiration = -1000;
 
-        UserDetails userDetails = User.withUsername("originaluser")
-                .password("password")
-                .build();
-
         UserDetails otherUser = User.withUsername("eternalsunshine")
                 .password("password")
                 .build();
