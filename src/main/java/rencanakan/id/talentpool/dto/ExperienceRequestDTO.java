@@ -23,6 +23,9 @@ public class ExperienceRequestDTO {
     @Size(max = 50, message = "Company must not exceed 50 characters")
     private String company;
 
+    @NotBlank(message = "Company image is required")
+    private String companyImage;
+
     @NotNull(message = "Employment type is required")
     private EmploymentType employmentType;
 
