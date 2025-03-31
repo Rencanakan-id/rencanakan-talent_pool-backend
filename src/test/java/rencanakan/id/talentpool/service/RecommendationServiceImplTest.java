@@ -98,7 +98,42 @@ class RecommendationServiceImplTest {
         userResponseDTO.setEmail("test@example.setcom");
         userResponseDTO.setPhoneNumber("081234567890");
         userResponseDTO.setNik("1234567890123456");
+    }
 
+    // Helper method to test successful recommendation creation
+    private RecommendationResponseDTO testCreateRecommendationWithMessage(String message) {
+        try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
+            // Setup modified DTOs with the custom message
+            requestDTO.setMessage(message);
+
+            Recommendation modifiedRecommendation = new Recommendation();
+            modifiedRecommendation.setId(recommendation.getId());
+            modifiedRecommendation.setContractorId(recommendation.getContractorId());
+            modifiedRecommendation.setContractorName(recommendation.getContractorName());
+            modifiedRecommendation.setMessage(message);
+            modifiedRecommendation.setStatus(recommendation.getStatus());
+            modifiedRecommendation.setTalent(recommendation.getTalent());
+
+            RecommendationResponseDTO modifiedResponseDTO = new RecommendationResponseDTO();
+            modifiedResponseDTO.setId("recommendation123");
+            modifiedResponseDTO.setContractorId(1L);
+            modifiedResponseDTO.setContractorName("Test Contractor");
+            modifiedResponseDTO.setMessage(message);
+            modifiedResponseDTO.setStatus(StatusType.PENDING);
+
+            // Setup mocks
+            mockedMapper.when(() -> DTOMapper.map(requestDTO, Recommendation.class)).thenReturn(modifiedRecommendation);
+            mockedMapper.when(() -> DTOMapper.map(modifiedRecommendation, RecommendationResponseDTO.class)).thenReturn(modifiedResponseDTO);
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(modifiedRecommendation);
+
+            // Execute the method
+            RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent, requestDTO);
+
+            // Verify repository was called
+            verify(recommendationRepository, times(1)).save(any(Recommendation.class));
+
+            return result;
+        }
     }
 
     // POSITIVE TEST CASES
@@ -106,7 +141,6 @@ class RecommendationServiceImplTest {
     @Test
     void testCreateRecommendationSuccess() {
         try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
-
             mockedMapper.when(() -> DTOMapper.map(requestDTO, Recommendation.class)).thenReturn(recommendation);
             mockedMapper.when(() -> DTOMapper.map(recommendation, RecommendationResponseDTO.class)).thenReturn(responseDTO);
             when(recommendationRepository.save(any(Recommendation.class))).thenReturn(recommendation);
@@ -123,73 +157,15 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithMinimumMessageLength() {
-        try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
-
-            requestDTO.setMessage("A");
-
-            RecommendationResponseDTO modifiedResponseDTO = new RecommendationResponseDTO();
-            modifiedResponseDTO.setId("recommendation123");
-            modifiedResponseDTO.setContractorId(1L);
-            modifiedResponseDTO.setContractorName("Test Contractor");
-            modifiedResponseDTO.setMessage("A");
-            modifiedResponseDTO.setStatus(StatusType.PENDING);
-
-            Recommendation modifiedRecommendation = new Recommendation();
-            modifiedRecommendation.setId(recommendation.getId());
-            modifiedRecommendation.setContractorId(recommendation.getContractorId());
-            modifiedRecommendation.setContractorName(recommendation.getContractorName());
-            modifiedRecommendation.setMessage("A");
-            modifiedRecommendation.setStatus(recommendation.getStatus());
-            modifiedRecommendation.setTalent(recommendation.getTalent());
-
-
-            mockedMapper.when(() -> DTOMapper.map(requestDTO, Recommendation.class)).thenReturn(modifiedRecommendation);
-            mockedMapper.when(() -> DTOMapper.map(modifiedRecommendation, RecommendationResponseDTO.class)).thenReturn(modifiedResponseDTO);
-            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(modifiedRecommendation);
-
-            RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent, requestDTO);
-
-            assertEquals("A", result.getMessage());
-            verify(recommendationRepository, times(1)).save(any(Recommendation.class));
-
-        }
-
+        RecommendationResponseDTO result = testCreateRecommendationWithMessage("A");
+        assertEquals("A", result.getMessage());
     }
 
     @Test
     void testCreateRecommendationWithMaxMessageLength() {
-        try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
-
-            String maxLengthMessage = "A".repeat(4000);
-            requestDTO.setMessage(maxLengthMessage);
-
-            RecommendationResponseDTO modifiedResponseDTO = new RecommendationResponseDTO();
-            modifiedResponseDTO.setId("recommendation123");
-            modifiedResponseDTO.setContractorId(1L);
-            modifiedResponseDTO.setContractorName("Test Contractor");
-            modifiedResponseDTO.setMessage(maxLengthMessage);
-            modifiedResponseDTO.setStatus(StatusType.PENDING);
-
-            Recommendation modifiedRecommendation = new Recommendation();
-            modifiedRecommendation.setId(recommendation.getId());
-            modifiedRecommendation.setContractorId(recommendation.getContractorId());
-            modifiedRecommendation.setContractorName(recommendation.getContractorName());
-            modifiedRecommendation.setMessage(maxLengthMessage);
-            modifiedRecommendation.setStatus(recommendation.getStatus());
-            modifiedRecommendation.setTalent(recommendation.getTalent());
-
-
-            mockedMapper.when(() -> DTOMapper.map(requestDTO, Recommendation.class)).thenReturn(modifiedRecommendation);
-            mockedMapper.when(() -> DTOMapper.map(modifiedRecommendation, RecommendationResponseDTO.class)).thenReturn(modifiedResponseDTO);
-            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(modifiedRecommendation);
-
-            RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent, requestDTO);
-
-            assertEquals(4000, result.getMessage().length());
-            verify(recommendationRepository, times(1)).save(any(Recommendation.class));
-
-        }
-
+        String maxLengthMessage = "A".repeat(4000);
+        RecommendationResponseDTO result = testCreateRecommendationWithMessage(maxLengthMessage);
+        assertEquals(4000, result.getMessage().length());
     }
 
     // NEGATIVE TEST CASES
@@ -206,7 +182,6 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithNoContractorId() {
-
         requestDTO.setContractorId(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -218,7 +193,6 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithNoContractorName() {
-
         requestDTO.setContractorName(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -230,7 +204,6 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithEmptyContractorName() {
-
         requestDTO.setContractorName("");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -242,7 +215,6 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithNoMessage() {
-
         requestDTO.setMessage(null);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -254,7 +226,6 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithEmptyMessage() {
-
         requestDTO.setMessage("");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -268,7 +239,6 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithMessageExceedingMaxLength() {
-
         String tooLongMessage = "A".repeat(4001); // Exceeds max length by one character
         requestDTO.setMessage(tooLongMessage);
 
@@ -281,7 +251,6 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithZeroContractorId() {
-
         requestDTO.setContractorId(0L);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -293,7 +262,6 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithNegativeContractorId() {
-
         requestDTO.setContractorId(-1L);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -305,38 +273,9 @@ class RecommendationServiceImplTest {
 
     @Test
     void testCreateRecommendationWithExactlyMaxMessageLength() {
-        try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
-
-            String maxLengthMessage = "A".repeat(4000);
-            requestDTO.setMessage(maxLengthMessage);
-
-            RecommendationResponseDTO modifiedResponseDTO = new RecommendationResponseDTO();
-            modifiedResponseDTO.setId("recommendation123");
-            modifiedResponseDTO.setContractorId(1L);
-            modifiedResponseDTO.setContractorName("Test Contractor");
-            modifiedResponseDTO.setMessage(maxLengthMessage);
-            modifiedResponseDTO.setStatus(StatusType.PENDING);
-
-            Recommendation modifiedRecommendation = new Recommendation();
-            modifiedRecommendation.setId(recommendation.getId());
-            modifiedRecommendation.setContractorId(recommendation.getContractorId());
-            modifiedRecommendation.setContractorName(recommendation.getContractorName());
-            modifiedRecommendation.setMessage(maxLengthMessage);
-            modifiedRecommendation.setStatus(recommendation.getStatus());
-            modifiedRecommendation.setTalent(recommendation.getTalent());
-
-
-            mockedMapper.when(() -> DTOMapper.map(requestDTO, Recommendation.class)).thenReturn(modifiedRecommendation);
-            mockedMapper.when(() -> DTOMapper.map(modifiedRecommendation, RecommendationResponseDTO.class)).thenReturn(modifiedResponseDTO);
-            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(modifiedRecommendation);
-
-            RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent, requestDTO);
-
-            assertEquals(4000, result.getMessage().length());
-            verify(recommendationRepository, times(1)).save(any(Recommendation.class));
-
-        }
-
+        String maxLengthMessage = "A".repeat(4000);
+        RecommendationResponseDTO result = testCreateRecommendationWithMessage(maxLengthMessage);
+        assertEquals(4000, result.getMessage().length());
     }
 
     @Test
