@@ -35,14 +35,4 @@ public class UserController {
                 .data(updatedProfile)
                 .build();
     }
-
-//    @PostMapping()
-//    public ResponseEntity<User> createExperience(@RequestBody UserProfileRequestDTO request) {
-//        try {
-//            User createdProfile = userProfileService.createProfile(request);
-//            return ResponseEntity.ok(createdProfile);
-//        } catch (IllegalArgumentException e) {
-//            return ResponseEntity.badRequest().body(null);
-//        }
-//    }
 }

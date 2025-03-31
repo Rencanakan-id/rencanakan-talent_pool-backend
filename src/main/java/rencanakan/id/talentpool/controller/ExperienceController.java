@@ -48,13 +48,6 @@ public class ExperienceController {
                         .build());
     }
 
-    @GetMapping
-    public ResponseEntity<Object> createExperiences(
-    ) {
-        System.out.println(1111111111);
-        return ResponseEntity.status(HttpStatus.OK).body(null);
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<WebResponse<ExperienceResponseDTO>> editExperienceById(
             @PathVariable Long id,

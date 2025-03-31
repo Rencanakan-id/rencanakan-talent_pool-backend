@@ -17,7 +17,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class JwtServiceTest {
+class JwtServiceTest {
 
     @InjectMocks
     private JwtService jwtService;
@@ -29,7 +29,7 @@ public class JwtServiceTest {
     private static final long JWT_EXPIRATION = 3600000; // 1 hour
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         jwtService = new JwtService();
         setPrivateField(jwtService, "secretKey", SECRET_KEY);
         setPrivateField(jwtService, "jwtExpiration", JWT_EXPIRATION);
@@ -40,28 +40,28 @@ public class JwtServiceTest {
     }
 
     @Test
-    public void testGenerateToken() {
+    void testGenerateToken() {
         String token = jwtService.generateToken(userDetails);
         assertNotNull(token);
         assertFalse(token.isEmpty());
     }
 
     @Test
-    public void testExtractUsername() {
+    void testExtractUsername() {
         String token = jwtService.generateToken(userDetails);
         String username = jwtService.extractUsername(token);
         assertEquals("brighterdaysahead", username);
     }
 
     @Test
-    public void testIsTokenValid() {
+    void testIsTokenValid() {
         String token = jwtService.generateToken(userDetails);
         boolean isValid = jwtService.isTokenValid(token, userDetails);
         assertTrue(isValid, "Token should be valid for the correct user.");
     }
 
     @Test
-    public void testIsTokenInvalidForDifferentUser() {
+    void testIsTokenInvalidForDifferentUser() {
         String token = jwtService.generateToken(userDetails);
 
         UserDetails otherUser = User.withUsername("eternalsunshine")
@@ -73,7 +73,7 @@ public class JwtServiceTest {
     }
 
     @Test
-    public void testIsTokenInvalidForExpiredToken() throws InterruptedException {
+    void testIsTokenInvalidForExpiredToken() throws InterruptedException {
         Map<String, Object> claims = new HashMap<>();
         long shortExpiration = 100;
         String token = jwtService.buildToken(claims, userDetails, shortExpiration);
@@ -111,9 +111,7 @@ public class JwtServiceTest {
     }
 
     @Test
-    public void testGetExpirationTime() throws Exception {
-        JwtService jwtService = new JwtService();
-
+    void testGetExpirationTime() throws Exception {
         Field jwtExpirationField = JwtService.class.getDeclaredField("jwtExpiration");
         jwtExpirationField.setAccessible(true);
         jwtExpirationField.set(jwtService, 3600000L);
@@ -122,7 +120,7 @@ public class JwtServiceTest {
         assertEquals(3600000L, expirationTime);
     }
 
-    private void setPrivateField(Object target, String fieldName, Object value) {
+    void setPrivateField(Object target, String fieldName, Object value) {
         try {
             var field = target.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
