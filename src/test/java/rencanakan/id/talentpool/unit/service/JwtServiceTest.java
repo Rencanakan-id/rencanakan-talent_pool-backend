@@ -73,35 +73,37 @@ class JwtServiceTest {
     }
 
     @Test
-    void testIsTokenInvalidForExpiredToken() throws InterruptedException {
+    void testIsTokenInvalidForExpiredToken() {
         Map<String, Object> claims = new HashMap<>();
-        long shortExpiration = 100;
+        long shortExpiration = -1000;
+
         String token = jwtService.buildToken(claims, userDetails, shortExpiration);
-
-        Thread.sleep(200);
-
         boolean isValid = jwtService.isTokenValid(token, userDetails);
+
         assertFalse(isValid, "Token should be invalid if it has expired.");
     }
 
     @Test
-    public void testIsTokenInvalidForExpiredTokenAndDifferentUser() throws InterruptedException {
+    void testIsTokenInvalidForExpiredTokenAndDifferentUser() {
         Map<String, Object> claims = new HashMap<>();
-        long shortExpiration = 100;
-        String token = jwtService.buildToken(claims, userDetails, shortExpiration);
+        long shortExpiration = -1000;
 
-        Thread.sleep(200);
+        UserDetails userDetails = User.withUsername("originaluser")
+                .password("password")
+                .build();
 
         UserDetails otherUser = User.withUsername("eternalsunshine")
                 .password("password")
                 .build();
 
+        String token = jwtService.buildToken(claims, userDetails, shortExpiration);
         boolean isValid = jwtService.isTokenValid(token, otherUser);
+
         assertFalse(isValid, "Token should be invalid if it has expired or the user does not match.");
     }
 
     @Test
-    public void testExtractClaim() {
+    void testExtractClaim() {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("customClaim", "customValue");
         String token = jwtService.generateToken(extraClaims, userDetails);

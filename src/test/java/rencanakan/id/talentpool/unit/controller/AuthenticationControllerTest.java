@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import rencanakan.id.talentpool.controller.AuthenticationController;
 import rencanakan.id.talentpool.dto.LoginRequestDTO;
-import rencanakan.id.talentpool.dto.LoginResponseDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.AuthenticationService;
