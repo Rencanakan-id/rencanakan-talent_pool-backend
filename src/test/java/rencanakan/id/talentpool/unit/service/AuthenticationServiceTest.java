@@ -95,6 +95,18 @@ class AuthenticationServiceTest {
     }
 
     @Test
+    void testSignup_DuplicateUser_Fail() {
+        when(userService.findByEmail(anyString())).thenReturn(new User());
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            authenticationService.signup(userRequestDTO);
+        });
+
+        assertEquals("User with email " + userRequestDTO.getEmail() + " already exists.", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
     void testSignup_InvalidUser_ValidationFails() {
         userRequestDTO.setEmail("invalid-email");
 

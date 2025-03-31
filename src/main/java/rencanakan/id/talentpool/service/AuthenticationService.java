@@ -65,15 +65,12 @@ public class AuthenticationService {
     }
 
     public User authenticate(LoginRequestDTO input) {
-        System.out.println(input.getEmail());
-        System.out.println(input.getPassword());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
                         input.getPassword()
                 )
         );
-
         return userRepository.findByEmail(input.getEmail()).orElse(null);
     }
 }
