@@ -1,4 +1,4 @@
-package rencanakan.id.talentpool.service;
+package rencanakan.id.talentpool.unit.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Validator;
@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -18,9 +19,12 @@ import java.util.List;
 import java.util.Optional;
 import java.lang.reflect.Field;
 
+import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
+import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
+import rencanakan.id.talentpool.service.UserServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -128,7 +132,7 @@ class UserServiceTest {
     @Nested
     class UpdateUserTests {
         private List<String> preferredLocations;
-        private User updatedUserData;
+        private UserRequestDTO updatedUserData;
         
         @BeforeEach
         void setUp() {
@@ -137,8 +141,7 @@ class UserServiceTest {
             preferredLocations.add("Depok");
             preferredLocations.add("Bogor");
             
-            updatedUserData = new User();
-            updatedUserData.setId(testUserId);
+            updatedUserData = new UserRequestDTO();
             updatedUserData.setFirstName("Jane");
             updatedUserData.setLastName("Doe");
             updatedUserData.setEmail("jane.doe@example.com");
@@ -146,10 +149,10 @@ class UserServiceTest {
         }
         
         @Test
-        void editUser_WithValidData_UpdatesSuccessfully() {
+        void editById_WithValidData_UpdatesSuccessfully() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             
-            UserResponseDTO editResult = userService.editUser(testUserId, updatedUserData);
+            UserResponseDTO editResult = userService.editById(testUserId, updatedUserData);
 
             assertNotNull(editResult);
             assertEquals(testUserId, editResult.getId());
@@ -162,11 +165,11 @@ class UserServiceTest {
         }
 
         @Test
-        void editUser_WithNoChanges_RetainsOriginalValues() {
+        void editById_WithNoChanges_RetainsOriginalValues() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            User emptyUpdateData = new User();
+            UserRequestDTO emptyUpdateData = new UserRequestDTO();
 
-            UserResponseDTO editResult = userService.editUser(testUserId, emptyUpdateData);
+            UserResponseDTO editResult = userService.editById(testUserId, emptyUpdateData);
 
             assertEquals(testUserId, editResult.getId());
             assertEquals("John", editResult.getFirstName());
@@ -176,21 +179,23 @@ class UserServiceTest {
         }
 
         @Test
-        void editUser_WithInvalidEmail_ThrowsException() throws Exception {
+        void editById_WithInvalidEmail_ThrowsException() throws Exception {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             Field emailField = User.class.getDeclaredField("email");
             emailField.setAccessible(true);
             emailField.set(invalidUser, "invalid-email");
 
+            UserRequestDTO invalidUserRequest = DTOMapper.map(invalidUser, UserRequestDTO.class);
+
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-                userService.editUser(testUserId, invalidUser);
+                userService.editById(testUserId, invalidUserRequest);
             });
             assertEquals("Failed to update user", exception.getMessage());
         }
 
         @Test
-        void editUser_WithInvalidNIK_ThrowsException() throws Exception {
+        void editById_WithInvalidNIK_ThrowsException() throws Exception {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             Field nikField = User.class.getDeclaredField("nik");
@@ -198,25 +203,29 @@ class UserServiceTest {
             nikField.set(invalidUser, "invalid-nik");
             invalidUser.setId(testUserId);
 
+            UserRequestDTO invalidUserRequest = DTOMapper.map(invalidUser, UserRequestDTO.class);
+
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-                userService.editUser(testUserId, invalidUser);
+                userService.editById(testUserId, invalidUserRequest);
             });
             assertEquals("Failed to update user", exception.getMessage());
         }
 
         @Test
-        void editUser_WithNonExistentId_ThrowsEntityNotFoundException() {
+        void editById_WithNonExistentId_ThrowsEntityNotFoundException() {
             when(userRepository.findById("invalid-id")).thenReturn(Optional.empty());
             User user = new User();
 
+            UserRequestDTO invalidUserRequest = DTOMapper.map(user, UserRequestDTO.class);
+
             Exception exception = assertThrows(RuntimeException.class, () -> 
-                userService.editUser("invalid-id", user)
+                userService.editById("invalid-id", invalidUserRequest)
             );
             assertEquals("User with ID invalid-id not found", exception.getMessage());
         }
 
         @Test
-        void editUser_WithNameTooLong_ThrowsException() throws Exception {
+        void editById_WithNameTooLong_ThrowsException() throws Exception {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             invalidUser.setId(testUserId);
@@ -226,10 +235,44 @@ class UserServiceTest {
             nameField.setAccessible(true);
             nameField.set(invalidUser, longName);
 
+            UserRequestDTO invalidUserRequest = DTOMapper.map(invalidUser, UserRequestDTO.class);
+
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-                userService.editUser(testUserId, invalidUser);
+                userService.editById(testUserId, invalidUserRequest);
             });
             assertEquals("Failed to update user", exception.getMessage());
+        }
+    }
+
+    @Nested
+    class UserDetailsServiceTests {
+        
+        @Test
+        void loadUserByUsername_WithValidEmail_ReturnsUser() {
+            String testEmail = "john.doe@example.com";
+            when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(testUser));
+
+            User result = userService.loadUserByUsername(testEmail);
+
+            assertNotNull(result);
+            assertEquals(testUserId, result.getId());
+            assertEquals("John", result.getFirstName());
+            assertEquals("Doe", result.getLastName());
+            assertEquals(testEmail, result.getEmail());
+            verify(userRepository, times(1)).findByEmail(testEmail);
+        }
+
+        @Test
+        void loadUserByUsername_WithNonExistentEmail_ThrowsUsernameNotFoundException() {
+            String nonExistentEmail = "nonexistent@example.com";
+            when(userRepository.findByEmail(nonExistentEmail)).thenReturn(Optional.empty());
+
+            Exception exception = assertThrows(UsernameNotFoundException.class, () -> {
+                userService.loadUserByUsername(nonExistentEmail);
+            });
+            
+            assertEquals("User not found", exception.getMessage());
+            verify(userRepository, times(1)).findByEmail(nonExistentEmail);
         }
     }
 }

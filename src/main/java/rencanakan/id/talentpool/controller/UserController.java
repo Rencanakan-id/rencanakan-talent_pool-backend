@@ -1,9 +1,6 @@
 package rencanakan.id.talentpool.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import rencanakan.id.talentpool.dto.UserResponseDTO;
@@ -15,42 +12,30 @@ import rencanakan.id.talentpool.service.UserService;
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/{id}")
-    public WebResponse<UserResponseDTO> getUserById(
-            @PathVariable String id, 
+    public WebResponse<UserResponseDTO> getUserProfileById(
+            @PathVariable("id") String id, 
             @RequestHeader("Authorization") String token) {
-        
+                
         UserResponseDTO resp = userService.getById(id);
-        
         return WebResponse.<UserResponseDTO>builder()
                 .data(resp)
                 .build();
     }
 
     @PutMapping("/{id}")
-    public WebResponse<UserResponseDTO> editUser(
-            @PathVariable String id,
-            @RequestBody User editedUser,
+    public WebResponse<UserResponseDTO> editUserProfile(
+            @PathVariable("id") String id,
+            @RequestBody User editedProfile,
             @RequestHeader("Authorization") String token) {
 
-        UserResponseDTO updatedUser = userService.editUser(id, editedUser);
+        UserResponseDTO updatedProfile = userService.editUser(id, editedProfile);
 
         return WebResponse.<UserResponseDTO>builder()
-                .data(updatedUser)
+                .data(updatedProfile)
                 .build();
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<User> authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails currentUserDetails = (UserDetails) authentication.getPrincipal();
-        User currentUser = userService.findByEmail(currentUserDetails.getUsername());
-        return ResponseEntity.ok(currentUser);
     }
 }

@@ -1,8 +1,10 @@
 package rencanakan.id.talentpool.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.User;
@@ -11,7 +13,7 @@ import rencanakan.id.talentpool.repository.UserRepository;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
@@ -72,5 +74,11 @@ public class UserServiceImpl implements UserService {
     public User findByEmail(String email) {
         Optional<User> userOptional = userRepository.findByEmail(email);
         return userOptional.orElse(null);
+    }
+
+    @Override
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }

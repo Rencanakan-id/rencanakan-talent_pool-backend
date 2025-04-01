@@ -5,28 +5,37 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import rencanakan.id.talentpool.dto.LoginUserDTO;
+import rencanakan.id.talentpool.dto.LoginRequestDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
+
 
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
 
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            UserService userService
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     public User signup(@Valid UserRequestDTO request) {
+        User checkUser = userService.findByEmail(request.getEmail());
+        if (checkUser != null) {
+            throw new IllegalArgumentException("User with email " + request.getEmail() + " already exists.");
+        }
+
         User newUser = User.builder()
                 .firstName(request.getFirstName())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -50,14 +59,13 @@ public class AuthenticationService {
         return userRepository.save(newUser);
     }
 
-    public User authenticate(LoginUserDTO input) {
+    public User authenticate(LoginRequestDTO input) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
                         input.getPassword()
                 )
         );
-
-        return userRepository.findByEmail(input.getEmail()).orElseThrow();
+        return userRepository.findByEmail(input.getEmail()).orElse(null);
     }
 }

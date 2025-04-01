@@ -1,8 +1,4 @@
-package rencanakan.id.talentpool.controller;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+package rencanakan.id.talentpool.unit.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -11,9 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.servlet.ServletException;
 import jakarta.validation.Validator;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,16 +17,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import java.util.List;
 
+import rencanakan.id.talentpool.controller.UserController;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.service.UserService;
 import rencanakan.id.talentpool.model.User;
@@ -45,22 +36,13 @@ class UserControllerTest {
     
     @Mock
     private Validator validator;
-    
-    @Mock
-    private Authentication authentication;
-    
-    @Mock
-    private SecurityContext securityContext;
-    
-    @Mock
-    private UserDetails userDetails;
 
     @InjectMocks
     private UserController userController;
     
     private MockMvc mockMvc;
     
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
 
 
     @BeforeEach
@@ -68,12 +50,7 @@ class UserControllerTest {
         mockMvc = MockMvcBuilders
             .standaloneSetup(userController)
             .build();
-    }
-    
-    @AfterEach
-    void tearDown() {
-        // Clear security context after each test to avoid leaking state
-        SecurityContextHolder.clearContext();
+        objectMapper = new ObjectMapper();
     }
 
     private UserResponseDTO createUserResponseDTO() {
@@ -130,12 +107,10 @@ class UserControllerTest {
         @Test
         @DisplayName("Should return user when user exists")
         void testGetUserById_Success() throws Exception {
-            // Arrange
             String userId = "user123";
             UserResponseDTO responseDTO = createUserResponseDTO();
             when(userService.getById(userId)).thenReturn(responseDTO);
 
-            // Act & Assert
             mockMvc.perform(get("/users/{id}", userId)
                     .header("Authorization", "Bearer test-token")
                     .contentType(MediaType.APPLICATION_JSON))
@@ -154,97 +129,22 @@ class UserControllerTest {
                     .andExpect(jsonPath("$.data.skkLevel").value("Senior"))
                     .andExpect(jsonPath("$.data.price").value(5000000));
 
-            // Verify service call
             verify(userService, times(1)).getById(userId);
         }
 
         @Test
         @DisplayName("Should return empty data when user not found")
         void testGetUserById_NotFound() throws Exception {
-            // Arrange
             String userId = "nonexistent";
             when(userService.getById(userId)).thenReturn(null);
 
-            // Act & Assert
             mockMvc.perform(get("/users/{id}", userId)
                     .header("Authorization", "Bearer test-token")
                     .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data").isEmpty());
 
-            // Verify service call
             verify(userService, times(1)).getById(userId);
-        }
-
-        @Test
-        @DisplayName("Should return authenticated user details")
-        void testGetAuthenticatedUser() throws Exception {
-            // Setup mock security context
-            User mockUser = createUser();
-            
-            // Configure security context with mocks
-            when(securityContext.getAuthentication()).thenReturn(authentication);
-            when(authentication.getPrincipal()).thenReturn(userDetails);
-            when(userDetails.getUsername()).thenReturn("john.doe@example.com");
-            SecurityContextHolder.setContext(securityContext);
-            
-            // Setup service to return mock user
-            when(userService.findByEmail("john.doe@example.com")).thenReturn(mockUser);
-
-            // Act & Assert
-            mockMvc.perform(get("/users/me"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.id").value("user123"))
-                    .andExpect(jsonPath("$.firstName").value("John"))
-                    .andExpect(jsonPath("$.lastName").value("Doe"))
-                    .andExpect(jsonPath("$.email").value("john.doe@example.com"))
-                    .andExpect(jsonPath("$.phoneNumber").value("1234567890"))
-                    .andExpect(jsonPath("$.photo").value("profile.jpg"))
-                    .andExpect(jsonPath("$.nik").value("1234567890123456"))
-                    .andExpect(jsonPath("$.experienceYears").value(5))
-                    .andExpect(jsonPath("$.price").value(5000000));
-            
-            // Verify service was called
-            verify(userService).findByEmail("john.doe@example.com");
-        }
-        
-        @Test
-        @DisplayName("Should handle case when authenticated user details are not found")
-        void testGetAuthenticatedUser_NotFound() throws Exception {
-            // Setup mock security context
-            when(securityContext.getAuthentication()).thenReturn(authentication);
-            when(authentication.getPrincipal()).thenReturn(userDetails);
-            when(userDetails.getUsername()).thenReturn("unknown@example.com");
-            SecurityContextHolder.setContext(securityContext);
-            
-            // Setup service to return null (user not found)
-            when(userService.findByEmail("unknown@example.com")).thenReturn(null);
-
-            // Act & Assert
-            mockMvc.perform(get("/users/me"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(""));
-            
-            // Verify service was called
-            verify(userService).findByEmail("unknown@example.com");
-        }
-        
-        @Test
-        @DisplayName("Should handle security context authentication exception")
-        void testGetAuthenticatedUser_SecurityException() throws Exception {
-            when(securityContext.getAuthentication()).thenReturn(null);
-            SecurityContextHolder.setContext(securityContext);
-            
-            try {
-                mockMvc.perform(get("/users/me"));
-                fail("Expected ServletException was not thrown");
-            } catch (ServletException e) {
-                Throwable rootCause = e.getRootCause();
-                assertTrue(rootCause instanceof NullPointerException);
-                assertEquals("Cannot invoke \"org.springframework.security.core.Authentication.getPrincipal()\" because \"authentication\" is null", 
-                             rootCause.getMessage());
-            }
         }
     }
 
@@ -255,7 +155,6 @@ class UserControllerTest {
         @Test
         @DisplayName("Should update user with valid data")
         void testUpdateUser_Success() throws Exception {
-            // Arrange
             String userId = "user123";
             User updatedUser = createUser();
             updatedUser.setFirstName("Jane");
@@ -267,7 +166,6 @@ class UserControllerTest {
             
             when(userService.editUser(eq(userId), any(User.class))).thenReturn(responseDTO);
 
-            // Act & Assert
             mockMvc.perform(put("/users/{id}", userId)
                     .header("Authorization", "Bearer test-token")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -277,21 +175,18 @@ class UserControllerTest {
                     .andExpect(jsonPath("$.data.firstName").value("Jane"))
                     .andExpect(jsonPath("$.data.lastName").value("Smith"));
 
-            // Verify service call
             verify(userService, times(1)).editUser(eq(userId), any(User.class));
         }
 
         @Test
         @DisplayName("Should return not found when updating non-existent user")
         void testUpdateUser_UserNotFound() throws Exception {
-            // Arrange
             String userId = "nonexistent";
             User updatedUser = createUser();
             
             when(userService.editUser(eq(userId), any(User.class)))
                     .thenReturn(null);
 
-            // Act & Assert
             mockMvc.perform(put("/users/{id}", userId)
                     .header("Authorization", "Bearer test-token")
                     .contentType(MediaType.APPLICATION_JSON)

@@ -1,4 +1,4 @@
-package rencanakan.id.talentpool.repository;
+package rencanakan.id.talentpool.unit.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import rencanakan.id.talentpool.model.User;
+import rencanakan.id.talentpool.repository.UserRepository;
 
 import java.util.Arrays;
 import java.util.List;
