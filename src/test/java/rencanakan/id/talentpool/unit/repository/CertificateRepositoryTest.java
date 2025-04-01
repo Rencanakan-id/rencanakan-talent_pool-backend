@@ -76,14 +76,14 @@ class CertificateRepositoryTest {
                     .file("java-cert.pdf")
                     .user(testUser)
                     .build();
-            certificate1 = entityManager.persistAndFlush(certificate1);
+            entityManager.persistAndFlush(certificate1);
             
             Certificate certificate2 = Certificate.builder()
                     .title("Python Certificate")
                     .file("python-cert.pdf")
                     .user(testUser)
                     .build();
-            certificate2 = entityManager.persistAndFlush(certificate2);
+            entityManager.persistAndFlush(certificate2);
             
             List<Certificate> certificates = certificateRepository.findByUserId(testUserId);
             

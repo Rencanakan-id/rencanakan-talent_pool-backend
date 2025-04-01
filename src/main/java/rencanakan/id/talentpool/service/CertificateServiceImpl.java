@@ -9,7 +9,6 @@ import rencanakan.id.talentpool.model.Certificate;
 import rencanakan.id.talentpool.repository.CertificateRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CertificateServiceImpl implements CertificateService {
@@ -29,8 +28,8 @@ public class CertificateServiceImpl implements CertificateService {
         }
 
         return certificates.stream()
-                .map(certificate -> DTOMapper.map(certificate, CertificateResponseDTO.class))
-                .collect(Collectors.toList());
+            .map(certificate -> DTOMapper.map(certificate, CertificateResponseDTO.class))
+            .toList();
     }
 
     @Override
