@@ -40,6 +40,7 @@ class CertificateServiceTest {
     @Nested
     class ReadCertificateTests {
         private User user;
+        private String userId;
         private Certificate certificate;
         private CertificateResponseDTO certificateResponseDTO;
     
@@ -65,6 +66,8 @@ class CertificateServiceTest {
                     .preferredLocations(Arrays.asList("Jakarta", "Bandung"))
                     .skill("Java, Spring Boot")
                     .build();
+
+            userId = user.getId();
     
             certificate = Certificate.builder()
                     .id(1L)
@@ -103,7 +106,7 @@ class CertificateServiceTest {
             when(certificateRepository.findByUserId(user.getId())).thenReturn(Collections.emptyList());
             
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, 
-                    () -> certificateService.getByUserId(user.getId()));
+                    () -> certificateService.getByUserId(userId));
             
             assertEquals("Certificates not found for user with id talent-123", exception.getMessage());
             verify(certificateRepository).findByUserId(user.getId());

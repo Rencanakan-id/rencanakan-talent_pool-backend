@@ -23,7 +23,7 @@ import rencanakan.id.talentpool.dto.CertificateResponseDTO;
 import rencanakan.id.talentpool.service.CertificateService;
 
 @ExtendWith(MockitoExtension.class)
-public class CertificateControllerTest {
+class CertificateControllerTest {
     
     @Mock
     private CertificateService certificateService;
