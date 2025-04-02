@@ -10,12 +10,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Experience;
+import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.ExperienceRepository;
 
 import java.time.LocalDate;
@@ -78,6 +80,7 @@ class ExperienceServiceTest {
                 .endDate(LocalDate.of(2020, 12, 31))
                 .location("Old Location")
                 .locationType(LocationType.HYBRID)
+                .user(User.builder().id("userId").build())
                 .build();
     }
    @Test
@@ -128,6 +131,7 @@ class ExperienceServiceTest {
         void testEditById_Success() {
             // Arrange
             Long experienceId = 1L;
+            String userId = "userId";
 
             when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
 
@@ -145,7 +149,7 @@ class ExperienceServiceTest {
             when(experienceRepository.save(any(Experience.class))).thenReturn(updatedExperience);
 
 
-            ExperienceResponseDTO response = experienceService.editById(experienceId, request);
+            ExperienceResponseDTO response = experienceService.editById(userId,experienceId, request);
 
 
             assertNotNull(response);
@@ -165,17 +169,32 @@ class ExperienceServiceTest {
         void testEditById_EntityNotFound() {
 
             Long nonExistentId = 999L;
+            String userId = "userId";
             when(experienceRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
 
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-                experienceService.editById(nonExistentId, request);
+                experienceService.editById(userId,nonExistentId, request);
             });
 
             assertEquals("Experience with ID 999 not found", exception.getMessage());
 
             verify(experienceRepository, times(1)).findById(nonExistentId);
             verify(experienceRepository, never()).save(any(Experience.class));
+        }
+
+        @Test
+        public void testEditById_UserNotAuthorized_ThrowsAccessDeniedException() {
+            // Arrange
+            String unauthorizedUserId = "999";
+            when(experienceRepository.findById(1L)).thenReturn(java.util.Optional.of(experience));
+
+            // Act & Assert
+            AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+                experienceService.editById(unauthorizedUserId, 1L, request);
+            });
+
+            assertEquals("You are not allowed to edit this experience.", exception.getMessage());
         }
     }
 

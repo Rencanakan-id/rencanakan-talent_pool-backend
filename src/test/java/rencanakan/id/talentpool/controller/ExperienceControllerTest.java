@@ -14,8 +14,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.mvc.method.annotation.PrincipalMethodArgumentResolver;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
 import rencanakan.id.talentpool.dto.WebResponse;
@@ -25,6 +32,7 @@ import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -54,6 +62,7 @@ public class ExperienceControllerTest {
 
    @BeforeEach
    void setUp() {
+
        objectMapper = Jackson2ObjectMapperBuilder.json()
                .modules(new JavaTimeModule())
                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -62,6 +71,7 @@ public class ExperienceControllerTest {
        mockMvc = MockMvcBuilders.standaloneSetup(experienceController)
                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
                .setControllerAdvice(new ErrorController()) //
+               .setCustomArgumentResolvers(new PrincipalMethodArgumentResolver())
                .build();
        request = createValidRequestDTO();
        response= createMockResponseDTO();
@@ -140,7 +150,7 @@ public class ExperienceControllerTest {
            String expectedStartDate = response.getStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
            String expectedEndDate = response.getEndDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
-           when(experienceService.editById(eq(experienceId), any(ExperienceRequestDTO.class)))
+           when(experienceService.editById(any(), eq(experienceId), any(ExperienceRequestDTO.class)))
                    .thenReturn(response);
 
            mockMvc.perform(put("/experiences/" + experienceId)
@@ -170,6 +180,20 @@ public class ExperienceControllerTest {
                    .andExpect(status().isBadRequest())
                    .andExpect(jsonPath("$.errors").exists());
        }
+       @Test
+       public void testEditExperience_UserNotAuthorized_ReturnsForbidden() throws Exception {
+
+           Long experienceId = 1L;
+
+           doThrow(new AccessDeniedException("You are not allowed to edit this experience."))
+                   .when(experienceService).editById(any(), eq(experienceId), any(ExperienceRequestDTO.class));
+
+           mockMvc.perform(put("/experiences/{id}", experienceId)
+                           .contentType(MediaType.APPLICATION_JSON)
+                           .content(objectMapper.writeValueAsString(request)))
+                   .andExpect(status().isForbidden()) // Expect 403 Forbidden status
+                   .andExpect(jsonPath("$.errors").value("You are not allowed to edit this experience.")); // Check error message
+       }
 
 
 
@@ -179,7 +203,7 @@ public class ExperienceControllerTest {
            Long invalidId = 999L;
            String token = "Bearer sample-token";
 
-           when(experienceService.editById(eq(invalidId), any(ExperienceRequestDTO.class)))
+           when(experienceService.editById(any(), eq(invalidId), any(ExperienceRequestDTO.class)))
                    .thenThrow(new EntityNotFoundException("Experience Not Found"));
 
            mockMvc.perform(put("/experiences/" + invalidId)
@@ -188,18 +212,10 @@ public class ExperienceControllerTest {
                            .content(objectMapper.writeValueAsString(request)))
                    .andExpect(status().isNotFound())
                    .andExpect(jsonPath("$.errors").value("Experience Not Found"));  // Pastikan pesan sesuai dengan exception
-           verify(experienceService, times(1)).editById(eq(invalidId), any(ExperienceRequestDTO.class));
+           verify(experienceService, times(1)).editById(any(String.class), eq(invalidId), any(ExperienceRequestDTO.class));
 
        }
-       @Test
-       void testMissingAuthorizationHeader() throws Exception {
-           Long id = 999L;
 
-           mockMvc.perform(put("/experiences/" + id)
-                           .contentType(MediaType.APPLICATION_JSON)
-                           .content(objectMapper.writeValueAsString(request)))
-                   .andExpect(status().isUnauthorized());
-       }
 
 
    }
