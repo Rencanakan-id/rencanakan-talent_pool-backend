@@ -24,9 +24,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import rencanakan.id.talentpool.controller.UserController;
+import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
-import rencanakan.id.talentpool.service.UserService;
 import rencanakan.id.talentpool.model.User;
+import rencanakan.id.talentpool.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
@@ -43,13 +44,20 @@ class UserControllerTest {
     private MockMvc mockMvc;
     
     private ObjectMapper objectMapper;
-
+    
+    private User testUser;
 
     @BeforeEach
     void setUp() {
+        testUser = new User();
+        testUser.setId("user123");
+        testUser.setEmail("john.doe@example.com");
+        
         mockMvc = MockMvcBuilders
             .standaloneSetup(userController)
+            .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(testUser))
             .build();
+            
         objectMapper = new ObjectMapper();
     }
 
@@ -76,13 +84,12 @@ class UserControllerTest {
         return dto;
     }
 
-    private User createUser() {
-        return User.builder()
-                .id("user123")
+    private UserRequestDTO createUserRequestDTO() {
+        return UserRequestDTO.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@example.com")
-                .password("hashedPassword")
+                .password("password123")
                 .phoneNumber("1234567890")
                 .photo("profile.jpg")
                 .aboutMe("Experienced developer")
@@ -146,6 +153,69 @@ class UserControllerTest {
 
             verify(userService, times(1)).getById(userId);
         }
+        
+        @Test
+        @DisplayName("Should return current user when using /me endpoint")
+        void testGetCurrentUser_Success() throws Exception {
+            UserResponseDTO responseDTO = createUserResponseDTO();
+            when(userService.getById(any())).thenReturn(responseDTO);
+
+            mockMvc.perform(get("/users/me")
+                    .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.data.id").value(testUser.getId()))
+                    .andExpect(jsonPath("$.data.firstName").value("John"))
+                    .andExpect(jsonPath("$.data.lastName").value("Doe"))
+                    .andExpect(jsonPath("$.data.email").value("john.doe@example.com"))
+                    .andExpect(jsonPath("$.data.phoneNumber").value("08123456789"))
+                    .andExpect(jsonPath("$.data.photo").value("profile.jpg"))
+                    .andExpect(jsonPath("$.data.aboutMe").value("Experienced developer"))
+                    .andExpect(jsonPath("$.data.nik").value("1234567890123456"))
+                    .andExpect(jsonPath("$.data.npwp").value("123456789"))
+                    .andExpect(jsonPath("$.data.photoKtp").value("ktp.jpg"))
+                    .andExpect(jsonPath("$.data.photoNpwp").value("npwp.jpg"))
+                    .andExpect(jsonPath("$.data.photoIjazah").value("ijazah.jpg"))
+                    .andExpect(jsonPath("$.data.experienceYears").value(5))
+                    .andExpect(jsonPath("$.data.skkLevel").value("Senior"))
+                    .andExpect(jsonPath("$.data.currentLocation").value("Jakarta"))
+                    .andExpect(jsonPath("$.data.preferredLocations[0]").value("Jakarta"))
+                    .andExpect(jsonPath("$.data.preferredLocations[1]").value("Bandung"))
+                    .andExpect(jsonPath("$.data.preferredLocations[2]").value("Surabaya"))
+                    .andExpect(jsonPath("$.data.skill").value("Java, Spring Boot"))
+                    .andExpect(jsonPath("$.data.price").value(5000000));
+
+            verify(userService, times(1)).getById(any());
+        }
+        
+        @Test
+        @DisplayName("Should return 401 when user is unauthorized")
+        void testGetCurrentUser_Unauthorized() throws Exception {
+            mockMvc = MockMvcBuilders
+                .standaloneSetup(userController)
+                .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
+                .build();
+
+            mockMvc.perform(get("/users/me")
+                    .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.errors").value("Unauthorized access."));
+
+            verify(userService, never()).getById(any());
+        }
+        
+        @Test
+        @DisplayName("Should return 404 when user is not found")
+        void testGetCurrentUser_NotFound() throws Exception {
+            when(userService.getById(any())).thenReturn(null);
+            
+            mockMvc.perform(get("/users/me")
+                    .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("User not found."));
+                    
+            verify(userService, times(1)).getById(any());
+        }
     }
 
     @Nested
@@ -156,7 +226,7 @@ class UserControllerTest {
         @DisplayName("Should update user with valid data")
         void testUpdateUser_Success() throws Exception {
             String userId = "user123";
-            User updatedUser = createUser();
+            UserRequestDTO updatedUser = createUserRequestDTO();
             updatedUser.setFirstName("Jane");
             updatedUser.setLastName("Smith");
             
@@ -164,7 +234,7 @@ class UserControllerTest {
             responseDTO.setFirstName("Jane");
             responseDTO.setLastName("Smith");
             
-            when(userService.editUser(eq(userId), any(User.class))).thenReturn(responseDTO);
+            when(userService.editById(eq(userId), any(UserRequestDTO.class))).thenReturn(responseDTO);
 
             mockMvc.perform(put("/users/{id}", userId)
                     .header("Authorization", "Bearer test-token")
@@ -175,24 +245,38 @@ class UserControllerTest {
                     .andExpect(jsonPath("$.data.firstName").value("Jane"))
                     .andExpect(jsonPath("$.data.lastName").value("Smith"));
 
-            verify(userService, times(1)).editUser(eq(userId), any(User.class));
+            verify(userService, times(1)).editById(eq(userId), any(UserRequestDTO.class));
         }
 
         @Test
-        @DisplayName("Should return not found when updating non-existent user")
+        @DisplayName("Should return forbidden when updating non-existent user")
         void testUpdateUser_UserNotFound() throws Exception {
             String userId = "nonexistent";
-            User updatedUser = createUser();
+            UserRequestDTO updatedUser = createUserRequestDTO();
             
-            when(userService.editUser(eq(userId), any(User.class)))
-                    .thenReturn(null);
-
             mockMvc.perform(put("/users/{id}", userId)
                     .header("Authorization", "Bearer test-token")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(updatedUser)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").isEmpty());
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.errors").value("You are not authorized to edit this user."));
+            
+            verify(userService, never()).editById(eq(userId), any(UserRequestDTO.class));
+        }
+        
+        @Test
+        @DisplayName("Should return forbidden when updating another user's profile")
+        void testUpdateUser_Forbidden() throws Exception {
+            String otherUserId = "other123";
+            UserRequestDTO updatedUser = createUserRequestDTO();
+            
+            mockMvc.perform(put("/users/{id}", otherUserId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updatedUser)))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.errors").value("You are not authorized to edit this user."));
+            
+            verify(userService, never()).editById(eq(otherUserId), any(UserRequestDTO.class));
         }
     }
 }
