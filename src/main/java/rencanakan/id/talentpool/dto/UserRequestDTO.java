@@ -1,15 +1,18 @@
 package rencanakan.id.talentpool.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Setter
-public class UserProfileRequestDTO {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserRequestDTO {
 
     @NotBlank(message = "First name is required")
     private String firstName;
@@ -18,6 +21,7 @@ public class UserProfileRequestDTO {
     private String lastName;
 
     @NotBlank(message = "Email is required")
+    @Email
     private String email;
 
     @NotBlank(message = "Phone number is required")
