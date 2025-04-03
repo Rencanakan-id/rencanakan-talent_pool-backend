@@ -15,7 +15,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
-import rencanakan.id.talentpool.dto.RecommendationStatusRequestDTO;
 import rencanakan.id.talentpool.service.RecommendationService;
 import rencanakan.id.talentpool.enums.StatusType;
 
@@ -32,7 +31,7 @@ class RecommendationControllerTest {
     private ObjectMapper objectMapper;
 
     private String id;
-    private RecommendationStatusRequestDTO requestDTO;
+
     private RecommendationResponseDTO responseDTO;
 
     @BeforeEach
@@ -44,7 +43,7 @@ class RecommendationControllerTest {
                 .build();
 
         id = "1";
-        requestDTO = new RecommendationStatusRequestDTO(StatusType.ACCEPTED);
+
         responseDTO = new RecommendationResponseDTO(
                 id, "talentId", 123L, "contractorName", "Some message", StatusType.ACCEPTED
         );
@@ -52,11 +51,11 @@ class RecommendationControllerTest {
 
     @Test
     void testEditStatusById() throws Exception {
-        when(recommendationService.editStatusById(eq(id), any(RecommendationStatusRequestDTO.class))).thenReturn(responseDTO);
+        when(recommendationService.editStatusById(eq(id), any(StatusType.class))).thenReturn(responseDTO);
 
         mockMvc.perform(patch("/recommendations/{id}", id)
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(requestDTO)))
+                        .content(objectMapper.writeValueAsString(StatusType.ACCEPTED)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(responseDTO.getId()))
                 .andExpect(jsonPath("$.data.talentId").value(responseDTO.getTalentId()))
@@ -69,12 +68,12 @@ class RecommendationControllerTest {
 
     @Test
     void testEditStatusById_RecommendationNotFound() throws Exception {
-        when(recommendationService.editStatusById(eq(id),  any(RecommendationStatusRequestDTO.class)))
+        when(recommendationService.editStatusById(eq(id),  any(StatusType.class)))
                 .thenThrow(new EntityNotFoundException("Recommendation with ID " + id + " not found"));
 
         mockMvc.perform(patch("/recommendations/{id}", id)
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(requestDTO)))
+                        .content(objectMapper.writeValueAsString(StatusType.ACCEPTED)))
                 .andExpect(status().isNotFound());
     }
 
@@ -84,11 +83,11 @@ class RecommendationControllerTest {
                 "2", "newTalentId", 456L, "newContractorName", "Modified message", StatusType.PENDING
         );
 
-        when(recommendationService.editStatusById(eq(id), any(RecommendationStatusRequestDTO.class))).thenReturn(modifiedResponseDTO);
+        when(recommendationService.editStatusById(eq(id), any(StatusType.class))).thenReturn(modifiedResponseDTO);
 
         mockMvc.perform(patch("/recommendations/{id}", id)
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(requestDTO)))
+                        .content(objectMapper.writeValueAsString(StatusType.ACCEPTED)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(modifiedResponseDTO.getId()))
                 .andExpect(jsonPath("$.data.talentId").value(modifiedResponseDTO.getTalentId()))

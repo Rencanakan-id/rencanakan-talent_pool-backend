@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentpool.dto.*;
+import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 import rencanakan.id.talentpool.service.RecommendationService;
@@ -23,8 +24,8 @@ public class RecommendationController {
     @PatchMapping("/{id}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> editStatusById(
             @PathVariable String id,
-            @RequestBody @Valid RecommendationStatusRequestDTO dto){
-        RecommendationResponseDTO res = this.recommendationService.editStatusById(id, dto);
+            @RequestBody StatusType status){
+        RecommendationResponseDTO res = this.recommendationService.editStatusById(id, status);
         WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
                 .data(res)
                 .build();

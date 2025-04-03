@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
-import rencanakan.id.talentpool.dto.RecommendationStatusRequestDTO;
 import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
@@ -31,17 +30,18 @@ class RecommendationServiceTest {
     void setUp() {
         recommendation = new Recommendation();
         recommendation.setId("1");
-        recommendation.setStatus(rencanakan.id.talentpool.enums.StatusType.PENDING);
+        recommendation.setStatus(StatusType.PENDING);
     }
 
     @Test
     void testEditStatusById_Success() {
-        RecommendationStatusRequestDTO requestDTO = new RecommendationStatusRequestDTO(StatusType.ACCEPTED);
-
+        Recommendation updated = new Recommendation();
+        updated.setId("1");
+        updated.setStatus(StatusType.ACCEPTED);
         when(recommendationRepository.findById("1")).thenReturn(java.util.Optional.of(recommendation));
-        when(recommendationRepository.save(any(Recommendation.class))).thenReturn(recommendation);
+        when(recommendationRepository.save(any(Recommendation.class))).thenReturn(updated);
 
-        RecommendationResponseDTO response = recommendationService.editStatusById("1", requestDTO);
+        RecommendationResponseDTO response = recommendationService.editStatusById("1", StatusType.ACCEPTED  );
 
         assertNotNull(response);
         assertEquals(rencanakan.id.talentpool.enums.StatusType.ACCEPTED, response.getStatus());
@@ -56,7 +56,7 @@ class RecommendationServiceTest {
         when(recommendationRepository.findById("1")).thenReturn(java.util.Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-            recommendationService.editStatusById("1", requestDTO);
+            recommendationService.editStatusById("1", StatusType.ACCEPTED);
         });
         assertEquals("Recommendation with ID 1 not found", exception.getMessage());
     }
