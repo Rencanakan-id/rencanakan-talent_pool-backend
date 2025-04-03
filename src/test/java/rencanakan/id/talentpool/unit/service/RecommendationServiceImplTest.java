@@ -1,4 +1,4 @@
-package rencanakan.id.talentpool.service;
+package rencanakan.id.talentpool.unit.service;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
-import rencanakan.id.talentpool.dto.UserProfileResponseDTO;
+import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Recommendation;
@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import org.mockito.MockedStatic;
+import rencanakan.id.talentpool.service.RecommendationServiceImpl;
 
 import static org.mockito.Mockito.mockStatic;
 
@@ -33,7 +34,7 @@ class RecommendationServiceImplTest {
     private static Validator validator;
     private Recommendation recommendation;
     private User mockTalent;
-    private UserProfileResponseDTO userResponseDTO;
+    private UserResponseDTO userResponseDTO;
 
     @Mock
     private RecommendationRepository recommendationRepository;
@@ -46,9 +47,6 @@ class RecommendationServiceImplTest {
 
     @InjectMocks
     private RecommendationServiceImpl recommendationService;
-
-    @InjectMocks
-    private DTOMapper dtoMapper;
 
     @BeforeAll
     static void setupValidator() {
@@ -92,7 +90,7 @@ class RecommendationServiceImplTest {
         responseDTO.setMessage("Test recommendation message");
         responseDTO.setStatus(StatusType.PENDING);
 
-        userResponseDTO = new UserProfileResponseDTO();
+        userResponseDTO = new UserResponseDTO();
         userResponseDTO.setFirstName("Test");
         userResponseDTO.setLastName("Talent");
         userResponseDTO.setEmail("test@example.setcom");

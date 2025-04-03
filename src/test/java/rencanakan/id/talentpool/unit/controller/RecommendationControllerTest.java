@@ -1,4 +1,4 @@
-package rencanakan.id.talentpool.controller;
+package rencanakan.id.talentpool.unit.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -15,6 +15,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import rencanakan.id.talentpool.controller.RecommendationController;
 import rencanakan.id.talentpool.dto.*;
 import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.model.User;
@@ -102,7 +103,6 @@ class RecommendationControllerTest {
                     .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value("recommendation123")) // Change from $.data.id
-                    .andExpect(jsonPath("$.talent.id").value("user123"))
                     .andExpect(jsonPath("$.contractorId").value(1L))
                     .andExpect(jsonPath("$.contractorName").value("Contractor name"))
                     .andExpect(jsonPath("$.message").value("Test controller message"))

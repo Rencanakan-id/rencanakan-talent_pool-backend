@@ -8,7 +8,6 @@ import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
-import rencanakan.id.talentpool.repository.UserProfileRepository;
 
 import java.util.Optional;
 
