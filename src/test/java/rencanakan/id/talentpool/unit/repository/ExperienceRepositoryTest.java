@@ -1,4 +1,4 @@
-package rencanakan.id.talentpool.repository;
+package rencanakan.id.talentpool.unit.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import rencanakan.id.talentpool.model.Experience;
 import rencanakan.id.talentpool.model.User;
+import rencanakan.id.talentpool.repository.ExperienceRepository;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 

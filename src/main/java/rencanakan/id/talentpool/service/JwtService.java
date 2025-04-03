@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +22,7 @@ public class JwtService {
 
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
+
     private UserDetails userDetails;
 
     public String extractUsername(String token) {
@@ -46,7 +46,7 @@ public class JwtService {
         return jwtExpiration;
     }
 
-    private String buildToken(
+    public String buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,
             long expiration
@@ -62,23 +62,22 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isTokenValid(String token, rencanakan.id.talentpool.model.User userDetails) {
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getEmail())) && !isTokenExpired(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-
     private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
+        return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
+                .setAllowedClockSkewSeconds(60L * 60 * 24 * 365 * 10)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

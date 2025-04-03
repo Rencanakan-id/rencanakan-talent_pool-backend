@@ -5,8 +5,10 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
+
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Experience;
+import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.ExperienceRepository;
 
 import java.util.List;
@@ -22,11 +24,11 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     @Override
-    public ExperienceResponseDTO createExperience(@Valid ExperienceRequestDTO request) {
+    public ExperienceResponseDTO createExperience(String userId, @Valid ExperienceRequestDTO request) {
         Experience newExperience = DTOMapper.map(request, Experience.class);
+        newExperience.setUser(User.builder().id(userId).build());
 
         Experience savedExperience = experienceRepository.save(newExperience);
-
         return DTOMapper.map(savedExperience, ExperienceResponseDTO.class);
     }
 

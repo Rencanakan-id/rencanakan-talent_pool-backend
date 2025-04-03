@@ -1,4 +1,4 @@
-package rencanakan.id.talentpool.service;
+package rencanakan.id.talentpool.unit.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +13,7 @@ import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 import rencanakan.id.talentpool.model.Experience;
 import rencanakan.id.talentpool.repository.ExperienceRepository;
+import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
 import java.time.LocalDate;
 import java.util.Optional;

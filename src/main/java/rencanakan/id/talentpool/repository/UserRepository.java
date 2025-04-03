@@ -7,6 +7,6 @@ import rencanakan.id.talentpool.model.User;
 import java.util.Optional;
 
 @Repository
-public interface UserProfileRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByEmail(String email);
 }
