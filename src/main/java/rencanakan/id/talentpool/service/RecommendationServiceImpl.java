@@ -23,6 +23,10 @@ public class RecommendationServiceImpl implements RecommendationService {
     @Override
     public RecommendationResponseDTO createRecommendation(String talentId, @Valid RecommendationRequestDTO recommendation) {
 
+        if (talentId == null || recommendation == null) {
+            throw new IllegalArgumentException("Recommendation request cannot be null");
+        }
+
         Recommendation newRecommendation = DTOMapper.map(recommendation, Recommendation.class);
         newRecommendation.setTalent(User.builder().id(talentId).build());
 
