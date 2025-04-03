@@ -185,8 +185,7 @@ class UserRepositoryTest {
                     .build();
 
             assertThrows(DataIntegrityViolationException.class, () -> {
-                userRepository.save(duplicateEmailUser);
-                userRepository.flush();
+                userRepository.saveAndFlush(duplicateEmailUser);
             });
         }
     }
