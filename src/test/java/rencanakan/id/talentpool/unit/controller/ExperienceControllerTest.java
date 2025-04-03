@@ -42,7 +42,7 @@ import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
-public class ExperienceControllerTest {
+class ExperienceControllerTest {
 
     @Mock
     private ExperienceServiceImpl experienceService;
