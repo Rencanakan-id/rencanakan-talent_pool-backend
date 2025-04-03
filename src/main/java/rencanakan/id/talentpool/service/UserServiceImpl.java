@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.User;
@@ -29,7 +30,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserResponseDTO editUser(String id, User edited) {
+    public UserResponseDTO editById(String id, UserRequestDTO edited) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User with ID " + id + " not found"));
 
@@ -42,7 +43,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
     }
 
-    private void updateUserFields(User user, User edited) {
+    private void updateUserFields(User user, UserRequestDTO edited) {
         updateIfNotNull(edited.getEmail(), user::setEmail);
         updateIfNotNull(edited.getFirstName(), user::setFirstName);
         updateIfNotNull(edited.getLastName(), user::setLastName);
