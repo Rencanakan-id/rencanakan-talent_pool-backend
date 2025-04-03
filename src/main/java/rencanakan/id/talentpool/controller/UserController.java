@@ -1,6 +1,5 @@
 package rencanakan.id.talentpool.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +15,11 @@ import rencanakan.id.talentpool.service.UserService;
 @RequestMapping("/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<WebResponse<UserResponseDTO>> getUserById(
@@ -25,6 +27,12 @@ public class UserController {
             @RequestHeader("Authorization") String token) {
 
         UserResponseDTO resp = userService.getById(id);
+
+        if (resp == null) {
+            return ResponseEntity.status(404).body(WebResponse.<UserResponseDTO>builder()
+                    .errors("User not found.")
+                    .build());
+        }
 
         return ResponseEntity.ok(WebResponse.<UserResponseDTO>builder()
                 .data(resp)

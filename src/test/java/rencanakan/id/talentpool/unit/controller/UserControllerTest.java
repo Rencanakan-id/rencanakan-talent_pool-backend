@@ -140,7 +140,7 @@ class UserControllerTest {
         }
 
         @Test
-        @DisplayName("Should return empty data when user not found")
+        @DisplayName("Should return 404 when user not found")
         void testGetUserById_NotFound() throws Exception {
             String userId = "nonexistent";
             when(userService.getById(userId)).thenReturn(null);
@@ -148,8 +148,8 @@ class UserControllerTest {
             mockMvc.perform(get("/users/{id}", userId)
                     .header("Authorization", "Bearer test-token")
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").isEmpty());
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("User not found."));
 
             verify(userService, times(1)).getById(userId);
         }

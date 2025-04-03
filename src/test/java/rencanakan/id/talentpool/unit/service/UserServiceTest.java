@@ -111,9 +111,11 @@ class UserServiceTest {
             String nonExistentEmail = "nonexistent@example.com";
             when(userRepository.findByEmail(nonExistentEmail)).thenReturn(Optional.empty());
 
-            User result = userService.findByEmail(nonExistentEmail);
-
-            assertNull(result);
+            Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+                userService.findByEmail(nonExistentEmail);
+            });
+            
+            assertEquals("User not found with email: " + nonExistentEmail, exception.getMessage());
             verify(userRepository, times(1)).findByEmail(nonExistentEmail);
         }
         
@@ -122,9 +124,11 @@ class UserServiceTest {
             String emptyEmail = "";
             when(userRepository.findByEmail(emptyEmail)).thenReturn(Optional.empty());
 
-            User result = userService.findByEmail(emptyEmail);
-
-            assertNull(result);
+            Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+                userService.findByEmail(emptyEmail);
+            });
+            
+            assertEquals("User not found with email: " + emptyEmail, exception.getMessage());
             verify(userRepository, times(1)).findByEmail(emptyEmail);
         }
     }
@@ -191,7 +195,7 @@ class UserServiceTest {
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editById(testUserId, invalidUserRequest);
             });
-            assertEquals("Failed to update user", exception.getMessage());
+            assertTrue(exception.getMessage().startsWith("Failed to update user"));
         }
 
         @Test
@@ -208,7 +212,7 @@ class UserServiceTest {
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editById(testUserId, invalidUserRequest);
             });
-            assertEquals("Failed to update user", exception.getMessage());
+            assertTrue(exception.getMessage().startsWith("Failed to update user"));
         }
 
         @Test
@@ -240,7 +244,7 @@ class UserServiceTest {
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editById(testUserId, invalidUserRequest);
             });
-            assertEquals("Failed to update user", exception.getMessage());
+            assertTrue(exception.getMessage().startsWith("Failed to update user"));
         }
     }
 

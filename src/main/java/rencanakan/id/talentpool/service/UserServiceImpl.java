@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             userRepository.save(user);
             return DTOMapper.map(user, UserResponseDTO.class);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Failed to update user");
+            throw new IllegalArgumentException("Failed to update user: " + e.getMessage(), e);
         }
     }
 
@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User findByEmail(String email) {
         Optional<User> userOptional = userRepository.findByEmail(email);
-        return userOptional.orElse(null);
+        return userOptional.orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
     }
 
     @Override

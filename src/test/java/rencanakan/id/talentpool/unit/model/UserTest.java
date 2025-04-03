@@ -85,6 +85,7 @@ class UserTest {
        userWithoutId.setId(null);
 
        assertThat(userWithoutId.getId()).hasSize(36);
+       assertThat(userWithoutId.getId()).matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
    }
 
    @Test
