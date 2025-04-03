@@ -3,6 +3,7 @@ package rencanakan.id.talentpool.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
@@ -19,13 +20,13 @@ public class RecommendationController {
     @PostMapping
     public ResponseEntity<RecommendationResponseDTO> createRecommendation(
             @RequestBody @Valid RecommendationRequestDTO request,
-            @RequestAttribute(value = "currentUser", required = false) User currentUser) {
+            @AuthenticationPrincipal User user) {
 
-        if (currentUser == null) {
+        if (user == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        RecommendationResponseDTO response = recommendationService.createRecommendation(currentUser.getId(), request);
+        RecommendationResponseDTO response = recommendationService.createRecommendation(user.getId(), request);
         return ResponseEntity.ok(response);
     }
 }

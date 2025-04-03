@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import rencanakan.id.talentpool.controller.RecommendationController;
@@ -90,15 +91,16 @@ class RecommendationControllerTest {
 
         @Test
         void testCreateRecommendation_Success() throws Exception {
+
             RecommendationRequestDTO request = createValidRequestDTO();
             RecommendationResponseDTO mockResponseDTO = createMockResponseDTO();
 
-            when(recommendationService.createRecommendation(eq(mockTalent.getId()), any(RecommendationRequestDTO.class)))
+            when(recommendationService.createRecommendation(any(), any(RecommendationRequestDTO.class)))
                     .thenReturn(mockResponseDTO);
 
             mockMvc.perform(post("/recommendations")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .requestAttr("currentUser", mockTalent)
+                            .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
                             .content(mapper.writeValueAsString(request)))
                     .andDo(print())
                     .andExpect(status().isOk())
