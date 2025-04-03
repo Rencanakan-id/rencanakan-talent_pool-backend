@@ -11,7 +11,7 @@ import rencanakan.id.talentpool.model.User;
 @NoArgsConstructor
 public class RecommendationResponseDTO {
     private String id;
-    private User talent;
+    private String talentId;
     private Long contractorId;
     private String contractorName;
     private String message;

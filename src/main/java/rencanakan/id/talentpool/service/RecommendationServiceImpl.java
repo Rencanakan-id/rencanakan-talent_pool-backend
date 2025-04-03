@@ -21,42 +21,10 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public RecommendationResponseDTO createRecommendation(User talent, @Valid RecommendationRequestDTO recommendation) {
-        if (recommendation == null || talent == null) {
-            throw new IllegalArgumentException("Recommendation request cannot be null");
-        }
-
-        if (recommendation.getContractorId() == null) {
-            throw new IllegalArgumentException("Contractor ID is required");
-        }
-
-        if (recommendation.getContractorName() == null) {
-            throw new IllegalArgumentException("Contractor name is required");
-        }
-
-        if (recommendation.getContractorName().isEmpty()) {
-            throw new IllegalArgumentException("Contractor name cannot be empty");
-        }
-
-        if (recommendation.getMessage() == null) {
-            throw new IllegalArgumentException("Recommendation message is required");
-        }
-
-        if (recommendation.getMessage().isEmpty()) {
-            throw new IllegalArgumentException("Recommendation message cannot be empty");
-        }
-
-        if (recommendation.getMessage().length() > 4000) {
-            throw new IllegalArgumentException("Message cannot exceed 4000 characters");
-        }
-
-        if (recommendation.getContractorId() <= 0L) {
-            throw new IllegalArgumentException("Contractor ID must be greater than 0");
-        }
-
+    public RecommendationResponseDTO createRecommendation(String talentId, @Valid RecommendationRequestDTO recommendation) {
 
         Recommendation newRecommendation = DTOMapper.map(recommendation, Recommendation.class);
-        newRecommendation.setTalent(talent);
+        newRecommendation.setTalent(User.builder().id(talentId).build());
 
         Recommendation savedRecommendation = recommendationRepository.save(newRecommendation);
 

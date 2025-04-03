@@ -25,7 +25,7 @@ public class RecommendationController {
             return ResponseEntity.badRequest().build();
         }
 
-        RecommendationResponseDTO response = recommendationService.createRecommendation(currentUser, request);
+        RecommendationResponseDTO response = recommendationService.createRecommendation(currentUser.getId(), request);
         return ResponseEntity.ok(response);
     }
 }

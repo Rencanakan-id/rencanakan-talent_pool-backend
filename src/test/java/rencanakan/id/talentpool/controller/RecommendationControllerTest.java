@@ -76,7 +76,7 @@ class RecommendationControllerTest {
     private RecommendationResponseDTO createMockResponseDTO() {
         return RecommendationResponseDTO.builder()
                 .id("recommendation123")
-                .talent(mockTalent)
+                .talentId("user123")
                 .contractorId(1L)
                 .contractorName("Contractor name")
                 .message("Test controller message")
@@ -92,7 +92,7 @@ class RecommendationControllerTest {
             RecommendationRequestDTO request = createValidRequestDTO();
             RecommendationResponseDTO mockResponseDTO = createMockResponseDTO();
 
-            when(recommendationService.createRecommendation(eq(mockTalent), any(RecommendationRequestDTO.class)))
+            when(recommendationService.createRecommendation(eq(mockTalent.getId()), any(RecommendationRequestDTO.class)))
                     .thenReturn(mockResponseDTO);
 
             mockMvc.perform(post("/recommendations")

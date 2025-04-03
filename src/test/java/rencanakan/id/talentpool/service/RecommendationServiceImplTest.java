@@ -128,7 +128,7 @@ class RecommendationServiceImplTest {
             when(recommendationRepository.save(any(Recommendation.class))).thenReturn(modifiedRecommendation);
 
             // Execute the method
-            RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent, requestDTO);
+            RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
 
             // Verify repository was called
             verify(recommendationRepository, times(1)).save(any(Recommendation.class));
@@ -150,7 +150,7 @@ class RecommendationServiceImplTest {
             RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
 
             assertNotNull(result);
-            assertEquals(1L, result.getId());
+            assertEquals("recommendation123", result.getId());
             assertEquals("Test Contractor", result.getContractorName());
             assertEquals("Test recommendation message", result.getMessage());
             assertEquals(StatusType.PENDING, result.getStatus());
