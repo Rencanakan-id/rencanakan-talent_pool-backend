@@ -23,7 +23,7 @@ public class ExperienceController {
         this.experienceService = experienceService;
     }
 
-    @GetMapping("/{talent_id}")
+    @GetMapping("/user/{talent_id}")
     public ResponseEntity<WebResponse<List<ExperienceResponseDTO>>> getExperiencesByTalentId(
             @PathVariable("talent_id") String talentId,
             @RequestHeader("Authorization") String token) {

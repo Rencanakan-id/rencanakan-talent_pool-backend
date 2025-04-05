@@ -88,7 +88,7 @@ public class ExperienceControllerTest {
             when(experienceService.getByTalentId(talentId)).thenReturn(experiences);
 
             // Act & Assert
-            mockMvc.perform(get("/experiences/" + talentId)
+            mockMvc.perform(get("/experiences/user/" + talentId)
                             .header("Authorization", token)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
@@ -112,7 +112,7 @@ public class ExperienceControllerTest {
             when(experienceService.getByTalentId(talentId)).thenReturn(Collections.emptyList());
 
             // Act & Assert
-            mockMvc.perform(get("/experiences/" + talentId)
+            mockMvc.perform(get("/experiences/user/" + talentId)
                             .header("Authorization", token)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
@@ -133,7 +133,7 @@ public class ExperienceControllerTest {
                     .thenThrow(new EntityNotFoundException("Talent with id " + talentId + " not found"));
 
             // Act & Assert
-            mockMvc.perform(get("/experiences/" + talentId)
+            mockMvc.perform(get("/experiences/user/" + talentId)
                             .header("Authorization", token)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
@@ -150,7 +150,7 @@ public class ExperienceControllerTest {
             String talentId = "talent-123";
 
             // Act & Assert
-            mockMvc.perform(get("/experiences/" + talentId)
+            mockMvc.perform(get("/experiences/user/" + talentId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isUnauthorized())
