@@ -1,4 +1,4 @@
-package rencanakan.id.talentpool.model;
+package rencanakan.id.talentpool.unit.model;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rencanakan.id.talentpool.enums.StatusType;
+import rencanakan.id.talentpool.model.Recommendation;
+import rencanakan.id.talentpool.model.User;
 
 import java.util.Set;
 import java.util.UUID;

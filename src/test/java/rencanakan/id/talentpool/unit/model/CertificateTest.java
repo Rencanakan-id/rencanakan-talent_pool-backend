@@ -1,9 +1,12 @@
-package rencanakan.id.talentpool.model;
+package rencanakan.id.talentpool.unit.model;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import rencanakan.id.talentpool.model.Certificate;
+import rencanakan.id.talentpool.model.User;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
