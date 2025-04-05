@@ -21,6 +21,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.persistence.EntityNotFoundException;
+import rencanakan.id.talentpool.dto.CertificateRequestDTO;
 import rencanakan.id.talentpool.dto.CertificateResponseDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Certificate;
@@ -177,8 +178,9 @@ class CertificateServiceTest {
     class CreateCertificateTests {
         private User user;
         private String userId;
+        private CertificateRequestDTO certificateRequestDTO;
         private Certificate certificate;
-        private CertificateResponseDTO certificateRequestDTO;
+        private Certificate savedCertificate;
         private CertificateResponseDTO certificateResponseDTO;
 
         @BeforeEach
@@ -206,176 +208,207 @@ class CertificateServiceTest {
 
             userId = user.getId();
 
-            certificateRequestDTO = new CertificateResponseDTO();
-            certificateRequestDTO.setTitle("Java Certificate");
-            certificateRequestDTO.setFile("java-cert.pdf");
+            certificateRequestDTO = new CertificateRequestDTO();
+            certificateRequestDTO.setTitle("AWS Certified Developer");
+            certificateRequestDTO.setFile("aws-cert.pdf");
 
             certificate = Certificate.builder()
+                    .title("AWS Certified Developer")
+                    .file("aws-cert.pdf")
+                    .build();
+
+            savedCertificate = Certificate.builder()
                     .id(1L)
-                    .title("Java Certificate")
-                    .file("java-cert.pdf")
+                    .title("AWS Certified Developer")
+                    .file("aws-cert.pdf")
                     .user(User.builder().id(userId).build())
                     .build();
 
-            certificateResponseDTO = new CertificateResponseDTO();
-            certificateResponseDTO.setId(1L);
-            certificateResponseDTO.setTitle("Java Certificate");
-            certificateResponseDTO.setFile("java-cert.pdf");
+            certificateResponseDTO = CertificateResponseDTO.builder()
+                    .id(1L)
+                    .title("AWS Certified Developer")
+                    .file("aws-cert.pdf")
+                    .talentId(userId)
+                    .build();
         }
 
+        // Positive test case - successful creation
         @Test
-        void create_WithValidData_ShouldReturnSavedDTO() {
+        void create_WithValidData_ShouldReturnDTO() {
             try (MockedStatic<DTOMapper> dtoMapperMock = mockStatic(DTOMapper.class)) {
-                // Create a certificate without user set to verify the method sets it correctly
-                Certificate certificateWithoutUser = Certificate.builder()
-                        .title("Java Certificate")
-                        .file("java-cert.pdf")
-                        .build();
-
-                // Mock mapping from DTO to entity
-                dtoMapperMock.when(() -> DTOMapper.map(eq(certificateRequestDTO), eq(Certificate.class)))
-                        .thenReturn(certificateWithoutUser);
-
-                // Use argument captor to verify the saved entity has the user set
-                ArgumentCaptor<Certificate> certificateCaptor = ArgumentCaptor.forClass(Certificate.class);
-
-                // Mock the repository save
-                when(certificateRepository.save(certificateCaptor.capture())).thenReturn(certificate);
-
-                // Mock mapping from entity back to DTO
-                dtoMapperMock.when(() -> DTOMapper.map(eq(certificate), eq(CertificateResponseDTO.class)))
+                // Setup mocks
+                dtoMapperMock.when(() -> DTOMapper.map(certificateRequestDTO, Certificate.class))
+                        .thenReturn(certificate);
+                dtoMapperMock.when(() -> DTOMapper.map(savedCertificate, CertificateResponseDTO.class))
                         .thenReturn(certificateResponseDTO);
 
-                // Execute the method
+                when(certificateRepository.save(any(Certificate.class))).thenReturn(savedCertificate);
+
+                // Execute
                 CertificateResponseDTO result = certificateService.create(userId, certificateRequestDTO);
 
-                // Verify the result
+                // Verify
                 assertNotNull(result);
                 assertEquals(1L, result.getId());
-                assertEquals("Java Certificate", result.getTitle());
-                assertEquals("java-cert.pdf", result.getFile());
+                assertEquals("AWS Certified Developer", result.getTitle());
+                assertEquals("aws-cert.pdf", result.getFile());
+                assertEquals(userId, result.getTalentId());
 
-                // Verify the user was set correctly
+                // Verify user is set correctly
+                ArgumentCaptor<Certificate> certificateCaptor = ArgumentCaptor.forClass(Certificate.class);
+                verify(certificateRepository).save(certificateCaptor.capture());
+
                 Certificate capturedCertificate = certificateCaptor.getValue();
                 assertNotNull(capturedCertificate.getUser());
                 assertEquals(userId, capturedCertificate.getUser().getId());
-
-                // Verify interactions
-                verify(certificateRepository).save(certificateCaptor.capture());
             }
         }
 
+        // Negative test case - null userId
         @Test
         void create_WithNullUserId_ShouldThrowIllegalArgumentException() {
-            // Execute and verify exception
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
-                    () -> certificateService.create(null, certificateRequestDTO)
-            );
+            // Execute and verify
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> certificateService.create(null, certificateRequestDTO));
 
             assertEquals("Certification request cannot be null", exception.getMessage());
 
-            // Verify no interactions with repository
-            verifyNoInteractions(certificateRepository);
+            // Verify repository was not called
+            verify(certificateRepository, never()).save(any());
         }
 
+        // Negative test case - null certificateRequest
         @Test
-        void create_WithNullRequest_ShouldThrowIllegalArgumentException() {
-            // Execute and verify exception
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
-                    () -> certificateService.create(userId, null)
-            );
+        void create_WithNullCertificateRequest_ShouldThrowIllegalArgumentException() {
+            // Execute and verify
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> certificateService.create(userId, null));
 
             assertEquals("Certification request cannot be null", exception.getMessage());
 
-            // Verify no interactions with repository
-            verifyNoInteractions(certificateRepository);
+            // Verify repository was not called
+            verify(certificateRepository, never()).save(any());
         }
 
+        // Negative test case - both null
         @Test
-        void create_WhenMapperFails_ShouldPropagateException() {
+        void create_WithBothParamsNull_ShouldThrowIllegalArgumentException() {
+            // Execute and verify
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> certificateService.create(null, null));
+
+            assertEquals("Certification request cannot be null", exception.getMessage());
+
+            // Verify repository was not called
+            verify(certificateRepository, never()).save(any());
+        }
+
+        // Edge case - mapper throws exception
+        @Test
+        void create_WhenMapperThrowsException_ShouldPropagateException() {
             try (MockedStatic<DTOMapper> dtoMapperMock = mockStatic(DTOMapper.class)) {
-                // Mock mapping exception
-                dtoMapperMock.when(() -> DTOMapper.map(eq(certificateRequestDTO), eq(Certificate.class)))
-                        .thenThrow(RuntimeException.class);
+                // Setup mock to throw exception
+                dtoMapperMock.when(() -> DTOMapper.map(certificateRequestDTO, Certificate.class))
+                        .thenThrow(new RuntimeException("Mapping error"));
 
-                // Execute and verify exception
-                assertThrows(
-                        RuntimeException.class,
-                        () -> certificateService.create(userId, certificateRequestDTO)
-                );
+                // Execute and verify
+                RuntimeException exception = assertThrows(RuntimeException.class,
+                        () -> certificateService.create(userId, certificateRequestDTO));
 
-                // Verify no interactions with repository
-                verifyNoInteractions(certificateRepository);
+                assertEquals("Mapping error", exception.getMessage());
+
+                // Verify repository was not called
+                verify(certificateRepository, never()).save(any());
             }
         }
 
+        // Edge case - repository throws exception
         @Test
-        void create_WhenRepositorySaveFails_ShouldPropagateException() {
+        void create_WhenRepositoryThrowsException_ShouldPropagateException() {
             try (MockedStatic<DTOMapper> dtoMapperMock = mockStatic(DTOMapper.class)) {
-                // Mock mapping from DTO to entity
-                dtoMapperMock.when(() -> DTOMapper.map(eq(certificateRequestDTO), eq(Certificate.class)))
+                // Setup mocks
+                dtoMapperMock.when(() -> DTOMapper.map(certificateRequestDTO, Certificate.class))
                         .thenReturn(certificate);
 
-                // Mock repository save to throw exception
                 when(certificateRepository.save(any(Certificate.class)))
                         .thenThrow(new RuntimeException("Database error"));
 
-                // Execute and verify exception
-                RuntimeException exception = assertThrows(
-                        RuntimeException.class,
-                        () -> certificateService.create(userId, certificateRequestDTO)
-                );
+                // Execute and verify
+                RuntimeException exception = assertThrows(RuntimeException.class,
+                        () -> certificateService.create(userId, certificateRequestDTO));
 
                 assertEquals("Database error", exception.getMessage());
-
-                // Verify interactions
-                verify(certificateRepository).save(any(Certificate.class));
             }
         }
 
+        // Edge case - Response mapper throws exception
         @Test
-        void create_WithEmptyTitle_ShouldProcessRequest() {
-            // Create certificate with empty title
-            CertificateResponseDTO emptyTitleRequest = new CertificateResponseDTO();
-            emptyTitleRequest.setTitle("");
-            emptyTitleRequest.setFile("java-cert.pdf");
+        void create_WhenResponseMapperThrowsException_ShouldPropagateException() {
+            try (MockedStatic<DTOMapper> dtoMapperMock = mockStatic(DTOMapper.class)) {
+                // Setup mocks
+                dtoMapperMock.when(() -> DTOMapper.map(certificateRequestDTO, Certificate.class))
+                        .thenReturn(certificate);
+                dtoMapperMock.when(() -> DTOMapper.map(savedCertificate, CertificateResponseDTO.class))
+                        .thenThrow(new RuntimeException("Response mapping error"));
 
-            Certificate emptyTitleCertificate = Certificate.builder()
+                when(certificateRepository.save(any(Certificate.class))).thenReturn(savedCertificate);
+
+                // Execute and verify
+                RuntimeException exception = assertThrows(RuntimeException.class,
+                        () -> certificateService.create(userId, certificateRequestDTO));
+
+                assertEquals("Response mapping error", exception.getMessage());
+
+                // Verify repository was called
+                verify(certificateRepository).save(any());
+            }
+        }
+
+        // Edge case - empty but not null certificate request fields
+        @Test
+        void create_WithEmptyFields_ShouldStillCreate() {
+            // Setup
+            CertificateRequestDTO emptyFieldsRequest = new CertificateRequestDTO();
+            emptyFieldsRequest.setTitle("");
+            emptyFieldsRequest.setFile("");
+
+            Certificate emptyFieldsCertificate = Certificate.builder()
+                    .title("")
+                    .file("")
+                    .build();
+
+            Certificate savedEmptyCertificate = Certificate.builder()
                     .id(1L)
                     .title("")
-                    .file("java-cert.pdf")
+                    .file("")
                     .user(User.builder().id(userId).build())
                     .build();
 
-            CertificateResponseDTO emptyTitleResponse = new CertificateResponseDTO();
-            emptyTitleResponse.setId(1L);
-            emptyTitleResponse.setTitle("");
-            emptyTitleResponse.setFile("java-cert.pdf");
+            CertificateResponseDTO emptyResponseDTO = CertificateResponseDTO.builder()
+                    .id(1L)
+                    .title("")
+                    .file("")
+                    .talentId(userId)
+                    .build();
 
             try (MockedStatic<DTOMapper> dtoMapperMock = mockStatic(DTOMapper.class)) {
-                // Mock mapping from DTO to entity
-                dtoMapperMock.when(() -> DTOMapper.map(eq(emptyTitleRequest), eq(Certificate.class)))
-                        .thenReturn(emptyTitleCertificate);
+                // Setup mocks
+                dtoMapperMock.when(() -> DTOMapper.map(emptyFieldsRequest, Certificate.class))
+                        .thenReturn(emptyFieldsCertificate);
+                dtoMapperMock.when(() -> DTOMapper.map(savedEmptyCertificate, CertificateResponseDTO.class))
+                        .thenReturn(emptyResponseDTO);
 
-                // Mock the repository save
-                when(certificateRepository.save(any(Certificate.class))).thenReturn(emptyTitleCertificate);
+                when(certificateRepository.save(any(Certificate.class))).thenReturn(savedEmptyCertificate);
 
-                // Mock mapping from entity back to DTO
-                dtoMapperMock.when(() -> DTOMapper.map(eq(emptyTitleCertificate), eq(CertificateResponseDTO.class)))
-                        .thenReturn(emptyTitleResponse);
+                // Execute
+                CertificateResponseDTO result = certificateService.create(userId, emptyFieldsRequest);
 
-                // Execute the method
-                CertificateResponseDTO result = certificateService.create(userId, emptyTitleRequest);
-
-                // Verify the result
+                // Verify
                 assertNotNull(result);
                 assertEquals(1L, result.getId());
                 assertEquals("", result.getTitle());
-
-                // Verify interactions
-                verify(certificateRepository).save(any(Certificate.class));
+                assertEquals("", result.getFile());
+                assertEquals(userId, result.getTalentId());
             }
         }
     }
