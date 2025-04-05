@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -41,9 +40,6 @@ import java.util.List;
 @ExtendWith(MockitoExtension.class)
 class CertificateControllerTest {
 
-    // Add Mockito rule to allow lenient stubbing
-//    @org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
-
     @Mock
     private CertificateService certificateService;
 
@@ -66,14 +62,9 @@ class CertificateControllerTest {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(certificateController)
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
-//                .setControllerAdvice(new org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver())
                 .build();
 
         user = createUser();
-
-        // Configure mockito to be more lenient with argument matching
-//        lenient().when(certificateService.create(any(String.class), any(CertificateRequestDTO.class)))
-//                .thenReturn(createMockResponseDTO());
     }
 
     private User createUser() {
