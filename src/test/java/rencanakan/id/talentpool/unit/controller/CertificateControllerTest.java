@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import rencanakan.id.talentpool.controller.CertificateController;
 import rencanakan.id.talentpool.dto.CertificateResponseDTO;
+import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.CertificateService;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,18 +33,24 @@ class CertificateControllerTest {
     private CertificateController certificateController;
     
     private MockMvc mockMvc;
+
+    private User testUser;
     
     @BeforeEach
     void setUp() {
+        testUser = new User();
+        testUser.setId("user123");
+        testUser.setEmail("john.doe@example.com");
+
         mockMvc = MockMvcBuilders
                 .standaloneSetup(certificateController)
+                .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(testUser))
                 .build();
     }
     
     @Nested
     class ReadCertificateTests {
         
-        private String token;
         private String talentId;
         private Long certificateId;
         private List<CertificateResponseDTO> certificateList;
@@ -51,7 +58,6 @@ class CertificateControllerTest {
         
         @BeforeEach
         void setUp() {
-            token = "Bearer token";
             talentId = "talent-123";
             certificateId = 1L;
             
@@ -69,8 +75,7 @@ class CertificateControllerTest {
         void getCertificatesByUserId_ShouldReturnCertificates() throws Exception {
             when(certificateService.getByUserId(talentId)).thenReturn(certificateList);
             
-            mockMvc.perform(get("/certificates/user/{userId}", talentId)
-                    .header("Authorization", token))
+            mockMvc.perform(get("/certificates/user/{userId}", talentId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", hasSize(1)))
                 .andExpect(jsonPath("$.data[0].id").value(certificateId))
@@ -81,14 +86,14 @@ class CertificateControllerTest {
         }
         
         @Test
-        void getCertificatesByUserId_WhenNoCertificates_ShouldReturnEmptyList() throws Exception {
+        void getCertificatesByUserId_WhenNoCertificates_ShouldReturnNotFound() throws Exception {
             List<CertificateResponseDTO> emptyList = new ArrayList<>();
             when(certificateService.getByUserId(talentId)).thenReturn(emptyList);
             
-            mockMvc.perform(get("/certificates/user/{userId}", talentId)
-                    .header("Authorization", token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(0)));
+            mockMvc.perform(get("/certificates/user/{userId}", talentId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors").value("No certificates found for user ID: " + talentId))
+                .andExpect(jsonPath("$.data").doesNotExist());
             
             verify(certificateService, times(1)).getByUserId(talentId);
         }
@@ -97,8 +102,7 @@ class CertificateControllerTest {
         void getCertificateById_ShouldReturnCertificate() throws Exception {
             when(certificateService.getById(certificateId)).thenReturn(certificate);
             
-            mockMvc.perform(get("/certificates/{id}", certificateId)
-                    .header("Authorization", token))
+            mockMvc.perform(get("/certificates/{id}", certificateId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(certificateId))
                 .andExpect(jsonPath("$.data.title").value("Java Certificate"))
@@ -111,12 +115,28 @@ class CertificateControllerTest {
         void getCertificateById_WhenNotFound_ShouldReturnNotFound() throws Exception {
             when(certificateService.getById(certificateId)).thenReturn(null);
             
-            mockMvc.perform(get("/certificates/{id}", certificateId)
-                    .header("Authorization", token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").isEmpty());
+            mockMvc.perform(get("/certificates/{id}", certificateId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors").value("Certificate not found with ID: " + certificateId))
+                .andExpect(jsonPath("$.data").doesNotExist());
             
             verify(certificateService, times(1)).getById(certificateId);
+        }
+        
+        @Test
+        void getUserData_WhenUserIsNull_ShouldReturnUnauthorized() throws Exception {
+            MockMvc mockMvcWithNullUser = MockMvcBuilders
+                    .standaloneSetup(certificateController)
+                    .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
+                    .build();
+                    
+            mockMvcWithNullUser.perform(get("/certificates/{id}", certificateId))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errors").value("Unauthorized access"));
+                
+            mockMvcWithNullUser.perform(get("/certificates/user/{userId}", talentId))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errors").value("Unauthorized access"));
         }
     }
 }
