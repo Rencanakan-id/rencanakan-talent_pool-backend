@@ -8,13 +8,12 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.JwtService;
+import rencanakan.id.talentpool.service.UserServiceImpl;
 
 import java.io.IOException;
 
@@ -23,13 +22,13 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
+    private final UserServiceImpl userService;
 
     private static final String JWT_HEADER = "Authorization";
     private static final String JWT_TOKEN_PREFIX = "Bearer ";
 
     @Override
-    protected void doFilterInternal(
+    public void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -45,11 +44,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         jwtToken = authHeader.substring(7);
         username = jwtService.extractUsername(jwtToken);
-        System.out.println("ini username");
-        System.out.println(username);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            User userDetails = (User) this.userDetailsService.loadUserByUsername(username);
+            User userDetails = this.userService.loadUserByUsername(username);
 
             if (jwtService.isTokenValid(jwtToken, userDetails)) {
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

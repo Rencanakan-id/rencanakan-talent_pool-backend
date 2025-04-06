@@ -15,6 +15,7 @@ public class ExperienceResponseDTO {
     private Long id;
     private String title;
     private String company;
+    private String companyImage;
     private EmploymentType employmentType;
     private LocalDate startDate;
     private LocalDate endDate;
