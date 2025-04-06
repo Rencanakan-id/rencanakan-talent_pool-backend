@@ -27,6 +27,7 @@ import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 import rencanakan.id.talentpool.service.UserService;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -344,6 +345,174 @@ class ExperienceServiceTest {
             assertEquals("Database error", exception.getMessage());
             verify(experienceRepository).findById(experienceId);
             verify(experienceRepository).delete(any(Experience.class));
+        }
+    }
+
+    @Nested
+    class GetByTalentIdTest {
+
+        @Test
+        void testGetByTalentId_Success() {
+            // Arrange
+            String userId = "1";
+            List<Experience> experienceList = List.of(experience);
+            List<ExperienceResponseDTO> expectedDTOList = List.of(experienceResponseDTO);
+
+            try (MockedStatic<DTOMapper> mockedStatic = Mockito.mockStatic(DTOMapper.class)) {
+                when(experienceRepository.findByUserId(userId)).thenReturn(experienceList);
+                mockedStatic.when(() -> DTOMapper.map(experience, ExperienceResponseDTO.class))
+                        .thenReturn(experienceResponseDTO);
+
+                // Act
+                List<ExperienceResponseDTO> result = experienceService.getByTalentId(userId);
+
+                // Assert
+                assertNotNull(result);
+                assertEquals(1, result.size());
+                assertEquals(experienceResponseDTO.getId(), result.get(0).getId());
+                assertEquals(experienceResponseDTO.getTitle(), result.get(0).getTitle());
+                assertEquals(experienceResponseDTO.getCompany(), result.get(0).getCompany());
+
+                // Verify
+                verify(experienceRepository).findByUserId(userId);
+            }
+        }
+
+        @Test
+        void testGetByTalentId_MultipleExperiences() {
+            // Arrange
+            String userId = "1";
+
+            // Create a second experience with different values
+            Experience secondExperience = Experience.builder()
+                    .id(2L)
+                    .title("Senior Developer")
+                    .company("Another Corp")
+                    .employmentType(EmploymentType.CONTRACT)
+                    .startDate(LocalDate.of(2022, 6, 1))
+                    .endDate(LocalDate.of(2023, 12, 31))
+                    .location("New York")
+                    .locationType(LocationType.HYBRID)
+                    .user(user)
+                    .build();
+
+            ExperienceResponseDTO secondResponseDTO = ExperienceResponseDTO.builder()
+                    .id(2L)
+                    .title("Senior Developer")
+                    .company("Another Corp")
+                    .employmentType(EmploymentType.CONTRACT)
+                    .startDate(LocalDate.of(2022, 6, 1))
+                    .endDate(LocalDate.of(2023, 12, 31))
+                    .location("New York")
+                    .locationType(LocationType.HYBRID)
+                    .build();
+
+            List<Experience> experienceList = List.of(experience, secondExperience);
+
+            try (MockedStatic<DTOMapper> mockedStatic = Mockito.mockStatic(DTOMapper.class)) {
+                when(experienceRepository.findByUserId(userId)).thenReturn(experienceList);
+
+                // Configure DTOMapper to map each experience to its corresponding DTO
+                mockedStatic.when(() -> DTOMapper.map(experience, ExperienceResponseDTO.class))
+                        .thenReturn(experienceResponseDTO);
+                mockedStatic.when(() -> DTOMapper.map(secondExperience, ExperienceResponseDTO.class))
+                        .thenReturn(secondResponseDTO);
+
+                // Act
+                List<ExperienceResponseDTO> result = experienceService.getByTalentId(userId);
+
+                // Assert
+                assertNotNull(result);
+                assertEquals(2, result.size());
+
+                // Verify first result
+                assertEquals(experienceResponseDTO.getId(), result.get(0).getId());
+                assertEquals(experienceResponseDTO.getTitle(), result.get(0).getTitle());
+                assertEquals(experienceResponseDTO.getCompany(), result.get(0).getCompany());
+
+                // Verify second result
+                assertEquals(secondResponseDTO.getId(), result.get(1).getId());
+                assertEquals(secondResponseDTO.getTitle(), result.get(1).getTitle());
+                assertEquals(secondResponseDTO.getCompany(), result.get(1).getCompany());
+                assertEquals(secondResponseDTO.getEmploymentType(), result.get(1).getEmploymentType());
+
+                // Verify
+                verify(experienceRepository).findByUserId(userId);
+            }
+        }
+
+        @Test
+        void testGetByTalentId_EmptyResult() {
+            // Arrange
+            String userId = "1";
+            List<Experience> emptyList = List.of();
+
+            when(experienceRepository.findByUserId(userId)).thenReturn(emptyList);
+
+            // Act
+            List<ExperienceResponseDTO> result = experienceService.getByTalentId(userId);
+
+            // Assert
+            assertNotNull(result);
+            assertTrue(result.isEmpty());
+
+            // Verify
+            verify(experienceRepository).findByUserId(userId);
+            verifyNoMoreInteractions(experienceRepository);
+        }
+
+        @Test
+        void testGetByTalentId_WithNullId() {
+            // Arrange
+            String nullUserId = null;
+
+            // We expect the repository to be called with null and return an empty list
+            // This tests the behavior of the service when null is passed
+            when(experienceRepository.findByUserId(nullUserId)).thenReturn(List.of());
+
+            // Act
+            List<ExperienceResponseDTO> result = experienceService.getByTalentId(nullUserId);
+
+            // Assert
+            assertNotNull(result);
+            assertTrue(result.isEmpty());
+
+            // Verify
+            verify(experienceRepository).findByUserId(nullUserId);
+        }
+
+        @Test
+        void testGetByTalentId_RepositoryThrowsException() {
+            // Arrange
+            String userId = "1";
+            when(experienceRepository.findByUserId(userId)).thenThrow(new RuntimeException("Database error"));
+
+            // Act & Assert
+            Exception exception = assertThrows(RuntimeException.class, () -> {
+                experienceService.getByTalentId(userId);
+            });
+
+            assertEquals("Database error", exception.getMessage());
+            verify(experienceRepository).findByUserId(userId);
+        }
+
+        @Test
+        void testGetByTalentId_NonExistentUser() {
+            // Arrange
+            String nonExistentUserId = "999";
+
+            // Even if user doesn't exist, the repository should return an empty list
+            when(experienceRepository.findByUserId(nonExistentUserId)).thenReturn(List.of());
+
+            // Act
+            List<ExperienceResponseDTO> result = experienceService.getByTalentId(nonExistentUserId);
+
+            // Assert
+            assertNotNull(result);
+            assertTrue(result.isEmpty());
+
+            // Verify
+            verify(experienceRepository).findByUserId(nonExistentUserId);
         }
     }
 }
