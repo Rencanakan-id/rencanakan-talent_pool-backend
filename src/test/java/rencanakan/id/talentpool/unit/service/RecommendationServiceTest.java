@@ -1,4 +1,4 @@
-package rencanakan.id.talentpool.service;
+package rencanakan.id.talentpool.unit.service;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,6 +14,7 @@ import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
 import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
+import rencanakan.id.talentpool.service.RecommendationServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class RecommendationServiceTest {
@@ -50,9 +51,6 @@ class RecommendationServiceTest {
 
     @Test
     void testEditStatusById_RecommendationNotFound() {
-        RecommendationStatusRequestDTO requestDTO = new RecommendationStatusRequestDTO(StatusType.ACCEPTED);
-
-
         when(recommendationRepository.findById("1")).thenReturn(java.util.Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {

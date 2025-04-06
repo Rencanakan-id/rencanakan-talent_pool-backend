@@ -1,6 +1,7 @@
-package rencanakan.id.talentpool.dto;
+package rencanakan.id.talentpool.unit.dto;
 
 import org.junit.jupiter.api.Test;
+import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
 import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.model.User;
 

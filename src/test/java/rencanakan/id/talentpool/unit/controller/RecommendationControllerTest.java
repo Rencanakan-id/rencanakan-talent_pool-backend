@@ -1,4 +1,4 @@
-package rencanakan.id.talentpool.controller;
+package rencanakan.id.talentpool.unit.controller;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -14,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import rencanakan.id.talentpool.controller.ErrorController;
+import rencanakan.id.talentpool.controller.RecommendationController;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
 import rencanakan.id.talentpool.service.RecommendationService;
 import rencanakan.id.talentpool.enums.StatusType;
