@@ -1,9 +1,11 @@
 package rencanakan.id.talentpool.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentpool.dto.CertificateResponseDTO;
 import rencanakan.id.talentpool.dto.WebResponse;
+import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.CertificateService;
 
 import java.util.List;
@@ -21,20 +23,46 @@ public class CertificateController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<WebResponse<List<CertificateResponseDTO>>> getCertificatesByUserId(
             @PathVariable("userId") String userId,
-            @RequestHeader("Authorization") String token) {
+            @AuthenticationPrincipal User user) {
+
+        if (user == null) {
+            return ResponseEntity.status(401).body(WebResponse.<List<CertificateResponseDTO>>builder()
+                    .errors("Unauthorized access")
+                    .build());
+        }
 
         List<CertificateResponseDTO> certificates = certificateService.getByUserId(userId);
+
+        if (certificates.isEmpty()) {
+            return ResponseEntity.status(404).body(WebResponse.<List<CertificateResponseDTO>>builder()
+                    .errors("No certificates found for user ID: " + userId)
+                    .build());
+        }
+
         return ResponseEntity.ok(WebResponse.<List<CertificateResponseDTO>>builder()
                 .data(certificates)
                 .build());
     }
     
-    @GetMapping("/{certificateId}")
+    @GetMapping("/{id}")
     public ResponseEntity<WebResponse<CertificateResponseDTO>> getCertificateById(
-            @PathVariable("certificateId") Long certificateId,
-            @RequestHeader("Authorization") String token) {
+            @PathVariable("id") Long certificateId,
+            @AuthenticationPrincipal User user) {
+
+        if (user == null) {
+            return ResponseEntity.status(401).body(WebResponse.<CertificateResponseDTO>builder()
+                    .errors("Unauthorized access")
+                    .build());
+        }
 
         CertificateResponseDTO certificate = certificateService.getById(certificateId);
+        
+        if (certificate == null) {
+            return ResponseEntity.status(404).body(WebResponse.<CertificateResponseDTO>builder()
+                    .errors("Certificate not found with ID: " + certificateId)
+                    .build());
+        }
+
         return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
                 .data(certificate)
                 .build());
