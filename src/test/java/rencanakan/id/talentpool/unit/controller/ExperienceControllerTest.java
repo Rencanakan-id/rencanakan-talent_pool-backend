@@ -1,19 +1,9 @@
 package rencanakan.id.talentpool.unit.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -27,22 +17,26 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import jakarta.persistence.EntityNotFoundException;
 import rencanakan.id.talentpool.controller.ExperienceController;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
+import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @ExtendWith(MockitoExtension.class)
-class ExperienceControllerTest {
+public class ExperienceControllerTest {
 
     @Mock
     private ExperienceServiceImpl experienceService;
@@ -62,13 +56,12 @@ class ExperienceControllerTest {
                 .modules(new JavaTimeModule())
                 .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .build();
-        
-        user = createUser();
 
         mockMvc = MockMvcBuilders.standaloneSetup(experienceController)
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
-                .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(user))
                 .build();
+
+        user = createUser();
     }
 
     private User createUser() {
@@ -185,6 +178,7 @@ class ExperienceControllerTest {
                             .content(objectMapper.writeValueAsString(invalidRequest)))
                     .andExpect(status().isBadRequest());
         }
+
     }
 
     @Nested
@@ -193,7 +187,7 @@ class ExperienceControllerTest {
         @Test
         void testDeleteExperience_Success() throws Exception {
             Long experienceId = 1L;
-            
+
             doNothing().when(experienceService).deleteById(experienceId);
 
             mockMvc.perform(delete("/experiences/" + experienceId)
@@ -205,7 +199,7 @@ class ExperienceControllerTest {
         @Test
         void testDeleteExperience_NotFound() throws Exception {
             Long experienceId = 999L;
-            
+
             doThrow(new EntityNotFoundException("Experience not found")).when(experienceService).deleteById(experienceId);
 
             mockMvc.perform(delete("/experiences/" + experienceId)
@@ -213,7 +207,7 @@ class ExperienceControllerTest {
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.errors").value("Experience not found"));
         }
-        
+
         @Test
         void testDeleteExperience_Unauthorized() throws Exception {
             Long experienceId = 1L;

@@ -5,39 +5,52 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import rencanakan.id.talentpool.model.User;
+import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 import rencanakan.id.talentpool.model.Experience;
+import rencanakan.id.talentpool.model.User;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExperienceTest {
 
-private static Validator validator;
-private User mockUser;
-private LocalDate defaultStartDate;
+    private static Validator validator;
 
-@BeforeAll
-static void setupValidator() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
+    private User createUser() {
+        return User.builder()
+                .firstName("first")
+                .lastName("Smith")
+                .email("william@gmial.com")
+                .phoneNumber("1234567890")
+                .photo("profile-photo.jpg")
+                .aboutMe("I am a software developer.")
+                .nik("1234567890123456")
+                .npwp("987654321098765")
+                .photoKtp("ktp-photo.jpg")
+                .photoNpwp("npwp-photo.jpg")
+                .photoIjazah("ijazah-photo.jpg")
+                .experienceYears(5)
+                .skkLevel("Level 3")
+                .currentLocation("Jakarta")
+                .preferredLocations(Arrays.asList("Bandung", "Surabaya"))
+                .skill("Java, Spring Boot, Microservices")
+                .password("password")
+                .price(1000000)
+                .build();
     }
 
-    @BeforeEach
-    void setUp() {
-        mockUser = User.builder()
-                .id("user123")
-                .email("user123@email.com")
-                .password("password")
-                .build();
-        defaultStartDate = LocalDate.of(2020, 5, 1);
+    @BeforeAll
+    static void setupValidator() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
 
     @Test
@@ -48,15 +61,17 @@ static void setupValidator() {
 
     @Test
     void testFullValidParameters() {
+        User user = createUser();
+
         Experience experience = Experience.builder()
                 .title("Software Engineer")
                 .company("Tech Company")
                 .employmentType(EmploymentType.FULL_TIME)
-                .startDate(defaultStartDate)
+                .startDate(LocalDate.of(2020, 5, 1))
                 .endDate(LocalDate.of(2022, 5, 1))
                 .location("San Francisco")
                 .locationType(LocationType.ON_SITE)
-                .user(mockUser)
+                .user(user)
                 .build();
 
         Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -67,14 +82,16 @@ static void setupValidator() {
     class TitleAttributeTests {
         @Test
         void testTitleEmpty() {
+            User user = createUser();
+
             Experience experience = Experience.builder()
                     .title("")
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -85,15 +102,17 @@ static void setupValidator() {
 
         @Test
         void testTitleMaxLength() {
+            User user = createUser();
+
             String maxLengthTitle = "A".repeat(50);
             Experience experience = Experience.builder()
                     .title(maxLengthTitle)
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -103,15 +122,17 @@ static void setupValidator() {
 
         @Test
         void testTitleExceedingMaxLength() {
+            User user = createUser();
+
             String exceedingTitle = "A".repeat(51);
             Experience experience = Experience.builder()
                     .title(exceedingTitle)
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -125,14 +146,16 @@ static void setupValidator() {
     class CompanyAttributeTests {
         @Test
         void testCompanyEmpty() {
+            User user = createUser();
+
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -143,15 +166,17 @@ static void setupValidator() {
 
         @Test
         void testCompanyAtMaxLength() {
+            User user = createUser();
+
             String maxLengthCompany = "A".repeat(50);
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company(maxLengthCompany)
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -161,15 +186,17 @@ static void setupValidator() {
 
         @Test
         void testCompanyExceedingMaxLength() {
+            User user = createUser();
+
             String exceedingCompany = "A".repeat(51);
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company(exceedingCompany)
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -183,14 +210,16 @@ static void setupValidator() {
     class EmploymentTypeTests {
         @Test
         void testEmploymentTypeNull() {
+            User user = createUser();
+
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("Tech Company")
                     .employmentType(null)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -204,6 +233,8 @@ static void setupValidator() {
     class StartDateAttributeTests {
         @Test
         void testStartDateNull() {
+            User user = createUser();
+
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("Tech Company")
@@ -211,7 +242,7 @@ static void setupValidator() {
                     .startDate(null)
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -225,15 +256,17 @@ static void setupValidator() {
     class EndDateAttributeTests {
         @Test
         void testEndDateNull() {
+            User user = createUser();
+
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .endDate(null)
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -246,14 +279,16 @@ static void setupValidator() {
     class LocationAttributeTests {
         @Test
         void testLocationEmpty() {
+            User user = createUser();
+
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location("")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -264,15 +299,17 @@ static void setupValidator() {
 
         @Test
         void testLocationAtMaxLength() {
+            User user = createUser();
+
             String maxLengthLocation = "A".repeat(50);
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location(maxLengthLocation)
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -282,15 +319,17 @@ static void setupValidator() {
 
         @Test
         void testLocationExceedingMaxLength() {
+            User user = createUser();
+
             String exceedingLocation = "A".repeat(51);
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location(exceedingLocation)
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -304,14 +343,16 @@ static void setupValidator() {
     class LocationTypeAttributeTests {
         @Test
         void testLocationTypeNull() {
+            User user = createUser();
+
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location("San Francisco")
                     .locationType(null)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -329,10 +370,10 @@ static void setupValidator() {
                     .title("Software Engineer")
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(null)
+                    .user(null) // Explicitly set user to null
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -346,15 +387,17 @@ static void setupValidator() {
     class CustomLogicTests {
         @Test
         void testEndDateBeforeStartDate() {
+            User user = createUser();
+
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .endDate(LocalDate.of(2020, 4, 30))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             // Check the custom validation method directly
@@ -368,15 +411,17 @@ static void setupValidator() {
 
         @Test
         void testEndDateAfterStartDate() {
+            User user = createUser();
+
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
                     .endDate(LocalDate.of(2020, 5, 2))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
@@ -386,15 +431,17 @@ static void setupValidator() {
 
         @Test
         void testEndDateSameAsStartDate() {
+            User user = createUser();
+
             Experience experience = Experience.builder()
                     .title("Software Engineer")
                     .company("Tech Company")
                     .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(defaultStartDate)
-                    .endDate(defaultStartDate)
+                    .startDate(LocalDate.of(2020, 5, 1))
+                    .endDate(LocalDate.of(2020, 5, 1))
                     .location("San Francisco")
                     .locationType(LocationType.ON_SITE)
-                    .user(mockUser)
+                    .user(user)
                     .build();
 
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);

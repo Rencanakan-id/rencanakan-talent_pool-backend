@@ -16,10 +16,12 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final Validator validator;
+    private final JwtService jwtService;
 
-    public UserServiceImpl(UserRepository userRepository, Validator validator) {
+    public UserServiceImpl(UserRepository userRepository, Validator validator, JwtService jwtService) {
         this.userRepository = userRepository;
         this.validator = validator;
+        this.jwtService = jwtService;
     }
 
     @Override
