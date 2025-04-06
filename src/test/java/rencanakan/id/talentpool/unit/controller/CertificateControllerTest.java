@@ -1,7 +1,11 @@
 package rencanakan.id.talentpool.unit.controller;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -14,11 +18,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import rencanakan.id.talentpool.controller.CertificateController;
+import rencanakan.id.talentpool.dto.CertificateRequestDTO;
 import rencanakan.id.talentpool.dto.CertificateResponseDTO;
 import rencanakan.id.talentpool.service.CertificateService;
 
@@ -119,4 +125,52 @@ class CertificateControllerTest {
             verify(certificateService, times(1)).getById(certificateId);
         }
     }
+
+    @Nested
+    class EditCertificateTests {
+
+        private String token;
+        private Long certificateId;
+        private CertificateRequestDTO requestDTO;
+        private CertificateResponseDTO responseDTO;
+
+        @BeforeEach
+        void setUp() {
+            token = "Bearer token";
+            certificateId = 1L;
+
+            requestDTO = new CertificateRequestDTO();
+            requestDTO.setTitle("Updated Java Certificate");
+            requestDTO.setFile("updated-certificate.pdf");
+
+            responseDTO = new CertificateResponseDTO();
+            responseDTO.setId(certificateId);
+            responseDTO.setTitle("Updated Java Certificate");
+            responseDTO.setFile("updated-certificate.pdf");
+            responseDTO.setTalentId("talent-123");
+        }
+
+        @Test
+        void editCertificateById_ShouldReturnUpdatedCertificate() throws Exception {
+            when(certificateService.editById(eq(certificateId), any(CertificateRequestDTO.class)))
+                    .thenReturn(responseDTO);
+
+            mockMvc.perform(put("/certificates/{certificateId}", certificateId)
+                            .header("Authorization", token)
+                            .contentType("application/json")
+                            .content("""
+                    {
+                        "title": "Updated Java Certificate",
+                        "file": "updated-certificate.pdf"
+                    }
+                """))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.id").value(certificateId))
+                    .andExpect(jsonPath("$.data.title").value("Updated Java Certificate"))
+                    .andExpect(jsonPath("$.data.file").value("updated-certificate.pdf"));
+
+            verify(certificateService, times(1)).editById(eq(certificateId), any(CertificateRequestDTO.class));
+        }
+    }
+
 }
