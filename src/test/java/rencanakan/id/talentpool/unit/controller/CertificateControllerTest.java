@@ -124,7 +124,7 @@ class CertificateControllerTest {
         }
         
         @Test
-        void getUserData_WhenUserIsNull_ShouldReturnUnauthorized() throws Exception {
+        void getCertificateEndpoints_WhenUserIsNull_ShouldReturnUnauthorized() throws Exception {
             MockMvc mockMvcWithNullUser = MockMvcBuilders
                     .standaloneSetup(certificateController)
                     .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
