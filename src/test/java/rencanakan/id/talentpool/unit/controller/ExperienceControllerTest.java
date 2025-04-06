@@ -180,4 +180,45 @@ public class ExperienceControllerTest {
         }
 
     }
+
+    @Nested
+    class DeleteExperienceTest {
+
+        @Test
+        void testDeleteExperience_Success() throws Exception {
+            Long experienceId = 1L;
+
+            doNothing().when(experienceService).deleteById(experienceId);
+
+            mockMvc.perform(delete("/experiences/" + experienceId)
+                            .with(SecurityMockMvcRequestPostProcessors.user(user)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").value("Experience with id " + experienceId + " deleted"));
+        }
+
+        @Test
+        void testDeleteExperience_NotFound() throws Exception {
+            Long experienceId = 999L;
+
+            doThrow(new EntityNotFoundException("Experience not found")).when(experienceService).deleteById(experienceId);
+
+            mockMvc.perform(delete("/experiences/" + experienceId)
+                            .with(SecurityMockMvcRequestPostProcessors.user(user)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("Experience not found"));
+        }
+
+        @Test
+        void testDeleteExperience_Unauthorized() throws Exception {
+            Long experienceId = 1L;
+
+            mockMvc = MockMvcBuilders.standaloneSetup(experienceController)
+                    .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+                    .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
+                    .build();
+
+            mockMvc.perform(delete("/experiences/" + experienceId))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
 }

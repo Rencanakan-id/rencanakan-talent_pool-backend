@@ -1,10 +1,12 @@
 package rencanakan.id.talentpool.unit.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +27,7 @@ import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 import rencanakan.id.talentpool.service.UserService;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -274,5 +277,73 @@ class ExperienceServiceTest {
                 .location(experienceResponseDTO.getLocation())
                 .locationType(experienceResponseDTO.getLocationType())
                 .build();
+    }
+
+    @Nested
+    class DeleteExperienceTest {
+
+        @Test
+        void testDeleteById_Success() {
+            // Arrange
+            Long experienceId = 1L;
+            // Explicitly set up the mock behavior for this specific test
+            when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+            doNothing().when(experienceRepository).delete(any(Experience.class));
+
+            // Act
+            experienceService.deleteById(experienceId);
+
+            // Assert
+            verify(experienceRepository).findById(experienceId);
+            verify(experienceRepository).delete(experience); // Use the exact object for better verification
+        }
+
+        @Test
+        void testDeleteById_EntityNotFound() {
+            // Arrange
+            Long nonExistentId = 999L;
+
+            doReturn(Optional.empty()).when(experienceRepository).findById(nonExistentId);
+
+            // Act & Assert
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                experienceService.deleteById(nonExistentId);
+            });
+
+            // Verify the findById method was called with the correct argument
+            verify(experienceRepository, times(1)).findById(nonExistentId);
+
+            assertEquals("Experience with ID 999 not found", exception.getMessage());
+            assertTrue(exception.getMessage().contains("not found"));
+
+            verifyNoMoreInteractions(experienceRepository);
+        }
+
+        @Test
+        void testDeleteById_WithNullId() {
+            // Arrange
+
+            // Act & Assert
+            assertThrows(EntityNotFoundException.class, () -> {
+                experienceService.deleteById(null);
+            });
+        }
+
+        @Test
+        void testDeleteById_ThrowsRepositoryException() {
+            // Arrange
+            Long experienceId = 1L;
+            when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+            doThrow(new RuntimeException("Database error")).when(experienceRepository).delete(any(Experience.class));
+
+            // Act & Assert
+            Exception exception = assertThrows(RuntimeException.class, () -> {
+                experienceService.deleteById(experienceId);
+            });
+
+            assertEquals("Database error", exception.getMessage());
+            verify(experienceRepository).findById(experienceId);
+            verify(experienceRepository).delete(any(Experience.class));
+        }
     }
 }
