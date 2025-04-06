@@ -1,8 +1,10 @@
 package rencanakan.id.talentpool.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentpool.dto.CertificateResponseDTO;
+import rencanakan.id.talentpool.dto.CertificateRequestDTO;
 import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.service.CertificateService;
 
@@ -37,6 +39,19 @@ public class CertificateController {
         CertificateResponseDTO certificate = certificateService.getById(certificateId);
         return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
                 .data(certificate)
+                .build());
+    }
+
+    @PutMapping("/{certificateId}")
+    public ResponseEntity<WebResponse<CertificateResponseDTO>> editCertificateById(
+            @PathVariable Long certificateId,
+            @RequestHeader("Authorization") String token,
+            @RequestBody @Valid CertificateRequestDTO dto) {
+
+        CertificateResponseDTO updatedCertificate = certificateService.editById(certificateId, dto);
+
+        return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
+                .data(updatedCertificate)
                 .build());
     }
 }
