@@ -119,7 +119,6 @@ class UserControllerTest {
             when(userService.getById(userId)).thenReturn(responseDTO);
 
             mockMvc.perform(get("/users/{id}", userId)
-                    .header("Authorization", "Bearer test-token")
                     .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -146,12 +145,30 @@ class UserControllerTest {
             when(userService.getById(userId)).thenReturn(null);
 
             mockMvc.perform(get("/users/{id}", userId)
-                    .header("Authorization", "Bearer test-token")
                     .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.errors").value("User not found."));
 
             verify(userService, times(1)).getById(userId);
+        }
+
+        @Test
+        @DisplayName("Should return 401 when user is unauthorized for get by ID")
+        void testGetUserById_Unauthorized() throws Exception {
+            String userId = "user123";
+            
+            // Set up mock with null user (unauthorized)
+            mockMvc = MockMvcBuilders
+                .standaloneSetup(userController)
+                .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
+                .build();
+
+            mockMvc.perform(get("/users/{id}", userId)
+                    .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.errors").value("Unauthorized access."));
+
+            verify(userService, never()).getById(any());
         }
         
         @Test
@@ -237,7 +254,6 @@ class UserControllerTest {
             when(userService.editById(eq(userId), any(UserRequestDTO.class))).thenReturn(responseDTO);
 
             mockMvc.perform(put("/users/{id}", userId)
-                    .header("Authorization", "Bearer test-token")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(updatedUser)))
                     .andExpect(status().isOk())
@@ -255,7 +271,6 @@ class UserControllerTest {
             UserRequestDTO updatedUser = createUserRequestDTO();
             
             mockMvc.perform(put("/users/{id}", userId)
-                    .header("Authorization", "Bearer test-token")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(updatedUser)))
                     .andExpect(status().isForbidden())
