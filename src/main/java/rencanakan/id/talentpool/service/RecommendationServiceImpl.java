@@ -11,7 +11,6 @@ import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
 import rencanakan.id.talentpool.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -61,16 +60,10 @@ public class RecommendationServiceImpl implements RecommendationService {
     
     @Override
     public Map<StatusType, List<RecommendationResponseDTO>> getByTalentIdAndGroupedByStatus(String talentId) {
-        List<RecommendationResponseDTO> allRecommendations = getByTalentId(talentId);
-        
         Map<StatusType, List<RecommendationResponseDTO>> groupedRecommendations = new EnumMap<>(StatusType.class);
-
-        for (StatusType status : StatusType.values()) {
-            groupedRecommendations.put(status, new ArrayList<>());
-        }
         
-        for (RecommendationResponseDTO recommendation : allRecommendations) {
-            groupedRecommendations.get(recommendation.getStatus()).add(recommendation);
+        for (StatusType status : StatusType.values()) {
+            groupedRecommendations.put(status, getByTalentIdAndStatus(talentId, status));
         }
         
         return groupedRecommendations;
