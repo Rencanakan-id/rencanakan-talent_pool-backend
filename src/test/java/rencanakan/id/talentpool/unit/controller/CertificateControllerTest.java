@@ -58,7 +58,7 @@ class CertificateControllerTest {
         
         @BeforeEach
         void setUp() {
-            talentId = "talent-123";
+            talentId = "user123";
             certificateId = 1L;
             
             certificate = new CertificateResponseDTO();
