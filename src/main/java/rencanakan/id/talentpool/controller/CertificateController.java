@@ -32,17 +32,17 @@ public class CertificateController {
                     .build());
         }
 
-        List<CertificateResponseDTO> certificates = certificateService.getByUserId(userId);
-
-        if (certificates.isEmpty()) {
+        try {
+            List<CertificateResponseDTO> certificates = certificateService.getByUserId(userId);
+            
+            return ResponseEntity.ok(WebResponse.<List<CertificateResponseDTO>>builder()
+                    .data(certificates)
+                    .build());
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(WebResponse.<List<CertificateResponseDTO>>builder()
-                    .errors("No certificates found for user ID: " + userId)
+                    .errors(e.getMessage())
                     .build());
         }
-
-        return ResponseEntity.ok(WebResponse.<List<CertificateResponseDTO>>builder()
-                .data(certificates)
-                .build());
     }
     
     @GetMapping("/{certificateId}")
@@ -56,16 +56,17 @@ public class CertificateController {
                     .build());
         }
 
-        CertificateResponseDTO certificate = certificateService.getById(certificateId);
-        
-        if (certificate == null) {
+        try {
+            CertificateResponseDTO certificate = certificateService.getById(certificateId);
+
+            return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
+                    .data(certificate)
+                    .build());
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(WebResponse.<CertificateResponseDTO>builder()
-                    .errors("Certificate not found with ID: " + certificateId)
+                    .errors(e.getMessage())
                     .build());
         }
 
-        return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
-                .data(certificate)
-                .build());
     }
 }

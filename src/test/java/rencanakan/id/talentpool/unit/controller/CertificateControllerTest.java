@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import jakarta.persistence.EntityNotFoundException;
 import rencanakan.id.talentpool.controller.CertificateController;
 import rencanakan.id.talentpool.dto.CertificateResponseDTO;
 import rencanakan.id.talentpool.model.User;
@@ -86,13 +87,13 @@ class CertificateControllerTest {
         }
         
         @Test
-        void getCertificatesByUserId_WhenNoCertificates_ShouldReturnNotFound() throws Exception {
-            List<CertificateResponseDTO> emptyList = new ArrayList<>();
-            when(certificateService.getByUserId(talentId)).thenReturn(emptyList);
+        void getCertificateByUserId_WhenNotFound_ShouldReturnNotFound() throws Exception {
+            when(certificateService.getByUserId(talentId)).thenThrow(
+                new EntityNotFoundException("Certificates not found for user with id " + talentId));
             
             mockMvc.perform(get("/certificates/user/{userId}", talentId))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errors").value("No certificates found for user ID: " + talentId))
+                .andExpect(jsonPath("$.errors").value("Certificates not found for user with id " + talentId))
                 .andExpect(jsonPath("$.data").doesNotExist());
             
             verify(certificateService, times(1)).getByUserId(talentId);
@@ -113,15 +114,17 @@ class CertificateControllerTest {
         
         @Test
         void getCertificateById_WhenNotFound_ShouldReturnNotFound() throws Exception {
-            when(certificateService.getById(certificateId)).thenReturn(null);
+            when(certificateService.getById(certificateId)).thenThrow(
+                new EntityNotFoundException("Certificate with id " + certificateId + " not found"));
             
             mockMvc.perform(get("/certificates/{id}", certificateId))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errors").value("Certificate not found with ID: " + certificateId))
+                .andExpect(jsonPath("$.errors").value("Certificate with id " + certificateId + " not found"))
                 .andExpect(jsonPath("$.data").doesNotExist());
             
             verify(certificateService, times(1)).getById(certificateId);
         }
+
         
         @Test
         void getCertificateEndpoints_WhenUserIsNull_ShouldReturnUnauthorized() throws Exception {
