@@ -20,6 +20,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.persistence.EntityNotFoundException;
+import rencanakan.id.talentpool.dto.CertificateRequestDTO;
 import rencanakan.id.talentpool.dto.CertificateResponseDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Certificate;
@@ -43,6 +44,7 @@ class CertificateServiceTest {
         private String userId;
         private Certificate certificate;
         private CertificateResponseDTO certificateResponseDTO;
+        private CertificateRequestDTO certificateRequestDTO;
     
         @BeforeEach
         void setUp() {
@@ -80,6 +82,10 @@ class CertificateServiceTest {
             certificateResponseDTO.setId(1L);
             certificateResponseDTO.setTitle("Java Certificate");
             certificateResponseDTO.setFile("java-cert.pdf");
+
+            certificateRequestDTO = new CertificateRequestDTO();
+            certificateRequestDTO.setTitle("Python Certificate");
+            certificateRequestDTO.setFile("python-cert.pdf");
         }
         
         @Test
@@ -169,6 +175,46 @@ class CertificateServiceTest {
             }
             
             verify(certificateRepository).findById(1L);
+        }
+
+        @Test
+        void testEditById_Success() {
+            Long certificateId = 1L;
+
+            Certificate newCertificate = Certificate.builder()
+                    .id(1L)
+                    .title("Python Certificate")
+                    .file("python-cert.pdf")
+                    .user(user)
+                    .build();
+
+            when(certificateRepository.findById(certificateId)).thenReturn(Optional.of(certificate));
+            when(certificateRepository.save(any(Certificate.class))).thenReturn(newCertificate);
+
+            CertificateResponseDTO response = certificateService.editById(certificateId, certificateRequestDTO);
+
+            assertNotNull(response);
+            assertEquals("Python Certificate", response.getTitle());
+            assertEquals("python-cert.pdf", response.getFile());
+
+            verify(certificateRepository, times(1)).findById(certificateId);
+            verify(certificateRepository, times(1)).save(any(Certificate.class));
+        }
+
+        @Test
+        void testEditById_EntityNotFound() {
+
+            Long nonExistentId = 999L;
+            when(certificateRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                certificateService.editById(nonExistentId, certificateRequestDTO);
+            });
+
+            assertEquals("Certificate with ID 999 not found", exception.getMessage());
+
+            verify(certificateRepository, times(1)).findById(nonExistentId);
+            verify(certificateRepository, never()).save(any(Certificate.class));
         }
     }
 }
