@@ -356,7 +356,6 @@ class ExperienceServiceTest {
             // Arrange
             String userId = "1";
             List<Experience> experienceList = List.of(experience);
-            List<ExperienceResponseDTO> expectedDTOList = List.of(experienceResponseDTO);
 
             try (MockedStatic<DTOMapper> mockedStatic = Mockito.mockStatic(DTOMapper.class)) {
                 when(experienceRepository.findByUserId(userId)).thenReturn(experienceList);
