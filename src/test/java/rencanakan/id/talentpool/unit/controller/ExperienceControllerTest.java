@@ -28,6 +28,7 @@ import rencanakan.id.talentpool.service.ExperienceServiceImpl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -218,6 +219,117 @@ public class ExperienceControllerTest {
                     .build();
 
             mockMvc.perform(delete("/experiences/" + experienceId))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
+
+    @Nested
+    class GetExperiencesByTalentIdTest {
+
+        @Test
+        void testGetExperiencesByTalentId_Success() throws Exception {
+            // Given
+            String talentId = "1";
+            List<ExperienceResponseDTO> mockResponseList = List.of(
+                    createMockResponseDTO(),
+                    ExperienceResponseDTO.builder()
+                            .id(2L)
+                            .title("Software Engineer")
+                            .company("Tech Corp")
+                            .employmentType(EmploymentType.FULL_TIME)
+                            .startDate(LocalDate.now().minusYears(2))
+                            .endDate(LocalDate.now().minusYears(1))
+                            .location("Jakarta")
+                            .locationType(LocationType.HYBRID)
+                            .build()
+            );
+
+            when(experienceService.getByTalentId(talentId)).thenReturn(mockResponseList);
+
+            // When & Then
+            mockMvc.perform(get("/experiences/user/" + talentId)
+                            .with(SecurityMockMvcRequestPostProcessors.user(user))
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data.length()").value(2))
+                    .andExpect(jsonPath("$.data[0].id").value(1))
+                    .andExpect(jsonPath("$.data[0].title").value("Lead Construction Project Manager"))
+                    .andExpect(jsonPath("$.data[1].id").value(2))
+                    .andExpect(jsonPath("$.data[1].title").value("Software Engineer"));
+
+            verify(experienceService, times(1)).getByTalentId(talentId);
+        }
+
+        @Test
+        void testGetExperiencesByTalentId_EmptyList() throws Exception {
+            // Given
+            String talentId = "999"; // Non-existent talent ID
+            List<ExperienceResponseDTO> emptyList = List.of();
+
+            when(experienceService.getByTalentId(talentId)).thenReturn(emptyList);
+
+            // When & Then
+            mockMvc.perform(get("/experiences/user/" + talentId)
+                            .with(SecurityMockMvcRequestPostProcessors.user(user))
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data.length()").value(0));
+
+            verify(experienceService, times(1)).getByTalentId(talentId);
+        }
+
+        @Test
+        void testGetExperiencesByTalentId_InvalidTalentId() throws Exception {
+            // Given
+            String invalidTalentId = "invalid-format";
+
+            when(experienceService.getByTalentId(invalidTalentId))
+                    .thenThrow(new IllegalArgumentException("Invalid talent ID format"));
+
+            // When & Then
+            mockMvc.perform(get("/experiences/user/" + invalidTalentId)
+                            .with(SecurityMockMvcRequestPostProcessors.user(user))
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors").value("Invalid talent ID format"));
+
+            verify(experienceService, times(1)).getByTalentId(invalidTalentId);
+        }
+
+        @Test
+        void testGetExperiencesByTalentId_ServiceException() throws Exception {
+            // Given
+            String talentId = "1";
+
+            when(experienceService.getByTalentId(talentId))
+                    .thenThrow(new RuntimeException("Service error occurred"));
+
+            // When & Then
+            mockMvc.perform(get("/experiences/user/" + talentId)
+                            .with(SecurityMockMvcRequestPostProcessors.user(user))
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(jsonPath("$.errors").value("Service error occurred"));
+
+            verify(experienceService, times(1)).getByTalentId(talentId);
+        }
+
+        @Test
+        void testGetExperiencesByTalentId_Unauthorized() throws Exception {
+            // Given
+            String talentId = "1";
+
+            // Create a MockMvc instance without authentication
+            mockMvc = MockMvcBuilders.standaloneSetup(experienceController)
+                    .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+                    .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
+                    .build();
+
+            // When & Then
+            mockMvc.perform(get("/experiences/user/" + talentId)
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isUnauthorized());
         }
     }
