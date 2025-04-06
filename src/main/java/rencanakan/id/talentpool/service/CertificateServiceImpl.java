@@ -3,6 +3,7 @@ package rencanakan.id.talentpool.service;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
+import rencanakan.id.talentpool.dto.CertificateRequestDTO;
 import rencanakan.id.talentpool.dto.CertificateResponseDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Certificate;
@@ -39,5 +40,18 @@ public class CertificateServiceImpl implements CertificateService {
                 .orElseThrow(() -> new EntityNotFoundException("Certificate with id " + certificateId + " not found"));
 
         return DTOMapper.map(certificate, CertificateResponseDTO.class);
+    }
+
+    @Override
+    public CertificateResponseDTO editById(Long id, CertificateRequestDTO dto) {
+        Certificate certificate = certificateRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Certificate with ID " + id + " not found"));
+
+        certificate.setTitle(dto.getTitle());
+        certificate.setFile(dto.getFile());
+
+        Certificate updatedCertificate = certificateRepository.save(certificate);
+
+        return DTOMapper.map(updatedCertificate, CertificateResponseDTO.class);
     }
 }
