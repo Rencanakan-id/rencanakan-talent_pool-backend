@@ -18,6 +18,9 @@ import java.util.Map;
 @RequestMapping("/recommendations")
 public class RecommendationController {
     
+    private static final String UNAUTHORIZED_ACCESS_MESSAGE = "Unauthorized access";
+    private static final String NO_RECOMMENDATIONS_FOR_USER = "No recommendations found for user with id: ";
+    
     private final RecommendationService recommendationService;
 
     public RecommendationController(RecommendationService recommendationService) {
@@ -32,7 +35,7 @@ public class RecommendationController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     WebResponse.<RecommendationResponseDTO>builder()
-                        .errors("Unauthorized access")
+                        .errors(UNAUTHORIZED_ACCESS_MESSAGE)
                         .build());
         }
         
@@ -52,23 +55,23 @@ public class RecommendationController {
     
     @GetMapping("/user/{userId}")
     public ResponseEntity<WebResponse<List<RecommendationResponseDTO>>> getRecommendationsByTalentId(
-            @PathVariable("userId") String talentId,
+            @PathVariable("userId") String userId,
             @AuthenticationPrincipal User user) {
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     WebResponse.<List<RecommendationResponseDTO>>builder()
-                        .errors("Unauthorized access")
+                        .errors(UNAUTHORIZED_ACCESS_MESSAGE)
                         .build());
         }
         
         try {
-            List<RecommendationResponseDTO> recommendations = recommendationService.getByTalentId(talentId);
+            List<RecommendationResponseDTO> recommendations = recommendationService.getByTalentId(userId);
 
             if (recommendations.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         WebResponse.<List<RecommendationResponseDTO>>builder()
-                            .errors("No recommendations found for user with id: " + talentId)
+                            .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
                             .build());
             }
 
@@ -85,24 +88,24 @@ public class RecommendationController {
     
     @GetMapping("/user/{userId}/status/{status}")
     public ResponseEntity<WebResponse<List<RecommendationResponseDTO>>> getRecommendationsByTalentIdAndStatus(
-            @PathVariable("userId") String talentId,
+            @PathVariable("userId") String userId,
             @PathVariable("status") StatusType status,
             @AuthenticationPrincipal User user) {
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     WebResponse.<List<RecommendationResponseDTO>>builder()
-                        .errors("Unauthorized access")
+                        .errors(UNAUTHORIZED_ACCESS_MESSAGE)
                         .build());
         }
 
         try {
-            List<RecommendationResponseDTO> recommendations = recommendationService.getByTalentIdAndStatus(talentId, status);
+            List<RecommendationResponseDTO> recommendations = recommendationService.getByTalentIdAndStatus(userId, status);
 
             if (recommendations.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         WebResponse.<List<RecommendationResponseDTO>>builder()
-                            .errors("No recommendations found for user with id: " + talentId + " and status: " + status)
+                            .errors(NO_RECOMMENDATIONS_FOR_USER + userId + " and status: " + status)
                             .build());
             }
 
@@ -125,7 +128,7 @@ public class RecommendationController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     WebResponse.<Map<StatusType, List<RecommendationResponseDTO>>>builder()
-                        .errors("Unauthorized access")
+                        .errors(UNAUTHORIZED_ACCESS_MESSAGE)
                         .build());
         }
 
@@ -135,7 +138,7 @@ public class RecommendationController {
             if (groupedRecommendations.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         WebResponse.<Map<StatusType, List<RecommendationResponseDTO>>>builder()
-                            .errors("No recommendations found for user with id: " + userId)
+                            .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
                             .build());
             }
 

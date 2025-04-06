@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import jakarta.persistence.EntityNotFoundException;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
 import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.model.Recommendation;
@@ -143,11 +145,11 @@ class RecommendationServiceTest {
         }
 
         @Test
-        void getById_NonExistingId_ThrowsRuntimeException() {
+        void getById_NonExistingId_ThrowsEntityNotFoundException() {
             String id = "non-existing-id";
             when(recommendationRepository.findById(id)).thenReturn(Optional.empty());
 
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
                 recommendationService.getById(id);
             });
             
@@ -177,12 +179,12 @@ class RecommendationServiceTest {
         }
 
         @Test
-        void getByTalentId_NonExistingTalentId_ThrowsRuntimeException() {
+        void getByTalentId_NonExistingTalentId_ThrowsEntityNotFoundException() {
 
             String talentId = "non-existing-id";
             when(userRepository.findById(talentId)).thenReturn(Optional.empty());
 
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
                 recommendationService.getByTalentId(talentId);
             });
             
@@ -212,13 +214,13 @@ class RecommendationServiceTest {
         }
 
         @Test
-        void getByTalentIdAndStatus_NonExistingTalent_ThrowsRuntimeException() {
+        void getByTalentIdAndStatus_NonExistingTalent_ThrowsEntityNotFoundException() {
 
             String talentId = "non-existing-id";
             StatusType status = StatusType.PENDING;
             when(userRepository.findById(talentId)).thenReturn(Optional.empty());
 
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
                 recommendationService.getByTalentIdAndStatus(talentId, status);
             });
             
@@ -259,12 +261,12 @@ class RecommendationServiceTest {
         }
 
         @Test
-        void getByTalentIdAndGroupedByStatus_NonExistingTalent_ThrowsRuntimeException() {
+        void getByTalentIdAndGroupedByStatus_NonExistingTalent_ThrowsEntityNotFoundException() {
 
             String talentId = "non-existing-id";
             when(userRepository.findById(talentId)).thenReturn(Optional.empty());
 
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
                 recommendationService.getByTalentIdAndGroupedByStatus(talentId);
             });
             

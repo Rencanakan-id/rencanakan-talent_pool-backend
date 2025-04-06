@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -39,7 +40,13 @@ class RecommendationControllerTest {
     @InjectMocks
     private RecommendationController recommendationController;
 
-    
+    private void setupUnauthorizedMockMvc() {
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(recommendationController)
+                .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
+                .build();
+    }
+
     @Nested
     class ReadRecommendationTests {
         private User testUser;
@@ -224,10 +231,7 @@ class RecommendationControllerTest {
         
         @Test
         void getRecommendationById_UnauthorizedUser_ReturnsUnauthorizedResponse() throws Exception {
-            mockMvc = MockMvcBuilders
-                    .standaloneSetup(recommendationController)
-                    .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
-                    .build();
+            setupUnauthorizedMockMvc();
                     
             mockMvc.perform(get("/recommendations/{recommendationId}", "rec-id-1"))
                     .andExpect(status().isUnauthorized())
@@ -239,10 +243,7 @@ class RecommendationControllerTest {
         
         @Test
         void getRecommendationsByTalentId_UnauthorizedUser_ReturnsUnauthorizedResponse() throws Exception {
-            mockMvc = MockMvcBuilders
-                    .standaloneSetup(recommendationController)
-                    .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
-                    .build();
+            setupUnauthorizedMockMvc();
                     
             mockMvc.perform(get("/recommendations/user/{userId}", "user-id-1"))
                     .andExpect(status().isUnauthorized())
@@ -254,10 +255,7 @@ class RecommendationControllerTest {
         
         @Test
         void getRecommendationsByTalentIdAndStatus_UnauthorizedUser_ReturnsUnauthorizedResponse() throws Exception {
-            mockMvc = MockMvcBuilders
-                    .standaloneSetup(recommendationController)
-                    .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
-                    .build();
+            setupUnauthorizedMockMvc();
                     
             mockMvc.perform(get("/recommendations/user/{userId}/status/{status}", "user-id-1", StatusType.PENDING))
                     .andExpect(status().isUnauthorized())
@@ -324,10 +322,7 @@ class RecommendationControllerTest {
         
         @Test
         void getRecommendationsByTalentIdGroupedByStatus_UnauthorizedUser_ReturnsUnauthorizedResponse() throws Exception {
-            mockMvc = MockMvcBuilders
-                    .standaloneSetup(recommendationController)
-                    .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
-                    .build();
+            setupUnauthorizedMockMvc();
                     
             mockMvc.perform(get("/recommendations/user/{userId}/grouped-by-status", "user-id-1"))
                     .andExpect(status().isUnauthorized())

@@ -11,10 +11,10 @@ import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
 import rencanakan.id.talentpool.repository.UserRepository;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class RecommendationServiceImpl implements RecommendationService {
@@ -32,9 +32,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         Recommendation recommendation = recommendationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Recommendation not found with id: " + id));
         
-        RecommendationResponseDTO dto = DTOMapper.map(recommendation, RecommendationResponseDTO.class);
-        dto.setTalentId(recommendation.getTalent().getId());
-        return dto;
+        return DTOMapper.map(recommendation, RecommendationResponseDTO.class);
     }
     
     @Override
@@ -45,8 +43,8 @@ public class RecommendationServiceImpl implements RecommendationService {
         List<Recommendation> recommendations = recommendationRepository.findByTalent(talent);
         
         return recommendations.stream()
-                .map(recommendation -> DTOMapper.map(recommendation, RecommendationResponseDTO.class))
-                .collect(Collectors.toList());
+            .map(recommendation -> DTOMapper.map(recommendation, RecommendationResponseDTO.class))
+            .toList();
     }
 
     @Override
@@ -58,15 +56,21 @@ public class RecommendationServiceImpl implements RecommendationService {
         
         return recommendations.stream()
                 .map(recommendation -> DTOMapper.map(recommendation, RecommendationResponseDTO.class))
-                .collect(Collectors.toList());
+                .toList();
     }
     
     @Override
     public Map<StatusType, List<RecommendationResponseDTO>> getByTalentIdAndGroupedByStatus(String talentId) {
-        Map<StatusType, List<RecommendationResponseDTO>> groupedRecommendations = new HashMap<>();
+        List<RecommendationResponseDTO> allRecommendations = getByTalentId(talentId);
         
+        Map<StatusType, List<RecommendationResponseDTO>> groupedRecommendations = new EnumMap<>(StatusType.class);
+
         for (StatusType status : StatusType.values()) {
-            groupedRecommendations.put(status, getByTalentIdAndStatus(talentId, status));
+            groupedRecommendations.put(status, new ArrayList<>());
+        }
+        
+        for (RecommendationResponseDTO recommendation : allRecommendations) {
+            groupedRecommendations.get(recommendation.getStatus()).add(recommendation);
         }
         
         return groupedRecommendations;
