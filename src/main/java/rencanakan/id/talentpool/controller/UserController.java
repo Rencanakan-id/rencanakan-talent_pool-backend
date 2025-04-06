@@ -24,7 +24,13 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<WebResponse<UserResponseDTO>> getUserById(
             @PathVariable("id") String id, 
-            @RequestHeader("Authorization") String token) {
+            @AuthenticationPrincipal User user) {
+
+        if (user == null) {
+            return ResponseEntity.status(401).body(WebResponse.<UserResponseDTO>builder()
+                    .errors("Unauthorized access.")
+                    .build());
+        }
 
         UserResponseDTO resp = userService.getById(id);
 
