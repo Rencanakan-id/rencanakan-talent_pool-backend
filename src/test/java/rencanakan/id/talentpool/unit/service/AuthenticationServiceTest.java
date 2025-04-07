@@ -101,7 +101,7 @@ class AuthenticationServiceTest {
         when(userRepository.findByEmail(userRequestDTO.getEmail()))
                 .thenReturn(Optional.of(new User()));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
             authenticationService.signup(userRequestDTO);
         });
 
@@ -114,7 +114,7 @@ class AuthenticationServiceTest {
         when(userRepository.findByNik(userRequestDTO.getNik()))
                 .thenReturn(Optional.of(new User()));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
             authenticationService.signup(userRequestDTO);
         });
 
@@ -127,7 +127,7 @@ class AuthenticationServiceTest {
         when(userRepository.findByNpwp(userRequestDTO.getNpwp()))
                 .thenReturn(Optional.of(new User()));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
             authenticationService.signup(userRequestDTO);
         });
 
@@ -140,7 +140,7 @@ class AuthenticationServiceTest {
         when(userRepository.findByPhoneNumber(userRequestDTO.getPhoneNumber()))
                 .thenReturn(Optional.of(new User()));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
             authenticationService.signup(userRequestDTO);
         });
 
