@@ -2,11 +2,11 @@ package rencanakan.id.talentpool.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import rencanakan.id.talentpool.model.Experience;
+import rencanakan.id.talentpool.model.Certificate;
 
 import java.util.List;
 
 @Repository
-public interface ExperienceRepository extends JpaRepository<Experience, Long> {
-    List<Experience> findByUserId(String userId);
+public interface CertificateRepository extends JpaRepository<Certificate, Long> {
+    List<Certificate> findByUserId(String userId);
 }
