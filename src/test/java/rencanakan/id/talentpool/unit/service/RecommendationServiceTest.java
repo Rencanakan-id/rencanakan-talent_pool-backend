@@ -277,9 +277,10 @@ class RecommendationServiceTest {
 
         @Test
         void testCreateRecommendationWithNullRecommendation() {
+            String talentId = mockTalent.getId();
             // Act & Assert
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                    () -> recommendationService.createRecommendation(mockTalent.getId(), null));
+                    () -> recommendationService.createRecommendation(talentId, null));
 
             assertEquals("Recommendation request cannot be null", exception.getMessage());
             verify(recommendationRepository, never()).save(any(Recommendation.class));
