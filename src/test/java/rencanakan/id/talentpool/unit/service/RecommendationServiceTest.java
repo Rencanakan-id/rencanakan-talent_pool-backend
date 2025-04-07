@@ -13,12 +13,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.BeforeAll;
-import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
 import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
@@ -30,17 +24,15 @@ import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import rencanakan.id.talentpool.repository.UserRepository;
 import rencanakan.id.talentpool.service.RecommendationServiceImpl;
-import rencanakan.id.talentpool.dto.UserResponseDTO;
-import rencanakan.id.talentpool.mapper.DTOMapper;
 
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RecommendationServiceTest {
@@ -58,6 +50,11 @@ class RecommendationServiceTest {
 
     private User talent1;
     private User talent2;
+    private User mockTalent;
+    private RecommendationRequestDTO requestDTO;
+    private RecommendationResponseDTO responseDTO;
+    private UserResponseDTO userResponseDTO;
+    private Recommendation recommendation;
     private Recommendation recommendation1;
     private Recommendation recommendation2;
     private Recommendation recommendation3;
