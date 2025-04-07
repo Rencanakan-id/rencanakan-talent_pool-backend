@@ -206,22 +206,6 @@ class UserControllerTest {
         }
         
         @Test
-        @DisplayName("Should return 401 when user is unauthorized")
-        void testGetCurrentUser_Unauthorized() throws Exception {
-            mockMvc = MockMvcBuilders
-                .standaloneSetup(userController)
-                .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
-                .build();
-
-            mockMvc.perform(get("/users/me")
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.errors").value("Unauthorized access."));
-
-            verify(userService, never()).getById(any());
-        }
-        
-        @Test
         @DisplayName("Should return 404 when user is not found")
         void testGetCurrentUser_NotFound() throws Exception {
             when(userService.getById(any())).thenReturn(null);

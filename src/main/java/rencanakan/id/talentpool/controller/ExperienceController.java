@@ -28,6 +28,8 @@ public class ExperienceController {
             @PathVariable("talent_id") String talentId,
             @AuthenticationPrincipal User user) {
 
+        System.out.println("masuk sini kok");
+
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(WebResponse.<List<ExperienceResponseDTO>>builder()

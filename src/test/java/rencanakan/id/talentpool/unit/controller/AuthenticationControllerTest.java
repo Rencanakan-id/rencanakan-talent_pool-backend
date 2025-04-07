@@ -165,4 +165,68 @@ class AuthenticationControllerTest {
         verify(jwtService, times(1)).generateToken(authenticatedUser);
         verify(jwtService, times(1)).getExpirationTime();
     }
+
+    @Test
+    void testRegister_DuplicateEmail_ThrowsBadRequest() throws Exception {
+        when(authenticationService.signup(any(UserRequestDTO.class)))
+                .thenThrow(new RuntimeException("Email " + validUserRequestDTO.getEmail() + " sudah terdaftar."));
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUserRequestDTO)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors").value("Email " + validUserRequestDTO.getEmail() + " sudah terdaftar."))
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        verify(authenticationService, times(1)).signup(any(UserRequestDTO.class));
+    }
+
+    @Test
+    void testRegister_DuplicateNik_ThrowsBadRequest() throws Exception {
+        when(authenticationService.signup(any(UserRequestDTO.class)))
+                .thenThrow(new RuntimeException("NIK " + validUserRequestDTO.getNik() + " sudah terdaftar."));
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUserRequestDTO)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors").value("NIK " + validUserRequestDTO.getNik() + " sudah terdaftar."))
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        verify(authenticationService, times(1)).signup(any(UserRequestDTO.class));
+    }
+
+    @Test
+    void testRegister_DuplicateNpwp_ThrowsBadRequest() throws Exception {
+        when(authenticationService.signup(any(UserRequestDTO.class)))
+                .thenThrow(new RuntimeException("NPWP " + validUserRequestDTO.getNpwp() + " sudah terdaftar."));
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUserRequestDTO)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors").value("NPWP " + validUserRequestDTO.getNpwp() + " sudah terdaftar."))
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        verify(authenticationService, times(1)).signup(any(UserRequestDTO.class));
+    }
+
+    @Test
+    void testRegister_DuplicatePhoneNumber_ThrowsBadRequest() throws Exception {
+        when(authenticationService.signup(any(UserRequestDTO.class)))
+                .thenThrow(new RuntimeException("Nomor telepon " + validUserRequestDTO.getPhoneNumber() + " sudah terdaftar."));
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUserRequestDTO)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors").value("Nomor telepon " + validUserRequestDTO.getPhoneNumber() + " sudah terdaftar."))
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        verify(authenticationService, times(1)).signup(any(UserRequestDTO.class));
+    }
 }

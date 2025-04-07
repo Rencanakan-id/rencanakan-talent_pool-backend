@@ -1,6 +1,7 @@
 package rencanakan.id.talentpool.service;
 
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,6 +10,8 @@ import rencanakan.id.talentpool.dto.LoginRequestDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
+
+import java.util.Optional;
 
 
 @Service
@@ -30,10 +33,25 @@ public class AuthenticationService {
         this.userService = userService;
     }
 
-    public User signup(@Valid UserRequestDTO request) {
-        User checkUser = userService.findByEmail(request.getEmail());
-        if (checkUser != null) {
-            throw new IllegalArgumentException("User with email " + request.getEmail() + " already exists.");
+    public User signup(@Valid UserRequestDTO request) throws BadRequestException {
+        Optional<User> existingUserByEmail = userRepository.findByEmail(request.getEmail());
+        if (existingUserByEmail.isPresent()) {
+            throw new BadRequestException("Email " + request.getEmail() + " sudah terdaftar.");
+        }
+
+        Optional<User> existingUserByNik = userRepository.findByNik(request.getNik());
+        if (existingUserByNik.isPresent()) {
+            throw new BadRequestException("NIK " + request.getNik() + " sudah terdaftar.");
+        }
+
+        Optional<User> existingUserByNpwp = userRepository.findByNpwp(request.getNpwp());
+        if (existingUserByNpwp.isPresent()) {
+            throw new BadRequestException("NPWP " + request.getNpwp() + " sudah terdaftar.");
+        }
+
+        Optional<User> existingUserByPhoneNumber = userRepository.findByPhoneNumber(request.getPhoneNumber());
+        if (existingUserByPhoneNumber.isPresent()) {
+            throw new BadRequestException("Nomor telepon " + request.getPhoneNumber() + " sudah terdaftar.");
         }
 
         User newUser = User.builder()
