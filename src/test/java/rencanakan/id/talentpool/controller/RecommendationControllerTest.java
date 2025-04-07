@@ -11,9 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.mvc.method.annotation.PrincipalMethodArgumentResolver;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
 import rencanakan.id.talentpool.service.RecommendationService;
 import rencanakan.id.talentpool.enums.StatusType;
@@ -40,6 +43,7 @@ class RecommendationControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(recommendationController)
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
                 .setControllerAdvice(new ErrorController())
+                .setCustomArgumentResolvers(new PrincipalMethodArgumentResolver())
                 .build();
 
         id = "1";
@@ -51,7 +55,7 @@ class RecommendationControllerTest {
 
     @Test
     void testEditStatusById() throws Exception {
-        when(recommendationService.editStatusById(eq(id), any(StatusType.class))).thenReturn(responseDTO);
+        when(recommendationService.editStatusById(any(String.class),any(String.class), any(StatusType.class))).thenReturn(responseDTO);
 
         mockMvc.perform(patch("/recommendations/{id}", id)
                         .contentType("application/json")
@@ -68,13 +72,27 @@ class RecommendationControllerTest {
 
     @Test
     void testEditStatusById_RecommendationNotFound() throws Exception {
-        when(recommendationService.editStatusById(eq(id),  any(StatusType.class)))
+        when(recommendationService.editStatusById(any(String.class),any(String.class),  any(StatusType.class)))
                 .thenThrow(new EntityNotFoundException("Recommendation with ID " + id + " not found"));
 
         mockMvc.perform(patch("/recommendations/{id}", id)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(StatusType.ACCEPTED)))
                 .andExpect(status().isNotFound());
+    }
+    @Test
+    public void testEditStatus_UserNotAuthorized_ReturnsForbidden() throws Exception {
+
+        Long experienceId = 1L;
+
+        when(recommendationService.editStatusById(any(String.class), any(String.class), any(StatusType.class)))
+                .thenThrow(new AccessDeniedException("You are not allowed to edit this recommendation."));
+
+        mockMvc.perform(patch("/recommendations/{id}", experienceId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(StatusType.ACCEPTED)))
+                .andExpect(status().isForbidden()) // Expect 403 Forbidden status
+                .andExpect(jsonPath("$.errors").value("You are not allowed to edit this recommendation.")); // Check error message
     }
 
     @Test
@@ -83,7 +101,7 @@ class RecommendationControllerTest {
                 "2", "newTalentId", 456L, "newContractorName", "Modified message", StatusType.PENDING
         );
 
-        when(recommendationService.editStatusById(eq(id), any(StatusType.class))).thenReturn(modifiedResponseDTO);
+        when(recommendationService.editStatusById(any(String.class),any(String.class), any(StatusType.class))).thenReturn(modifiedResponseDTO);
 
         mockMvc.perform(patch("/recommendations/{id}", id)
                         .contentType("application/json")
