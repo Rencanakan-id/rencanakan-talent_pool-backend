@@ -42,8 +42,9 @@ public class Recommendation {
     @Column(name = "status_type", nullable = false)
     @NotNull(message = "Status is required")
     private StatusType status;
-    @PastOrPresent(message = "Last modified date cannot be in the future")
+
     @UpdateTimestamp
     @Column(name = "last_modified_date", nullable = false)
+    @PastOrPresent(message = "Last modified date cannot be in the future")
     private LocalDateTime lastModifiedDate;
 }
