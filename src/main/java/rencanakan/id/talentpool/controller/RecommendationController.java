@@ -1,45 +1,64 @@
 package rencanakan.id.talentpool.controller;
 
-import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
-import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
+import rencanakan.id.talentpool.dto.RecommendationRequestDTO;import org.springframework.web.server.ResponseStatusException;
 import rencanakan.id.talentpool.model.User;
-import rencanakan.id.talentpool.dto.WebResponse;
+import rencanakan.id.talentpool.dto.*;
 import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.service.RecommendationService;
 
 import java.util.List;
 import java.util.Map;
 
+
 @RestController
 @RequestMapping("/recommendations")
 public class RecommendationController {
-    
+
     private static final String UNAUTHORIZED_ACCESS_MESSAGE = "Unauthorized access";
     private static final String NO_RECOMMENDATIONS_FOR_USER = "No recommendations found for user with id: ";
-    
+
     private final RecommendationService recommendationService;
 
     public RecommendationController(RecommendationService recommendationService) {
         this.recommendationService = recommendationService;
     }
-    
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> editStatusById(
+            @PathVariable String id,
+            @RequestBody StatusType status,
+            @AuthenticationPrincipal User user){
+
+        RecommendationResponseDTO res = this.recommendationService.editStatusById(user.getId(), id, status);
+        WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
+                .data(res)
+                .build();
+
+        return ResponseEntity.ok(response);
+
+    }
+
+
     @GetMapping("/{recommendationId}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> getRecommendationById(
-            @PathVariable("recommendationId") String recommendationId, 
+            @PathVariable("recommendationId") String recommendationId,
             @AuthenticationPrincipal User user) {
-        
+
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     WebResponse.<RecommendationResponseDTO>builder()
                         .errors(UNAUTHORIZED_ACCESS_MESSAGE)
                         .build());
         }
-        
+
         try {
             RecommendationResponseDTO resp = recommendationService.getById(recommendationId);
 
@@ -53,7 +72,7 @@ public class RecommendationController {
                         .build());
         }
     }
-    
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<WebResponse<List<RecommendationResponseDTO>>> getRecommendationsByTalentId(
             @PathVariable("userId") String userId,
@@ -65,7 +84,7 @@ public class RecommendationController {
                         .errors(UNAUTHORIZED_ACCESS_MESSAGE)
                         .build());
         }
-        
+
         try {
             List<RecommendationResponseDTO> recommendations = recommendationService.getByTalentId(userId);
 
@@ -86,7 +105,7 @@ public class RecommendationController {
                         .build());
         }
     }
-    
+
     @GetMapping("/user/{userId}/status/{status}")
     public ResponseEntity<WebResponse<List<RecommendationResponseDTO>>> getRecommendationsByTalentIdAndStatus(
             @PathVariable("userId") String userId,
@@ -120,12 +139,12 @@ public class RecommendationController {
                         .build());
         }
     }
-    
+
     @GetMapping("/user/{userId}/grouped-by-status")
     public ResponseEntity<WebResponse<Map<StatusType, List<RecommendationResponseDTO>>>> getRecommendationsByTalentIdGroupedByStatus(
             @PathVariable("userId") String userId,
             @AuthenticationPrincipal User user) {
-        
+
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     WebResponse.<Map<StatusType, List<RecommendationResponseDTO>>>builder()

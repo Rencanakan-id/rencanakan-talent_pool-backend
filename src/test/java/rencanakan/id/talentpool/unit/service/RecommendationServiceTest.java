@@ -1,6 +1,10 @@
 package rencanakan.id.talentpool.unit.service;
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,14 +19,18 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.access.AccessDeniedException;
 
-import jakarta.persistence.EntityNotFoundException;
 import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
+import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.enums.StatusType;
+import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
+
+import java.util.Optional;
 import rencanakan.id.talentpool.repository.UserRepository;
 import rencanakan.id.talentpool.service.RecommendationServiceImpl;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
@@ -34,29 +42,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.*;
-
 @ExtendWith(MockitoExtension.class)
 class RecommendationServiceTest {
-
-    @InjectMocks
-    private RecommendationRequestDTO requestDTO;
-
-    @InjectMocks
-    private RecommendationResponseDTO responseDTO;
 
     @Mock
     private RecommendationRepository recommendationRepository;
 
-    @Mock
-    private UserRepository userRepository;
-
     @InjectMocks
     private RecommendationServiceImpl recommendationService;
 
-    private Recommendation recommendation;
-    private User mockTalent;
-    private UserResponseDTO userResponseDTO;
+
+    @Mock
+    private UserRepository userRepository;
+
+
     private User talent1;
     private User talent2;
     private Recommendation recommendation1;
@@ -91,7 +90,7 @@ class RecommendationServiceTest {
         userResponseDTO.setPhoneNumber("081234567890");
         userResponseDTO.setNik("1234567890123456");
     }
-    
+
     private void setUpUsers() {
         mockTalent = User.builder()
                 .id("user123")
@@ -143,7 +142,7 @@ class RecommendationServiceTest {
                 .skill("Java, Spring Boot")
                 .build();
     }
-    
+
     private void setUpRecommendations() {
         recommendation = Recommendation.builder()
                 .id("recommendation123")
@@ -178,7 +177,7 @@ class RecommendationServiceTest {
         recommendation3.setMessage("Good technical skills");
         recommendation3.setStatus(StatusType.DECLINED);
     }
-    
+
     void setUpRecommendationLists() {
         talent1Recommendations = Arrays.asList(recommendation1, recommendation2);
         talent1PendingRecommendations = Collections.singletonList(recommendation1);
@@ -289,10 +288,67 @@ class RecommendationServiceTest {
             verify(recommendationRepository, never()).save(any(Recommendation.class));
         }
     }
-    
+    @Nested
+    class patchStatus{
+
+        @Test
+        void testEditStatusById_Success() {
+            // Arrange
+            Recommendation updated = new Recommendation();
+            updated.setId("rec-id-1");
+            updated.setStatus(StatusType.ACCEPTED);
+
+            User mockedTalent = mock(User.class);
+            recommendation1.setTalent(mockedTalent);
+            when(mockedTalent.getId()).thenReturn("idUser");
+            when(recommendationRepository.findById(any())).thenReturn(Optional.of(recommendation1));
+
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(updated);
+
+            // Act
+            RecommendationResponseDTO response = recommendationService.editStatusById("idUser", recommendation1.getId(), StatusType.ACCEPTED);
+
+            // Assert
+            assertNotNull(response);
+            assertEquals(StatusType.ACCEPTED, response.getStatus());
+            verify(recommendationRepository, times(1)).save(recommendation1);
+        }
+
+        @Test
+        void testEditStatusById_RecommendationNotFound() {
+            // Arrange
+            when(recommendationRepository.findById("1")).thenReturn(Optional.empty());
+
+            // Act + Assert
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
+                    recommendationService.editStatusById( "idUser","1", StatusType.ACCEPTED)
+            );
+
+            assertEquals("Recommendation with ID 1 not found", exception.getMessage());
+        }
+
+
+        @Test
+        void testEditStatusById_UnAuthorized() {
+            // Arrange
+            User mockedTalent = mock(User.class);
+            recommendation1.setTalent(mockedTalent);
+            when(mockedTalent.getId()).thenReturn("idUser");
+            when(recommendationRepository.findById(eq(recommendation1.getId()))).thenReturn(Optional.of(recommendation1));
+
+            // Act & Assert
+            AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+                recommendationService.editStatusById("idUser123", recommendation1.getId(), StatusType.ACCEPTED);
+            });
+
+            assertEquals("You are not allowed to edit this experience.", exception.getMessage());
+            verify(recommendationRepository, never()).save(any());
+        }
+    }
+
     @Nested
     class ReadRecommendationTests {
-        
+
         @Test
         void getById_ExistingId_ReturnsCorrectRecommendation() {
 
@@ -307,7 +363,7 @@ class RecommendationServiceTest {
             assertEquals(recommendation1.getContractorName(), result.getContractorName());
             assertEquals(recommendation1.getStatus(), result.getStatus());
             assertEquals(talent1.getId(), result.getTalentId());
-            
+
             verify(recommendationRepository).findById(id);
         }
 
@@ -319,9 +375,9 @@ class RecommendationServiceTest {
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
                 recommendationService.getById(id);
             });
-            
+
             assertEquals("Recommendation not found with id: " + id, exception.getMessage());
-            
+
             verify(recommendationRepository).findById(id);
         }
 
@@ -333,14 +389,14 @@ class RecommendationServiceTest {
             when(recommendationRepository.findByTalent(talent1)).thenReturn(talent1Recommendations);
 
             List<RecommendationResponseDTO> result = recommendationService.getByTalentId(talentId);
-            
+
             assertNotNull(result);
             assertEquals(2, result.size());
-            
+
             List<String> recommendationIds = result.stream().map(RecommendationResponseDTO::getId).toList();
             assertTrue(recommendationIds.contains(recommendation1.getId()));
             assertTrue(recommendationIds.contains(recommendation2.getId()));
-            
+
             verify(userRepository).findById(talentId);
             verify(recommendationRepository).findByTalent(talent1);
         }
@@ -354,9 +410,9 @@ class RecommendationServiceTest {
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
                 recommendationService.getByTalentId(talentId);
             });
-            
+
             assertEquals("User not found with id: " + talentId, exception.getMessage());
-            
+
             verify(userRepository).findById(talentId);
             verify(recommendationRepository, never()).findByTalent(any());
         }
@@ -370,12 +426,12 @@ class RecommendationServiceTest {
             when(recommendationRepository.findByTalentAndStatus(talent1, status)).thenReturn(talent1PendingRecommendations);
 
             List<RecommendationResponseDTO> result = recommendationService.getByTalentIdAndStatus(talentId, status);
-            
+
             assertNotNull(result);
             assertEquals(1, result.size());
             assertEquals(recommendation1.getId(), result.get(0).getId());
             assertEquals(status, result.get(0).getStatus());
-            
+
             verify(userRepository).findById(talentId);
             verify(recommendationRepository).findByTalentAndStatus(talent1, status);
         }
@@ -390,9 +446,9 @@ class RecommendationServiceTest {
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
                 recommendationService.getByTalentIdAndStatus(talentId, status);
             });
-            
+
             assertEquals("User not found with id: " + talentId, exception.getMessage());
-            
+
             verify(userRepository).findById(talentId);
             verify(recommendationRepository, never()).findByTalentAndStatus(any(), any());
         }
@@ -409,18 +465,18 @@ class RecommendationServiceTest {
             when(recommendationRepository.findByTalentAndStatus(talent1, StatusType.DECLINED))
                     .thenReturn(Collections.emptyList());
 
-            Map<StatusType, List<RecommendationResponseDTO>> result = 
+            Map<StatusType, List<RecommendationResponseDTO>> result =
                     recommendationService.getByTalentIdAndGroupedByStatus(talentId);
-            
+
             assertNotNull(result);
             assertEquals(StatusType.values().length, result.size());
             assertEquals(1, result.get(StatusType.PENDING).size());
             assertEquals(1, result.get(StatusType.ACCEPTED).size());
             assertEquals(0, result.get(StatusType.DECLINED).size());
-            
+
             assertEquals(recommendation1.getId(), result.get(StatusType.PENDING).get(0).getId());
             assertEquals(recommendation2.getId(), result.get(StatusType.ACCEPTED).get(0).getId());
-            
+
             verify(userRepository, times(3)).findById(talentId);
             verify(recommendationRepository).findByTalentAndStatus(talent1, StatusType.PENDING);
             verify(recommendationRepository).findByTalentAndStatus(talent1, StatusType.ACCEPTED);
@@ -436,9 +492,9 @@ class RecommendationServiceTest {
             EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
                 recommendationService.getByTalentIdAndGroupedByStatus(talentId);
             });
-            
+
             assertEquals("User not found with id: " + talentId, exception.getMessage());
-            
+
             verify(userRepository).findById(talentId);
             verify(recommendationRepository, never()).findByTalentAndStatus(any(), any());
         }

@@ -66,6 +66,8 @@ dependencies {
 	testImplementation 'org.mockito:mockito-core:5.5.0'
 	testImplementation 'org.mockito:mockito-inline:5.2.0'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.assertj:assertj-core:3.24.2'
+
 
 	// Pact for Contract Testing
 	implementation 'au.com.dius.pact:consumer:4.6.17'

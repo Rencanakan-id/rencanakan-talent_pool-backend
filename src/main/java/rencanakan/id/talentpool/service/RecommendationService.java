@@ -9,6 +9,7 @@ import java.util.Map;
     
 public interface RecommendationService {
     RecommendationResponseDTO createRecommendation(String talentId, RecommendationRequestDTO recommendation);
+    RecommendationResponseDTO editStatusById(String userId, String id, StatusType status);
     RecommendationResponseDTO getById(String id);
     List<RecommendationResponseDTO> getByTalentId(String talentId);
     List<RecommendationResponseDTO> getByTalentIdAndStatus(String talentId, StatusType status);
