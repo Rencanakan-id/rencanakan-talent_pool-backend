@@ -53,7 +53,7 @@ class JwtServiceTest {
     void testExtractUsername() {
         String token = jwtService.generateToken(user);
         String username = jwtService.extractUsername(token);
-        assertEquals("brighterdaysahead", username);
+        assertEquals("john.doe@example.com", username);
     }
 
     @Test
