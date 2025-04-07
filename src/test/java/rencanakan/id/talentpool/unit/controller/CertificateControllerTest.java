@@ -136,7 +136,6 @@ class CertificateControllerTest {
 
         @BeforeEach
         void setUp() {
-            token = "Bearer token";
             certificateId = 1L;
 
             requestDTO = new CertificateRequestDTO();
@@ -156,7 +155,6 @@ class CertificateControllerTest {
                     .thenReturn(responseDTO);
 
             mockMvc.perform(put("/certificates/{certificateId}", certificateId)
-                            .header("Authorization", token)
                             .contentType("application/json")
                             .content("""
                     {
