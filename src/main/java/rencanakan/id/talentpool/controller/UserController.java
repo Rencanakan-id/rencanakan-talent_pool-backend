@@ -49,12 +49,6 @@ public class UserController {
     public ResponseEntity<WebResponse<UserResponseDTO>> getCurrentUser(
             @AuthenticationPrincipal User user) {
 
-        if (user == null) {
-            return ResponseEntity.status(401).body(WebResponse.<UserResponseDTO>builder()
-                    .errors("Unauthorized access.")
-                    .build());
-        }
-
         UserResponseDTO resp = userService.getById(user.getId());
 
 		if (resp == null) {
