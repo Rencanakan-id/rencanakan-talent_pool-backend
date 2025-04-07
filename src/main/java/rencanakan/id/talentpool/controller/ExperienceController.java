@@ -23,15 +23,34 @@ public class ExperienceController {
         this.experienceService = experienceService;
     }
 
-    @GetMapping("/{talent_id}")
+    @GetMapping("/user/{talent_id}")
     public ResponseEntity<WebResponse<List<ExperienceResponseDTO>>> getExperiencesByTalentId(
-            @PathVariable("talent_id") String talentId
-            ) {
+            @PathVariable("talent_id") String talentId,
+            @AuthenticationPrincipal User user) {
 
-        List<ExperienceResponseDTO> resp = experienceService.getByTalentId(talentId);
-        return ResponseEntity.ok(WebResponse.<List<ExperienceResponseDTO>>builder()
-                .data(resp)
-                .build());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(WebResponse.<List<ExperienceResponseDTO>>builder()
+                            .errors("Unauthorized access")
+                            .build());
+        }
+
+        try {
+            List<ExperienceResponseDTO> resp = experienceService.getByTalentId(talentId);
+            return ResponseEntity.ok(WebResponse.<List<ExperienceResponseDTO>>builder()
+                    .data(resp)
+                    .build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(WebResponse.<List<ExperienceResponseDTO>>builder()
+                            .errors(e.getMessage())
+                            .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(WebResponse.<List<ExperienceResponseDTO>>builder()
+                            .errors(e.getMessage())
+                            .build());
+        }
     }
 
     @PostMapping
@@ -48,11 +67,11 @@ public class ExperienceController {
 
     @PutMapping("/{id}")
     public ResponseEntity<WebResponse<ExperienceResponseDTO>> editExperienceById(
-            @PathVariable("id") Long id,
-            @RequestHeader("Authorization") String token,
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id,
             @RequestBody @Valid ExperienceRequestDTO dto) {
 
-        ExperienceResponseDTO updatedExperience = experienceService.editById(id, dto);
+        ExperienceResponseDTO updatedExperience = experienceService.editById(user.getId(), id, dto);
 
         return ResponseEntity.ok(WebResponse.<ExperienceResponseDTO>builder()
                 .data(updatedExperience)
