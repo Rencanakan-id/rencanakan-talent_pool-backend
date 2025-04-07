@@ -67,11 +67,11 @@ public class ExperienceController {
 
     @PutMapping("/{id}")
     public ResponseEntity<WebResponse<ExperienceResponseDTO>> editExperienceById(
-            @PathVariable("id") Long id,
-            @RequestHeader("Authorization") String token,
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id,
             @RequestBody @Valid ExperienceRequestDTO dto) {
 
-        ExperienceResponseDTO updatedExperience = experienceService.editById(id, dto);
+        ExperienceResponseDTO updatedExperience = experienceService.editById(user.getId(), id, dto);
 
         return ResponseEntity.ok(WebResponse.<ExperienceResponseDTO>builder()
                 .data(updatedExperience)
@@ -82,7 +82,7 @@ public class ExperienceController {
     public ResponseEntity<WebResponse<String>> deleteExperienceById(
             @PathVariable("id") Long id,
             @AuthenticationPrincipal User user) {
-        
+
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(WebResponse.<String>builder()
                     .errors("Unauthorized access")
