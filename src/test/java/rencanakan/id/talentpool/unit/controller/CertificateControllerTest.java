@@ -128,8 +128,6 @@ class CertificateControllerTest {
 
     @Nested
     class EditCertificateTests {
-
-        private String token;
         private Long certificateId;
         private CertificateRequestDTO requestDTO;
         private CertificateResponseDTO responseDTO;
@@ -169,6 +167,41 @@ class CertificateControllerTest {
 
             verify(certificateService, times(1)).editById(eq(certificateId), any(CertificateRequestDTO.class));
         }
+
+        @Test
+        void editCertificateById_WhenCertificateNotFound_ShouldReturn404() throws Exception {
+            when(certificateService.editById(eq(certificateId), any(CertificateRequestDTO.class)))
+                    .thenThrow(new RuntimeException("Not found"));
+
+            mockMvc.perform(put("/certificates/{certificateId}", certificateId)
+                            .principal(() -> "mock-user")
+                            .contentType("application/json")
+                            .content("""
+                    {
+                        "title": "Updated Java Certificate",
+                        "file": "updated-certificate.pdf"
+                    }
+                """))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("Certificate not found with ID: " + certificateId));
+
+            verify(certificateService, times(1)).editById(eq(certificateId), any(CertificateRequestDTO.class));
+        }
+
+        @Test
+        void editCertificateById_WhenValidationFails_ShouldReturn400() throws Exception {
+            mockMvc.perform(put("/certificates/{certificateId}", certificateId)
+                            .principal(() -> "mock-user")
+                            .contentType("application/json")
+                            .content("""
+                    {
+                        "title": "",
+                        "file": ""
+                    }
+                """))
+                    .andExpect(status().isBadRequest());
+        }
+
     }
 
 }
