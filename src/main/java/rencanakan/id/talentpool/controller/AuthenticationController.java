@@ -1,6 +1,8 @@
 package rencanakan.id.talentpool.controller;
 
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentpool.dto.LoginRequestDTO;
@@ -24,8 +26,18 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<WebResponse<User>> register(@Valid @RequestBody UserRequestDTO registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
+    public ResponseEntity<WebResponse<User>> register(@Valid @RequestBody UserRequestDTO registerUserDto) throws BadRequestException {
+        User registeredUser;
+        try {
+            registeredUser = authenticationService.signup(registerUserDto);
+
+        } catch (Exception e) {
+            WebResponse<User> response = WebResponse.<User>builder()
+                    .data(null)
+                    .errors(e.getMessage())
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
         WebResponse<User> response = WebResponse.<User>builder()
                 .data(registeredUser)
                 .errors(null)
