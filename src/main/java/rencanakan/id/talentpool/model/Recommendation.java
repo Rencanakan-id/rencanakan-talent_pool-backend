@@ -5,8 +5,6 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import rencanakan.id.talentpool.enums.StatusType;
 
-import java.util.UUID;
-
 @Entity
 @Getter
 @Setter
@@ -15,7 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table(name = "recommendation")
 public class Recommendation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -43,8 +40,4 @@ public class Recommendation {
     @Column(name = "status_type", nullable = false)
     @NotNull(message = "Status is required")
     private StatusType status;
-
-    public static RecommendationBuilder builder() {
-        return new RecommendationBuilder();
-    }
 }

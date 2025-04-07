@@ -2,7 +2,6 @@ package rencanakan.id.talentpool.dto;
 
 import lombok.*;
 import rencanakan.id.talentpool.enums.StatusType;
-import rencanakan.id.talentpool.model.User;
 
 @Getter
 @Setter

@@ -40,4 +40,6 @@ public class ExperienceRequestDTO {
 
     @NotNull(message = "Location type is required")
     private LocationType locationType;
+
+    private String userId;
 }
