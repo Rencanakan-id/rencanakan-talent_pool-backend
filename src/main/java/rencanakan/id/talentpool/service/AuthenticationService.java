@@ -36,22 +36,22 @@ public class AuthenticationService {
     public User signup(@Valid UserRequestDTO request) throws BadRequestException {
         Optional<User> existingUserByEmail = userRepository.findByEmail(request.getEmail());
         if (existingUserByEmail.isPresent()) {
-            throw new RuntimeException("Email " + request.getEmail() + " sudah terdaftar.");
+            throw new BadRequestException("Email " + request.getEmail() + " sudah terdaftar.");
         }
 
         Optional<User> existingUserByNik = userRepository.findByNik(request.getNik());
         if (existingUserByNik.isPresent()) {
-            throw new RuntimeException("NIK " + request.getNik() + " sudah terdaftar.");
+            throw new BadRequestException("NIK " + request.getNik() + " sudah terdaftar.");
         }
 
         Optional<User> existingUserByNpwp = userRepository.findByNpwp(request.getNpwp());
         if (existingUserByNpwp.isPresent()) {
-            throw new RuntimeException("NPWP " + request.getNpwp() + " sudah terdaftar.");
+            throw new BadRequestException("NPWP " + request.getNpwp() + " sudah terdaftar.");
         }
 
         Optional<User> existingUserByPhoneNumber = userRepository.findByPhoneNumber(request.getPhoneNumber());
         if (existingUserByPhoneNumber.isPresent()) {
-            throw new RuntimeException("Nomor telepon " + request.getPhoneNumber() + " sudah terdaftar.");
+            throw new BadRequestException("Nomor telepon " + request.getPhoneNumber() + " sudah terdaftar.");
         }
 
         User newUser = User.builder()
