@@ -268,6 +268,26 @@ class RecommendationServiceTest {
             assertEquals("Recommendation request cannot be null", exception.getMessage());
             verify(recommendationRepository, never()).save(any(Recommendation.class));
         }
+
+        @Test
+        void testCreateRecommendationWithNullTalent() {
+            // Act & Assert
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> recommendationService.createRecommendation(null, requestDTO));
+
+            assertEquals("Recommendation request cannot be null", exception.getMessage());
+            verify(recommendationRepository, never()).save(any(Recommendation.class));
+        }
+
+        @Test
+        void testCreateRecommendationWithNullRecommendation() {
+            // Act & Assert
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> recommendationService.createRecommendation(mockTalent.getId(), null));
+
+            assertEquals("Recommendation request cannot be null", exception.getMessage());
+            verify(recommendationRepository, never()).save(any(Recommendation.class));
+        }
     }
     
     @Nested

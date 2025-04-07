@@ -142,6 +142,21 @@ class RecommendationControllerTest {
                     .andDo(print())
                     .andExpect(status().isBadRequest());
         }
+
+        @Test
+        void testCreateRecommendation_Unauthorized() throws Exception {
+            setupUnauthorizedMockMvc();
+
+            RecommendationRequestDTO request = createValidRequestDTO();
+
+            mockMvc.perform(post("/recommendations")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
+                            .content(mapper.writeValueAsString(request)))
+                            .andDo(print())
+                            .andExpect(status().isBadRequest());
+
+        }
     }
 
     @Nested
