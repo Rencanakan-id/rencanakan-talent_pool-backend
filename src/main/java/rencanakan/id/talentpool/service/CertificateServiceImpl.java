@@ -12,6 +12,7 @@ import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.CertificateRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CertificateServiceImpl implements CertificateService {
@@ -69,5 +70,15 @@ public class CertificateServiceImpl implements CertificateService {
         Certificate updatedCertificate = certificateRepository.save(certificate);
 
         return DTOMapper.map(updatedCertificate, CertificateResponseDTO.class);
+    }
+
+    public void deleteById(Long id, String userId) {
+        Certificate certificate = certificateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sertifikat tidak ditemukan"));
+
+        if (!certificate.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Anda tidak memiliki akses");
+        }
+        certificateRepository.delete(certificate);
     }
 }
