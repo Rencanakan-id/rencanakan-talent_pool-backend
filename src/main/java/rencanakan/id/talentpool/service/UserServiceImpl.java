@@ -1,12 +1,13 @@
 package rencanakan.id.talentpool.service;
 
-import jakarta.validation.Validator;
-import org.springframework.security.core.userdetails.UserDetails;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
+import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
 
@@ -15,133 +16,65 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
-    private final Validator validator;
-    private final JwtService jwtService;
 
-    public UserServiceImpl(UserRepository userRepository, Validator validator, JwtService jwtService) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.validator = validator;
-        this.jwtService = jwtService;
     }
 
     @Override
     public UserResponseDTO getById(String id) {
-        Optional<User> userProfileOptional = userRepository.findById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User with ID " + id + " not found"));
         
-        if (userProfileOptional.isPresent()) {
-            User user = userProfileOptional.get();
-            return convertToDTO(user);
-        }
-        
-        return null;
+        return DTOMapper.map(user, UserResponseDTO.class);
     }
 
     @Override
-    public UserResponseDTO editProfile(String id, User editedProfile) {
-        Optional<User> userProfileOptional = userRepository.findById(id);
+    public UserResponseDTO editById(String id, UserRequestDTO edited) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User with ID " + id + " not found"));
 
-        if (userProfileOptional.isPresent()) {
-            User user = userProfileOptional.get();
-
-            try {
-                if (editedProfile.getEmail() != null) {
-                    user.setEmail(editedProfile.getEmail());
-                }
-                if (editedProfile.getPassword() != null) {
-                    user.setPassword(editedProfile.getPassword());
-                }
-                if (editedProfile.getNik() != null) {
-                    user.setNik(editedProfile.getNik());
-                }
-
-                if (editedProfile.getFirstName() != null) {
-                    user.setFirstName(editedProfile.getFirstName());
-                }
-                if (editedProfile.getLastName() != null) {
-                    user.setLastName(editedProfile.getLastName());
-                }
-                if (editedProfile.getEmail() != null) {
-                    user.setEmail(editedProfile.getEmail());
-                }
-                if (editedProfile.getPassword() != null) {
-                    user.setPassword(editedProfile.getPassword());
-                }
-                if (editedProfile.getPhoneNumber() != null) {
-                    user.setPhoneNumber(editedProfile.getPhoneNumber());
-                }
-                if (editedProfile.getPhoto() != null) {
-                    user.setPhoto(editedProfile.getPhoto());
-                }
-                if (editedProfile.getAboutMe() != null) {
-                    user.setAboutMe(editedProfile.getAboutMe());
-                }
-                if (editedProfile.getNik() != null) {
-                    user.setNik(editedProfile.getNik());
-                }
-                if (editedProfile.getNpwp() != null) {
-                    user.setNpwp(editedProfile.getNpwp());
-                }
-                if (editedProfile.getPhotoKtp() != null) {
-                    user.setPhotoKtp(editedProfile.getPhotoKtp());
-                }
-                if (editedProfile.getPhotoNpwp() != null) {
-                    user.setPhotoNpwp(editedProfile.getPhotoNpwp());
-                }
-                if (editedProfile.getPhotoIjazah() != null) {
-                    user.setPhotoIjazah(editedProfile.getPhotoIjazah());
-                }
-                if (editedProfile.getExperienceYears() != null) {
-                    user.setExperienceYears(editedProfile.getExperienceYears());
-                }
-                if (editedProfile.getSkkLevel() != null) {
-                    user.setSkkLevel(editedProfile.getSkkLevel());
-                }
-                if (editedProfile.getCurrentLocation() != null) {
-                    user.setCurrentLocation(editedProfile.getCurrentLocation());
-                }
-                if (editedProfile.getPreferredLocations() != null) {
-                    user.setPreferredLocations(editedProfile.getPreferredLocations());
-                }
-                if (editedProfile.getSkill() != null) {
-                    user.setSkill(editedProfile.getSkill());
-                }
-
-                userRepository.save(user);
-                return convertToDTO(user);
-            } catch (IllegalArgumentException e) {
-                throw e;
-            }
+        try {
+            updateUserFields(user, edited);
+            userRepository.save(user);
+            return DTOMapper.map(user, UserResponseDTO.class);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Failed to update user: " + e.getMessage(), e);
         }
+    }
 
-        return null;
+    private void updateUserFields(User user, UserRequestDTO edited) {
+        updateIfNotNull(edited.getEmail(), user::setEmail);
+        updateIfNotNull(edited.getFirstName(), user::setFirstName);
+        updateIfNotNull(edited.getLastName(), user::setLastName);
+        updateIfNotNull(edited.getPhoneNumber(), user::setPhoneNumber);
+
+        updateIfNotNull(edited.getPhoto(), user::setPhoto);
+        updateIfNotNull(edited.getAboutMe(), user::setAboutMe);
+        updateIfNotNull(edited.getNik(), user::setNik);
+        updateIfNotNull(edited.getNpwp(), user::setNpwp);
+
+        updateIfNotNull(edited.getPhotoKtp(), user::setPhotoKtp);
+        updateIfNotNull(edited.getPhotoNpwp(), user::setPhotoNpwp);
+        updateIfNotNull(edited.getPhotoIjazah(), user::setPhotoIjazah);
+        
+        updateIfNotNull(edited.getExperienceYears(), user::setExperienceYears);
+        updateIfNotNull(edited.getSkkLevel(), user::setSkkLevel);
+        updateIfNotNull(edited.getCurrentLocation(), user::setCurrentLocation);
+        updateIfNotNull(edited.getPreferredLocations(), user::setPreferredLocations);
+        updateIfNotNull(edited.getSkill(), user::setSkill);
+    }
+
+    private <T> void updateIfNotNull(T value, java.util.function.Consumer<T> setter) {
+        if (value != null) {
+            setter.accept(value);
+        }
     }
 
     @Override
     public User findByEmail(String email) {
-        Optional<User> userProfileOptional = userRepository.findByEmail(email);
-        return userProfileOptional.orElse(null);
-    }
-
-    private UserResponseDTO convertToDTO(User user) {
-        UserResponseDTO dto = new UserResponseDTO();
-        dto.setId(user.getId());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        dto.setEmail(user.getEmail());
-        dto.setPhoneNumber(user.getPhoneNumber());
-        dto.setPhoto(user.getPhoto());
-        dto.setAboutMe(user.getAboutMe());
-        dto.setNik(user.getNik());
-        dto.setNpwp(user.getNpwp());
-        dto.setPhotoKtp(user.getPhotoKtp());
-        dto.setPhotoNpwp(user.getPhotoNpwp());
-        dto.setPhotoIjazah(user.getPhotoIjazah());
-        dto.setExperienceYears(user.getExperienceYears());
-        dto.setSkkLevel(user.getSkkLevel());
-        dto.setCurrentLocation(user.getCurrentLocation());
-        dto.setPreferredLocations(user.getPreferredLocations());
-        dto.setSkill(user.getSkill());
-        return dto;
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        return userOptional.orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
     }
 
     @Override
