@@ -57,10 +57,6 @@ public class Experience {
     @NotNull(message = "Talent (User) is required")
     private User user;
 
-    public static ExperienceBuilder builder() {
-        return new ExperienceBuilder();
-    }
-
     @AssertFalse(message = "End date must not be earlier than start date")
     public boolean isEndDateBeforeStartDate() {
         if (endDate == null) {

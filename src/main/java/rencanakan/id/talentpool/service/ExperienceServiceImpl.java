@@ -2,11 +2,14 @@ package rencanakan.id.talentpool.service;
 
 import jakarta.validation.Valid;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
+
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Experience;
+import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.ExperienceRepository;
 
 import java.util.List;
@@ -22,19 +25,21 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     @Override
-    public ExperienceResponseDTO createExperience(@Valid ExperienceRequestDTO request) {
+    public ExperienceResponseDTO createExperience(String userId, @Valid ExperienceRequestDTO request) {
         Experience newExperience = DTOMapper.map(request, Experience.class);
+        newExperience.setUser(User.builder().id(userId).build());
 
         Experience savedExperience = experienceRepository.save(newExperience);
-
         return DTOMapper.map(savedExperience, ExperienceResponseDTO.class);
     }
 
     @Override
-    public ExperienceResponseDTO editById(Long id, @Valid ExperienceRequestDTO dto) {
+    public ExperienceResponseDTO editById(String userId, Long id, @Valid ExperienceRequestDTO dto) {
         Experience experience = experienceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Experience with ID " + id + " not found"));
-
+        if(!(experience.getUser().getId().equals(userId))){
+            throw new AccessDeniedException("You are not allowed to edit this experience.");
+        }
         experience.setTitle(dto.getTitle());
         experience.setCompany(dto.getCompany());
         experience.setEmploymentType(dto.getEmploymentType());
