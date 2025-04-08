@@ -27,7 +27,7 @@ import java.util.*;
 
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 class RecommendationServiceTest {
@@ -130,6 +130,53 @@ class RecommendationServiceTest {
         talent1Recommendations = Arrays.asList(recommendation1, recommendation2);
         talent1PendingRecommendations = Collections.singletonList(recommendation1);
     }
+
+    @Nested
+    class DeleteRecommendation{
+        @Test
+        void deleteById_Success() {
+            when(recommendationRepository.findById(recommendation1.getId())).thenReturn(Optional.of(recommendation1));
+            User mockedTalent = mock(User.class);
+            recommendation1.setTalent(mockedTalent);
+            when(mockedTalent.getId()).thenReturn("idUser");
+            RecommendationResponseDTO response = recommendationService.deleteById( "idUser", recommendation1.getId());
+
+            verify(recommendationRepository, times(1)).deleteById(recommendation1.getId());
+
+            assertNotNull(response);
+            assertEquals(recommendation1.getId(), response.getId());
+            assertEquals(StatusType.PENDING, response.getStatus());
+        }
+        @Test
+        void deleteById_NotFound_ThrowsException() {
+
+            when(recommendationRepository.findById("999")).thenReturn(Optional.empty());
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                recommendationService.deleteById("userId","999");
+            });
+
+            assertEquals("Recommendation with id 999 not found.", exception.getMessage());
+
+            verify(recommendationRepository, never()).deleteById("999");
+        }
+
+        @Test
+        void testDeleteById_UnAuthorized() {
+            // Arrange
+            User mockedTalent = mock(User.class);
+            recommendation1.setTalent(mockedTalent);
+            when(mockedTalent.getId()).thenReturn("idUser");
+            when(recommendationRepository.findById(eq(recommendation1.getId()))).thenReturn(Optional.of(recommendation1));
+
+            // Act & Assert
+            AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+                recommendationService.deleteById("idUser123", recommendation1.getId());
+            });
+
+            assertEquals("You are not allowed to delete this recommendation.", exception.getMessage());
+            verify(recommendationRepository, never()).save(any());
+        }
+    }
     @Nested
     class patchStatus{
 
@@ -183,7 +230,7 @@ class RecommendationServiceTest {
                 recommendationService.editStatusById("idUser123", recommendation1.getId(), StatusType.ACCEPTED);
             });
 
-            assertEquals("You are not allowed to edit this experience.", exception.getMessage());
+            assertEquals("You are not allowed to edit this recommendation.", exception.getMessage());
             verify(recommendationRepository, never()).save(any());
         }
     }
