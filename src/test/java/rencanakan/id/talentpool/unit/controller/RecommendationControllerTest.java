@@ -38,9 +38,8 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class RecommendationControllerTest {
@@ -115,12 +114,10 @@ class RecommendationControllerTest {
         @Test
         public void testEditStatus_UserNotAuthorized_ReturnsForbidden() throws Exception {
 
-            Long experienceId = 1L;
-
             when(recommendationService.editStatusById(any(), eq(id), any()))
                     .thenThrow(new AccessDeniedException("You are not allowed to edit this recommendation."));
 
-            mockMvc.perform(patch("/recommendations/{id}", experienceId)
+            mockMvc.perform(patch("/recommendations/{id}", id)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(StatusType.ACCEPTED)))
                     .andExpect(status().isForbidden()) // Expect 403 Forbidden status
@@ -157,7 +154,7 @@ class RecommendationControllerTest {
         void deleteByStatusId_NotFound_ShouldReturn404() throws Exception {
             String notFoundId = "999";
             doThrow(new EntityNotFoundException("Recommendation with id " + notFoundId + " not found."))
-                    .when(recommendationService).deleteById(notFoundId);
+                    .when(recommendationService).deleteById(any(), any());
 
             mockMvc.perform(delete("/recommendations/{id}", notFoundId)
                             .contentType(MediaType.APPLICATION_JSON))
@@ -165,9 +162,22 @@ class RecommendationControllerTest {
                     .andExpect(jsonPath("$.errors").value("Recommendation with id " + notFoundId + " not found."));
 
         }
+
+        @Test
+        public void testDelete_UserNotAuthorized_ReturnsForbidden() throws Exception {
+
+            when(recommendationService.deleteById(any(), eq(id)))
+                    .thenThrow(new AccessDeniedException("You are not allowed to delete this recommendation."));
+
+            mockMvc.perform(delete("/recommendations/{id}", id)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(StatusType.ACCEPTED)))
+                    .andExpect(status().isForbidden()) // Expect 403 Forbidden status
+                    .andExpect(jsonPath("$.errors").value("You are not allowed to delete this recommendation.")); // Check error message
+        }
         @Test
         void deleteByStatusId_Success_ShouldReturn200() throws Exception {
-            when(recommendationService.deleteById(id)).thenReturn(responseDTO);
+            when(recommendationService.deleteById(any(), eq(id))).thenReturn(responseDTO);
             mockMvc.perform(delete("/recommendations/{id}", id)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk()) // Harus 200 OK
