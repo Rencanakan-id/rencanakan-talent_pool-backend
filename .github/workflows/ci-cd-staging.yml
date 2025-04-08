@@ -136,5 +136,5 @@ jobs:
             docker rm talent_pool || true
             docker rmi rencanakan_talent_pool:latest || true
             docker load -i ~/myapp.tar
-            docker run --name talent_pool -d -p 80:8080 rencanakan_talent_pool:latest
+            docker run --name talent_pool -d -p 8080:8080 rencanakan_talent_pool:latest
           EOF
