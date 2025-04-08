@@ -12,7 +12,6 @@ import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.CertificateRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CertificateServiceImpl implements CertificateService {
@@ -72,7 +71,7 @@ public class CertificateServiceImpl implements CertificateService {
         return DTOMapper.map(updatedCertificate, CertificateResponseDTO.class);
     }
 
-    public void deleteById(Long id, String userId) {
+    public void deleteById(Long id, String userId) throws RuntimeException {
         Certificate certificate = certificateRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sertifikat tidak ditemukan"));
 
