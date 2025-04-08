@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import rencanakan.id.talentpool.dto.CertificateResponseDTO;
 import rencanakan.id.talentpool.dto.CertificateRequestDTO;
+import rencanakan.id.talentpool.dto.CertificateResponseDTO;
 import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.CertificateService;
@@ -44,17 +44,22 @@ public class CertificateController {
                 .build());
     }
 
+    @PostMapping
+    public ResponseEntity<WebResponse<CertificateResponseDTO>> createCertificate(
+            @RequestBody @Valid CertificateRequestDTO certificateRequest,
+            @AuthenticationPrincipal User user) {
+
+        CertificateResponseDTO createdCertificate = certificateService.create(user.getId(), certificateRequest);
+        return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
+                .data(createdCertificate)
+                .build());
+    }
+
     @PutMapping("/{certificateId}")
     public ResponseEntity<WebResponse<CertificateResponseDTO>> editCertificateById(
             @PathVariable Long certificateId,
             @AuthenticationPrincipal User user,
             @RequestBody @Valid CertificateRequestDTO dto) {
-
-        if (user == null) {
-            return ResponseEntity.status(401).body(WebResponse.<CertificateResponseDTO>builder()
-                    .errors("Unauthorized access")
-                    .build());
-        }
 
         try {
             CertificateResponseDTO updatedCertificate = certificateService.editById(certificateId, dto);

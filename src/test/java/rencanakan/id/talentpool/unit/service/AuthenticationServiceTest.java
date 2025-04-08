@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,7 +82,7 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void testSignup_ValidUser_Success() {
+    void testSignup_ValidUser_Success() throws BadRequestException {
 
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -95,15 +96,66 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void testSignup_DuplicateUser_Fail() {
-        when(userService.findByEmail(anyString())).thenReturn(new User());
+    void signup_DuplicateEmail_ThrowsException() {
+        when(userRepository.findByEmail(userRequestDTO.getEmail()))
+                .thenReturn(Optional.of(new User()));
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
             authenticationService.signup(userRequestDTO);
         });
 
-        assertEquals("User with email " + userRequestDTO.getEmail() + " already exists.", exception.getMessage());
+        assertEquals("Email " + userRequestDTO.getEmail() + " sudah terdaftar.", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void signup_DuplicateNik_ThrowsException() {
+        when(userRepository.findByNik(userRequestDTO.getNik()))
+                .thenReturn(Optional.of(new User()));
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            authenticationService.signup(userRequestDTO);
+        });
+
+        assertEquals("NIK " + userRequestDTO.getNik() + " sudah terdaftar.", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void signup_DuplicateNpwp_ThrowsException() {
+        when(userRepository.findByNpwp(userRequestDTO.getNpwp()))
+                .thenReturn(Optional.of(new User()));
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            authenticationService.signup(userRequestDTO);
+        });
+
+        assertEquals("NPWP " + userRequestDTO.getNpwp() + " sudah terdaftar.", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void signup_DuplicatePhoneNumber_ThrowsException() {
+        when(userRepository.findByPhoneNumber(userRequestDTO.getPhoneNumber()))
+                .thenReturn(Optional.of(new User()));
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            authenticationService.signup(userRequestDTO);
+        });
+
+        assertEquals("Nomor telepon " + userRequestDTO.getPhoneNumber() + " sudah terdaftar.", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void signup_InvalidEmail_ValidationFails() {
+        userRequestDTO.setEmail("invalid-email");
+
+        Set<ConstraintViolation<UserRequestDTO>> violations = validator.validate(userRequestDTO);
+
+        assertFalse(violations.isEmpty(), "Validation should fail for invalid email");
+        assertTrue(violations.iterator().next().getMessage().contains("must be a well-formed email address"),
+                "Validation message should indicate an invalid email format");
     }
 
     @Test

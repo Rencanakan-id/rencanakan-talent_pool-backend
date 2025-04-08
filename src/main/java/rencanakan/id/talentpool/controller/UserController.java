@@ -1,8 +1,11 @@
 package rencanakan.id.talentpool.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.model.User;
@@ -12,27 +15,69 @@ import rencanakan.id.talentpool.service.UserService;
 @RequestMapping("/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/{id}")
-    public WebResponse<UserResponseDTO> getUserProfileById(@PathVariable String id, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<WebResponse<UserResponseDTO>> getUserById(
+            @PathVariable("id") String id, 
+            @AuthenticationPrincipal User user) {
+
+        if (user == null) {
+            return ResponseEntity.status(401).body(WebResponse.<UserResponseDTO>builder()
+                    .errors("Unauthorized access.")
+                    .build());
+        }
+
         UserResponseDTO resp = userService.getById(id);
-        return WebResponse.<UserResponseDTO>builder()
+
+        if (resp == null) {
+            return ResponseEntity.status(404).body(WebResponse.<UserResponseDTO>builder()
+                    .errors("User not found.")
+                    .build());
+        }
+
+        return ResponseEntity.ok(WebResponse.<UserResponseDTO>builder()
                 .data(resp)
-                .build();
+                .build());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<WebResponse<UserResponseDTO>> getCurrentUser(
+            @AuthenticationPrincipal User user) {
+
+        UserResponseDTO resp = userService.getById(user.getId());
+
+		if (resp == null) {
+			return ResponseEntity.status(404).body(WebResponse.<UserResponseDTO>builder()
+					.errors("User not found.")
+					.build());
+		}
+        
+        return ResponseEntity.ok(WebResponse.<UserResponseDTO>builder()
+                .data(resp)
+                .build());
     }
 
     @PutMapping("/{id}")
-    public WebResponse<UserResponseDTO> editUserProfile(
-            @PathVariable String id,
-            @RequestBody User editedProfile,
-            @RequestHeader("Authorization") String token) {
+    public ResponseEntity<WebResponse<UserResponseDTO>> editUserById(
+            @PathVariable("id") String id,
+            @RequestBody @Valid UserRequestDTO editedUser,
+            @AuthenticationPrincipal User user) {
 
-        UserResponseDTO updatedProfile = userService.editProfile(id, editedProfile);
+        if (!user.getId().equals(id)) {
+            return ResponseEntity.status(403).body(WebResponse.<UserResponseDTO>builder()
+                    .errors("You are not authorized to edit this user.")
+                    .build());
+        }
 
-        return WebResponse.<UserResponseDTO>builder()
+        UserResponseDTO updatedProfile = userService.editById(id, editedUser);
+
+        return ResponseEntity.ok(WebResponse.<UserResponseDTO>builder()
                 .data(updatedProfile)
-                .build();
+                .build());
     }
 }

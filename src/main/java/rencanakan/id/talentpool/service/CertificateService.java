@@ -9,4 +9,5 @@ public interface CertificateService {
     List<CertificateResponseDTO> getByUserId(String talentId);
     CertificateResponseDTO getById(Long certificateId);
     CertificateResponseDTO editById(Long id, CertificateRequestDTO dto);
+    CertificateResponseDTO create(String userId, CertificateRequestDTO certificateRequest);
 }

@@ -44,16 +44,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         jwtToken = authHeader.substring(7);
         username = jwtService.extractUsername(jwtToken);
+        System.out.println("ini username " + username);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             User userDetails = this.userService.loadUserByUsername(username);
 
+            System.out.println("satu");
+
             if (jwtService.isTokenValid(jwtToken, userDetails)) {
+                System.out.println("dua");
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
                         userDetails.getAuthorities()
                 );
+
+                System.out.println("tiga");
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
