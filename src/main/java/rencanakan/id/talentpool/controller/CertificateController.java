@@ -1,5 +1,6 @@
 package rencanakan.id.talentpool.controller;
 
+import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,23 +26,50 @@ public class CertificateController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<WebResponse<List<CertificateResponseDTO>>> getCertificatesByUserId(
             @PathVariable("userId") String userId,
-            @RequestHeader("Authorization") String token) {
+            @AuthenticationPrincipal User user) {
 
-        List<CertificateResponseDTO> certificates = certificateService.getByUserId(userId);
-        return ResponseEntity.ok(WebResponse.<List<CertificateResponseDTO>>builder()
-                .data(certificates)
-                .build());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(WebResponse.<List<CertificateResponseDTO>>builder()
+                    .errors("Unauthorized access")
+                    .build());
+        }
+
+        try {
+            List<CertificateResponseDTO> certificates = certificateService.getByUserId(userId);
+
+            return ResponseEntity.ok(WebResponse.<List<CertificateResponseDTO>>builder()
+                    .data(certificates)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(WebResponse.<List<CertificateResponseDTO>>builder()
+                    .errors(e.getMessage())
+                    .build());
+        }
     }
     
     @GetMapping("/{certificateId}")
     public ResponseEntity<WebResponse<CertificateResponseDTO>> getCertificateById(
             @PathVariable("certificateId") Long certificateId,
-            @RequestHeader("Authorization") String token) {
+            @AuthenticationPrincipal User user) {
 
-        CertificateResponseDTO certificate = certificateService.getById(certificateId);
-        return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
-                .data(certificate)
-                .build());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(WebResponse.<CertificateResponseDTO>builder()
+                    .errors("Unauthorized access")
+                    .build());
+        }
+
+        try {
+            CertificateResponseDTO certificate = certificateService.getById(certificateId);
+
+            return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
+                    .data(certificate)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(WebResponse.<CertificateResponseDTO>builder()
+                    .errors(e.getMessage())
+                    .build());
+        }
+
     }
 
     @PostMapping

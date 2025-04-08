@@ -1,6 +1,5 @@
 package rencanakan.id.talentpool.unit.controller;
 
-import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -9,7 +8,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -34,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import jakarta.persistence.EntityNotFoundException;
 import rencanakan.id.talentpool.controller.CertificateController;
 import rencanakan.id.talentpool.dto.CertificateRequestDTO;
 import rencanakan.id.talentpool.dto.CertificateResponseDTO;
@@ -180,6 +179,7 @@ class CertificateControllerTest {
     @Nested
     class ReadCertificateTests {
 
+
         private String token;
         private String talentId;
         private Long certificateId;
@@ -188,72 +188,87 @@ class CertificateControllerTest {
 
         @BeforeEach
         void setUp() {
-            token = "Bearer token";
-            talentId = "talent-123";
+            talentId = "user123";
             certificateId = 1L;
-
+            
             certificate = new CertificateResponseDTO();
             certificate.setId(certificateId);
             certificate.setTitle("Java Certificate");
             certificate.setFile("certificate.pdf");
             certificate.setTalentId(talentId);
-
+            
             certificateList = new ArrayList<>();
             certificateList.add(certificate);
         }
-
+        
         @Test
         void getCertificatesByUserId_ShouldReturnCertificates() throws Exception {
             when(certificateService.getByUserId(talentId)).thenReturn(certificateList);
-
-            mockMvc.perform(get("/certificates/user/{userId}", talentId)
-                            .header("Authorization", token))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data", hasSize(1)))
-                    .andExpect(jsonPath("$.data[0].id").value(certificateId))
-                    .andExpect(jsonPath("$.data[0].title").value("Java Certificate"))
-                    .andExpect(jsonPath("$.data[0].file").value("certificate.pdf"));
-
+            
+            mockMvc.perform(get("/certificates/user/{userId}", talentId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].id").value(certificateId))
+                .andExpect(jsonPath("$.data[0].title").value("Java Certificate"))
+                .andExpect(jsonPath("$.data[0].file").value("certificate.pdf"));
+            
             verify(certificateService, times(1)).getByUserId(talentId);
         }
-
+        
         @Test
-        void getCertificatesByUserId_WhenNoCertificates_ShouldReturnEmptyList() throws Exception {
-            List<CertificateResponseDTO> emptyList = new ArrayList<>();
-            when(certificateService.getByUserId(talentId)).thenReturn(emptyList);
+        void getCertificateByUserId_WhenNotFound_ShouldReturnNotFound() throws Exception {
+            when(certificateService.getByUserId(talentId)).thenThrow(
+                new EntityNotFoundException("Certificates not found for user with id " + talentId));
 
-            mockMvc.perform(get("/certificates/user/{userId}", talentId)
-                            .header("Authorization", token))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data", hasSize(0)));
-
+            mockMvc.perform(get("/certificates/user/{userId}", talentId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors").value("Certificates not found for user with id " + talentId))
+                .andExpect(jsonPath("$.data").doesNotExist());
+            
             verify(certificateService, times(1)).getByUserId(talentId);
         }
-
+        
         @Test
         void getCertificateById_ShouldReturnCertificate() throws Exception {
             when(certificateService.getById(certificateId)).thenReturn(certificate);
+            
+            mockMvc.perform(get("/certificates/{id}", certificateId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(certificateId))
+                .andExpect(jsonPath("$.data.title").value("Java Certificate"))
+                .andExpect(jsonPath("$.data.file").value("certificate.pdf"));
+            
+            verify(certificateService, times(1)).getById(certificateId);
+        }
+        
+        @Test
+        void getCertificateById_WhenNotFound_ShouldReturnNotFound() throws Exception {
+            when(certificateService.getById(certificateId)).thenThrow(
+                new EntityNotFoundException("Certificate with id " + certificateId + " not found"));
 
-            mockMvc.perform(get("/certificates/{id}", certificateId)
-                            .header("Authorization", token))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.id").value(certificateId))
-                    .andExpect(jsonPath("$.data.title").value("Java Certificate"))
-                    .andExpect(jsonPath("$.data.file").value("certificate.pdf"));
-
+            mockMvc.perform(get("/certificates/{id}", certificateId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errors").value("Certificate with id " + certificateId + " not found"))
+                .andExpect(jsonPath("$.data").doesNotExist());
+            
             verify(certificateService, times(1)).getById(certificateId);
         }
 
+
         @Test
-        void getCertificateById_WhenNotFound_ShouldReturnNotFound() throws Exception {
-            when(certificateService.getById(certificateId)).thenReturn(null);
+        void getCertificateEndpoints_WhenUserIsNull_ShouldReturnUnauthorized() throws Exception {
+            MockMvc mockMvcWithNullUser = MockMvcBuilders
+                    .standaloneSetup(certificateController)
+                    .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
+                    .build();
 
-            mockMvc.perform(get("/certificates/{id}", certificateId)
-                            .header("Authorization", token))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").isEmpty());
+            mockMvcWithNullUser.perform(get("/certificates/{id}", certificateId))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errors").value("Unauthorized access"));
 
-            verify(certificateService, times(1)).getById(certificateId);
+            mockMvcWithNullUser.perform(get("/certificates/user/{userId}", talentId))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errors").value("Unauthorized access"));
         }
     }
 
