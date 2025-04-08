@@ -10,4 +10,5 @@ public interface CertificateService {
     CertificateResponseDTO getById(Long certificateId);
     CertificateResponseDTO editById(Long id, CertificateRequestDTO dto);
     CertificateResponseDTO create(String userId, CertificateRequestDTO certificateRequest);
+    void deleteById(Long certificateId, String id);
 }

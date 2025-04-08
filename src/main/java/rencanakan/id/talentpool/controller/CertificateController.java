@@ -12,6 +12,7 @@ import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.CertificateService;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/certificates")
@@ -99,5 +100,30 @@ public class CertificateController {
                     .errors("Certificate not found with ID: " + certificateId)
                     .build());
         }
+    }
+
+    @DeleteMapping("{certificateId}")
+    public ResponseEntity<WebResponse<String>> deleteCertificateById(
+            @PathVariable Long certificateId,
+            @AuthenticationPrincipal User user) {
+
+        try {
+            certificateService.deleteById(certificateId, user.getId());
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage() + "bawa pesan ini");
+            if (Objects.equals(e.getMessage(), "Sertifikat tidak ditemukan")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(WebResponse.<String>builder()
+                        .errors(e.getMessage())
+                        .build());
+            } else if (e.getMessage().contains("tidak memiliki akses")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(WebResponse.<String>builder()
+                        .errors(e.getMessage())
+                        .build());
+            }
+        }
+
+        return ResponseEntity.ok(WebResponse.<String>builder()
+                .data("Sertifikat berhasil dihapus.")
+                .build());
     }
 }

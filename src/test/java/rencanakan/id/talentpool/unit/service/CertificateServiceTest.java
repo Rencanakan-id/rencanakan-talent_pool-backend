@@ -38,56 +38,57 @@ class CertificateServiceTest {
     @InjectMocks
     private CertificateServiceImpl certificateService;
 
+    private User user;
+    private String userId;
+    private Certificate certificate;
+    private CertificateResponseDTO certificateResponseDTO;
+    private CertificateRequestDTO certificateRequestDTO;
+
+    @BeforeEach
+    void setUp() {
+        user = User.builder()
+                .id("talent-123")
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .password("password123")
+                .phoneNumber("1234567890")
+                .photo("profile.jpg")
+                .aboutMe("About me text")
+                .nik("1234567890123456")
+                .npwp("12.345.678.9-012.345")
+                .photoKtp("ktp.jpg")
+                .photoNpwp("npwp.jpg")
+                .photoIjazah("ijazah.jpg")
+                .experienceYears(5)
+                .skkLevel("Intermediate")
+                .currentLocation("Jakarta")
+                .preferredLocations(Arrays.asList("Jakarta", "Bandung"))
+                .skill("Java, Spring Boot")
+                .build();
+
+        userId = user.getId();
+
+        certificate = Certificate.builder()
+                .id(1L)
+                .title("Java Certificate")
+                .file("java-cert.pdf")
+                .user(user)
+                .build();
+
+        certificateResponseDTO = new CertificateResponseDTO();
+        certificateResponseDTO.setId(1L);
+        certificateResponseDTO.setTitle("Java Certificate");
+        certificateResponseDTO.setFile("java-cert.pdf");
+
+        certificateRequestDTO = new CertificateRequestDTO();
+        certificateRequestDTO.setTitle("Python Certificate");
+        certificateRequestDTO.setFile("python-cert.pdf");
+    }
     
     @Nested
     class ReadCertificateTests {
-        private User user;
-        private String userId;
-        private Certificate certificate;
-        private CertificateResponseDTO certificateResponseDTO;
-        private CertificateRequestDTO certificateRequestDTO;
-    
-        @BeforeEach
-        void setUp() {
-            user = User.builder()
-                    .id("talent-123")
-                    .firstName("John")
-                    .lastName("Doe")
-                    .email("john.doe@example.com")
-                    .password("password123")
-                    .phoneNumber("1234567890")
-                    .photo("profile.jpg")
-                    .aboutMe("About me text")
-                    .nik("1234567890123456")
-                    .npwp("12.345.678.9-012.345")
-                    .photoKtp("ktp.jpg")
-                    .photoNpwp("npwp.jpg")
-                    .photoIjazah("ijazah.jpg")
-                    .experienceYears(5)
-                    .skkLevel("Intermediate")
-                    .currentLocation("Jakarta")
-                    .preferredLocations(Arrays.asList("Jakarta", "Bandung"))
-                    .skill("Java, Spring Boot")
-                    .build();
 
-            userId = user.getId();
-    
-            certificate = Certificate.builder()
-                    .id(1L)
-                    .title("Java Certificate")
-                    .file("java-cert.pdf")
-                    .user(user)
-                    .build();
-    
-            certificateResponseDTO = new CertificateResponseDTO();
-            certificateResponseDTO.setId(1L);
-            certificateResponseDTO.setTitle("Java Certificate");
-            certificateResponseDTO.setFile("java-cert.pdf");
-
-            certificateRequestDTO = new CertificateRequestDTO();
-            certificateRequestDTO.setTitle("Python Certificate");
-            certificateRequestDTO.setFile("python-cert.pdf");
-        }
         
         @Test
         void getByTalentId_WithExistingCertificates_ShouldReturnDTOList() {
@@ -456,5 +457,50 @@ class CertificateServiceTest {
                 assertEquals(userId, result.getTalentId());
             }
         }
+    }
+
+    @Test
+    void testDeleteById_Success() {
+        // Arrange
+        Long certificateId = 1L;
+        when(certificateRepository.findById(certificateId)).thenReturn(Optional.of(certificate));
+
+        // Act
+        certificateService.deleteById(certificateId, userId);
+
+        // Assert
+        verify(certificateRepository, times(1)).delete(certificate);
+    }
+
+    @Test
+    void testDeleteById_CertificateNotFound() {
+        // Arrange
+        Long certificateId = 999L; // ID yang tidak ada di database
+        when(certificateRepository.findById(certificateId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            certificateService.deleteById(certificateId, userId);
+        });
+
+        assertEquals("Sertifikat tidak ditemukan", exception.getMessage());
+        verify(certificateRepository, never()).delete(any());
+    }
+
+    @Test
+    void testDeleteById_UnauthorizedAccess() {
+        // Arrange
+        Long certificateId = 1L;
+        String unauthorizedUserId = "unauthorized-user-id"; // Pengguna lain
+
+        when(certificateRepository.findById(certificateId)).thenReturn(Optional.of(certificate));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            certificateService.deleteById(certificateId, unauthorizedUserId);
+        });
+
+        assertEquals("Anda tidak memiliki akses", exception.getMessage());
+        verify(certificateRepository, never()).delete(any());
     }
 }
