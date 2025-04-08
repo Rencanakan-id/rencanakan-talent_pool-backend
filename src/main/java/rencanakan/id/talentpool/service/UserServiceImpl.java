@@ -48,6 +48,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         updateIfNotNull(edited.getFirstName(), user::setFirstName);
         updateIfNotNull(edited.getLastName(), user::setLastName);
         updateIfNotNull(edited.getPhoneNumber(), user::setPhoneNumber);
+        updateIfNotNull(edited.getPrice(), user::setPrice);
 
         updateIfNotNull(edited.getPhoto(), user::setPhoto);
         updateIfNotNull(edited.getAboutMe(), user::setAboutMe);

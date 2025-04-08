@@ -70,4 +70,14 @@ public class CertificateServiceImpl implements CertificateService {
 
         return DTOMapper.map(updatedCertificate, CertificateResponseDTO.class);
     }
+
+    public void deleteById(Long id, String userId) throws RuntimeException {
+        Certificate certificate = certificateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sertifikat tidak ditemukan"));
+
+        if (!certificate.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Anda tidak memiliki akses");
+        }
+        certificateRepository.delete(certificate);
+    }
 }
