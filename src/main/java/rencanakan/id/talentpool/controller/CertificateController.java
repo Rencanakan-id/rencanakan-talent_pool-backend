@@ -1,6 +1,5 @@
 package rencanakan.id.talentpool.controller;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.CertificateService;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.List;
 import java.util.Objects;
 
