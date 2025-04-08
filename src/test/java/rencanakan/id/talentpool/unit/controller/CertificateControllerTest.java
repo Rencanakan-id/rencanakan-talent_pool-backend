@@ -1,5 +1,6 @@
 package rencanakan.id.talentpool.unit.controller;
 
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -57,6 +58,12 @@ class CertificateControllerTest {
 
     private User user;
 
+    private String token;
+    private String talentId;
+    private Long certificateId;
+    private List<CertificateResponseDTO> certificateList;
+    private CertificateResponseDTO certificate;
+
     @BeforeEach
     void setUp() {
         objectMapper = Jackson2ObjectMapperBuilder.json()
@@ -70,6 +77,18 @@ class CertificateControllerTest {
                 .build();
 
         user = createUser();
+
+        talentId = "user123";
+        certificateId = 1L;
+
+        certificate = new CertificateResponseDTO();
+        certificate.setId(certificateId);
+        certificate.setTitle("Java Certificate");
+        certificate.setFile("certificate.pdf");
+        certificate.setTalentId(talentId);
+
+        certificateList = new ArrayList<>();
+        certificateList.add(certificate);
     }
 
     private User createUser() {
@@ -178,43 +197,20 @@ class CertificateControllerTest {
 
     @Nested
     class ReadCertificateTests {
-
-
-        private String token;
-        private String talentId;
-        private Long certificateId;
-        private List<CertificateResponseDTO> certificateList;
-        private CertificateResponseDTO certificate;
-
-        @BeforeEach
-        void setUp() {
-            talentId = "user123";
-            certificateId = 1L;
-            
-            certificate = new CertificateResponseDTO();
-            certificate.setId(certificateId);
-            certificate.setTitle("Java Certificate");
-            certificate.setFile("certificate.pdf");
-            certificate.setTalentId(talentId);
-            
-            certificateList = new ArrayList<>();
-            certificateList.add(certificate);
-        }
-        
         @Test
         void getCertificatesByUserId_ShouldReturnCertificates() throws Exception {
             when(certificateService.getByUserId(talentId)).thenReturn(certificateList);
-            
+
             mockMvc.perform(get("/certificates/user/{userId}", talentId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", hasSize(1)))
                 .andExpect(jsonPath("$.data[0].id").value(certificateId))
                 .andExpect(jsonPath("$.data[0].title").value("Java Certificate"))
                 .andExpect(jsonPath("$.data[0].file").value("certificate.pdf"));
-            
+
             verify(certificateService, times(1)).getByUserId(talentId);
         }
-        
+
         @Test
         void getCertificateByUserId_WhenNotFound_ShouldReturnNotFound() throws Exception {
             when(certificateService.getByUserId(talentId)).thenThrow(
@@ -224,23 +220,23 @@ class CertificateControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errors").value("Certificates not found for user with id " + talentId))
                 .andExpect(jsonPath("$.data").doesNotExist());
-            
+
             verify(certificateService, times(1)).getByUserId(talentId);
         }
-        
+
         @Test
         void getCertificateById_ShouldReturnCertificate() throws Exception {
             when(certificateService.getById(certificateId)).thenReturn(certificate);
-            
+
             mockMvc.perform(get("/certificates/{id}", certificateId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(certificateId))
                 .andExpect(jsonPath("$.data.title").value("Java Certificate"))
                 .andExpect(jsonPath("$.data.file").value("certificate.pdf"));
-            
+
             verify(certificateService, times(1)).getById(certificateId);
         }
-        
+
         @Test
         void getCertificateById_WhenNotFound_ShouldReturnNotFound() throws Exception {
             when(certificateService.getById(certificateId)).thenThrow(
@@ -250,7 +246,7 @@ class CertificateControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errors").value("Certificate with id " + certificateId + " not found"))
                 .andExpect(jsonPath("$.data").doesNotExist());
-            
+
             verify(certificateService, times(1)).getById(certificateId);
         }
 
@@ -350,4 +346,71 @@ class CertificateControllerTest {
 
     }
 
+    @Test
+    void deleteCertificateById_AllScenarios() throws Exception {
+        mockMvc.perform(delete("/certificates/{certificateId}", certificateId)
+                        .with(SecurityMockMvcRequestPostProcessors.user(user)))
+                .andReturn();
+
+        doThrow(new RuntimeException("Sertifikat tidak ditemukan"))
+                .when(certificateService).deleteById(any(), any());
+        mockMvc.perform(delete("/certificates/{certificateId}", certificateId)
+                        .with(SecurityMockMvcRequestPostProcessors.user(user)))
+                .andReturn();
+
+        doThrow(new RuntimeException("tidak memiliki akses"))
+                .when(certificateService).deleteById(any(), any());
+        mockMvc.perform(delete("/certificates/{certificateId}", certificateId)
+                        .with(SecurityMockMvcRequestPostProcessors.user(user)))
+                .andReturn();
+
+        doThrow(new RuntimeException("error lain"))
+                .when(certificateService).deleteById(any(), any());
+        mockMvc.perform(delete("/certificates/{certificateId}", certificateId)
+                        .with(SecurityMockMvcRequestPostProcessors.user(user)))
+                .andReturn();
+    }
+
+    @Nested
+    class DeleteCertificateTests {
+
+        private Long certificateId;
+
+        @BeforeEach
+        void setUp() {
+            certificateId = 1L;
+        }
+
+        @Test
+        void deleteCertificateById_Success() throws Exception {
+            lenient().doNothing().when(certificateService).deleteById(any(), any());
+
+            mockMvc.perform(delete("/certificates/{certificateId}", certificateId)
+                            .with(SecurityMockMvcRequestPostProcessors.user(user)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").value("Sertifikat berhasil dihapus."));
+        }
+
+        @Test
+        void deleteCertificateById_WhenCertificateNotFound_ShouldReturnNotFound() throws Exception {
+            lenient().doThrow(new RuntimeException("Sertifikat tidak ditemukan"))
+                    .when(certificateService).deleteById(any(), any());
+
+            mockMvc.perform(delete("/certificates/{certificateId}", certificateId)
+                            .with(SecurityMockMvcRequestPostProcessors.user(user)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("Sertifikat tidak ditemukan"));
+        }
+
+        @Test
+        void deleteCertificateById_WhenUnauthorizedAccess_ShouldReturnForbidden() throws Exception {
+            lenient().doThrow(new RuntimeException("Anda tidak memiliki akses"))
+                    .when(certificateService).deleteById(any(), any());
+
+            mockMvc.perform(delete("/certificates/{certificateId}", certificateId)
+                            .with(SecurityMockMvcRequestPostProcessors.user(user)))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.errors").value("Anda tidak memiliki akses"));
+        }
+    }
 }
