@@ -57,4 +57,17 @@ public class CertificateServiceImpl implements CertificateService {
         Certificate savedCertificate = certificateRepository.save(newCertificate);
         return DTOMapper.map(savedCertificate, CertificateResponseDTO.class);
     }
+
+    @Override
+    public CertificateResponseDTO editById(Long id, CertificateRequestDTO dto) {
+        Certificate certificate = certificateRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Certificate with ID " + id + " not found"));
+
+        certificate.setTitle(dto.getTitle());
+        certificate.setFile(dto.getFile());
+
+        Certificate updatedCertificate = certificateRepository.save(certificate);
+
+        return DTOMapper.map(updatedCertificate, CertificateResponseDTO.class);
+    }
 }

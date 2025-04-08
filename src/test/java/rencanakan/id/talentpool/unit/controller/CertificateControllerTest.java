@@ -1,5 +1,11 @@
 package rencanakan.id.talentpool.unit.controller;
 
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -18,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -249,4 +256,83 @@ class CertificateControllerTest {
             verify(certificateService, times(1)).getById(certificateId);
         }
     }
+
+    @Nested
+    class EditCertificateTests {
+        private Long certificateId;
+        private CertificateRequestDTO requestDTO;
+        private CertificateResponseDTO responseDTO;
+
+        @BeforeEach
+        void setUp() {
+            certificateId = 1L;
+
+            requestDTO = new CertificateRequestDTO();
+            requestDTO.setTitle("Updated Java Certificate");
+            requestDTO.setFile("updated-certificate.pdf");
+
+            responseDTO = new CertificateResponseDTO();
+            responseDTO.setId(certificateId);
+            responseDTO.setTitle("Updated Java Certificate");
+            responseDTO.setFile("updated-certificate.pdf");
+            responseDTO.setTalentId("talent-123");
+        }
+
+        @Test
+        void editCertificateById_ShouldReturnUpdatedCertificate() throws Exception {
+            when(certificateService.editById(eq(certificateId), any(CertificateRequestDTO.class)))
+                    .thenReturn(responseDTO);
+
+            mockMvc.perform(put("/certificates/{certificateId}", certificateId)
+                            .contentType("application/json")
+                            .content("""
+                    {
+                        "title": "Updated Java Certificate",
+                        "file": "updated-certificate.pdf"
+                    }
+                """))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.id").value(certificateId))
+                    .andExpect(jsonPath("$.data.title").value("Updated Java Certificate"))
+                    .andExpect(jsonPath("$.data.file").value("updated-certificate.pdf"));
+
+            verify(certificateService, times(1)).editById(eq(certificateId), any(CertificateRequestDTO.class));
+        }
+
+        @Test
+        void editCertificateById_WhenCertificateNotFound_ShouldReturn404() throws Exception {
+            when(certificateService.editById(eq(certificateId), any(CertificateRequestDTO.class)))
+                    .thenThrow(new RuntimeException("Not found"));
+
+            mockMvc.perform(put("/certificates/{certificateId}", certificateId)
+                            .principal(() -> "mock-user")
+                            .contentType("application/json")
+                            .content("""
+                    {
+                        "title": "Updated Java Certificate",
+                        "file": "updated-certificate.pdf"
+                    }
+                """))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("Certificate not found with ID: " + certificateId));
+
+            verify(certificateService, times(1)).editById(eq(certificateId), any(CertificateRequestDTO.class));
+        }
+
+        @Test
+        void editCertificateById_WhenValidationFails_ShouldReturn400() throws Exception {
+            mockMvc.perform(put("/certificates/{certificateId}", certificateId)
+                            .principal(() -> "mock-user")
+                            .contentType("application/json")
+                            .content("""
+                    {
+                        "title": "",
+                        "file": ""
+                    }
+                """))
+                    .andExpect(status().isBadRequest());
+        }
+
+    }
+
 }
