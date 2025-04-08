@@ -2,7 +2,6 @@ package rencanakan.id.talentpool.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import rencanakan.id.talentpool.enums.EmploymentType;
@@ -24,6 +23,9 @@ public class ExperienceRequestDTO {
     @Size(max = 50, message = "Company must not exceed 50 characters")
     private String company;
 
+    @NotBlank(message = "Company image is required")
+    private String companyImage;
+
     @NotNull(message = "Employment type is required")
     private EmploymentType employmentType;
 
@@ -38,4 +40,6 @@ public class ExperienceRequestDTO {
 
     @NotNull(message = "Location type is required")
     private LocationType locationType;
+
+    private String userId;
 }

@@ -1,39 +1,60 @@
 package rencanakan.id.talentpool.service;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
-import jakarta.validation.Validator;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import rencanakan.id.talentpool.dto.LoginUserDTO;
-import rencanakan.id.talentpool.dto.UserProfileRequestDTO;
+import rencanakan.id.talentpool.dto.LoginRequestDTO;
+import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.model.User;
-import rencanakan.id.talentpool.repository.UserProfileRepository;
+import rencanakan.id.talentpool.repository.UserRepository;
 
-import java.util.Set;
+import java.util.Optional;
+
 
 @Service
 public class AuthenticationService {
-    private final UserProfileRepository userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final Validator validator;
+    private final UserService userService;
 
     public AuthenticationService(
-            UserProfileRepository userRepository,
+            UserRepository userRepository,
             AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder, Validator validator
+            PasswordEncoder passwordEncoder,
+            UserService userService
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.validator = validator;
+        this.userService = userService;
     }
 
-    public User signup(@Valid UserProfileRequestDTO request) {
-        User newProfile = User.builder()
+    public User signup(@Valid UserRequestDTO request) throws BadRequestException {
+        Optional<User> existingUserByEmail = userRepository.findByEmail(request.getEmail());
+        if (existingUserByEmail.isPresent()) {
+            throw new BadRequestException("Email " + request.getEmail() + " sudah terdaftar.");
+        }
+
+        Optional<User> existingUserByNik = userRepository.findByNik(request.getNik());
+        if (existingUserByNik.isPresent()) {
+            throw new BadRequestException("NIK " + request.getNik() + " sudah terdaftar.");
+        }
+
+        Optional<User> existingUserByNpwp = userRepository.findByNpwp(request.getNpwp());
+        if (existingUserByNpwp.isPresent()) {
+            throw new BadRequestException("NPWP " + request.getNpwp() + " sudah terdaftar.");
+        }
+
+        Optional<User> existingUserByPhoneNumber = userRepository.findByPhoneNumber(request.getPhoneNumber());
+        if (existingUserByPhoneNumber.isPresent()) {
+            throw new BadRequestException("Nomor telepon " + request.getPhoneNumber() + " sudah terdaftar.");
+        }
+
+        User newUser = User.builder()
                 .firstName(request.getFirstName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .lastName(request.getLastName())
@@ -53,17 +74,16 @@ public class AuthenticationService {
                 .skill(request.getSkill())
                 .price(request.getPrice())
                 .build();
-        return userRepository.save(newProfile);
+        return userRepository.save(newUser);
     }
 
-    public User authenticate(LoginUserDTO input) {
+    public User authenticate(LoginRequestDTO input) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
                         input.getPassword()
                 )
         );
-
-        return userRepository.findByEmail(input.getEmail()).orElseThrow();
+        return userRepository.findByEmail(input.getEmail()).orElse(null);
     }
 }
