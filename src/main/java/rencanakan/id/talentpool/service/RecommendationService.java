@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface RecommendationService {
-    RecommendationResponseDTO deleteById( String id);
+    RecommendationResponseDTO deleteById(String userId,  String id);
     RecommendationResponseDTO editStatusById(String userId, String id, StatusType status);
     RecommendationResponseDTO getById(String id);
     List<RecommendationResponseDTO> getByTalentId(String talentId);

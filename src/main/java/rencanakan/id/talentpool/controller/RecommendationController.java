@@ -48,8 +48,9 @@ public class RecommendationController {
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
-            @PathVariable String id){
-        RecommendationResponseDTO res = this.recommendationService.deleteById(id);
+            @PathVariable String id,
+            @AuthenticationPrincipal User user ){
+        RecommendationResponseDTO res = this.recommendationService.deleteById(user.getId(),  id);
         WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
                 .data(res)
                 .build();

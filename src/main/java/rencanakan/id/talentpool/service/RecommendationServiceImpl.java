@@ -35,7 +35,7 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .orElseThrow(() -> new EntityNotFoundException("Recommendation with ID " + id + " not found"));
 
         if (!(recommendation.getTalent().getId().equals(userId))) {
-            throw new AccessDeniedException("You are not allowed to edit this experience.");
+            throw new AccessDeniedException("You are not allowed to edit this recommendation.");
         }
         recommendation.setStatus(status);
         recommendationRepository.save(recommendation);
@@ -51,10 +51,12 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public RecommendationResponseDTO deleteById(String id) {
+    public RecommendationResponseDTO deleteById(String userId, String id) {
         Recommendation recommendation = recommendationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Recommendation with id " + id + " not found."));
-
+        if (!(recommendation.getTalent().getId().equals(userId))) {
+            throw new AccessDeniedException("You are not allowed to delete this recommendation.");
+        }
         recommendationRepository.deleteById(id);
         return  DTOMapper.map(recommendation, RecommendationResponseDTO.class);
 
