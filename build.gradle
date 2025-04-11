@@ -102,6 +102,18 @@ tasks.jacocoTestReport {
 	}
 }
 
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 1.0 // 100% coverage
+			}
+		}
+	}
+}
+
+check.dependsOn jacocoTestCoverageVerification
+
 // SonarQube Configuration
 sonarqube {
 	properties {
