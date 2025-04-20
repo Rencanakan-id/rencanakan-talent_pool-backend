@@ -1,17 +1,24 @@
 package rencanakan.id.talentpool.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
+import jakarta.persistence.criteria.Predicate;
+import rencanakan.id.talentpool.dto.FilterTalentDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -79,8 +86,44 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    public List<UserResponseDTO> filter(FilterTalentDTO filter) {
+        Specification<User> specification = (root, query, builder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (Objects.nonNull(filter.getName())) {
+                String keyword = "%" + filter.getName().toLowerCase() + "%";
+
+                Predicate firstNamePredicate = builder.like(
+                        builder.lower(root.get("firstName")), keyword
+                );
+
+                Predicate lastNamePredicate = builder.like(
+                        builder.lower(root.get("lastName")), keyword
+                );
+
+                predicates.add(builder.or(firstNamePredicate, lastNamePredicate));
+            }
+
+            return builder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        List<User> users = userRepository.findAll(specification);
+        if(users.isEmpty()){
+            throw  new EntityNotFoundException("No users found");
+        }
+
+        return users.stream()
+                .map(user -> DTOMapper.map(user, UserResponseDTO.class))
+                .collect(Collectors.toList());
+    }
+
+
+
+    @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
+
+
 }
