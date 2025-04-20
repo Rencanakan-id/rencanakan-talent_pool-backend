@@ -2,12 +2,14 @@ package rencanakan.id.talentpool.unit.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Validator;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -15,10 +17,12 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.lang.reflect.Field;
 
+import rencanakan.id.talentpool.dto.FilterTalentDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
@@ -51,7 +55,7 @@ class UserServiceTest {
         testUser.setPassword("password123");
         testUser.setNik("1234567891011121");
     }
-    
+
     @Nested
     class ReadUserTests {
         @Test
@@ -78,7 +82,7 @@ class UserServiceTest {
             assertEquals("User with ID " + nonExistentId + " not found", exception.getMessage());
             verify(userRepository, times(1)).findById(nonExistentId);
         }
-        
+
         @Test
         void getById_WithEmptyId_ThrowsEntityNotFoundException() {
             String emptyId = "";
@@ -90,7 +94,7 @@ class UserServiceTest {
             assertEquals("User with ID " + emptyId + " not found", exception.getMessage());
             verify(userRepository, times(1)).findById(emptyId);
         }
-        
+
         @Test
         void findByEmail_WithValidEmail_ReturnsUser() {
             String testEmail = "john.doe@example.com";
@@ -114,11 +118,11 @@ class UserServiceTest {
             Exception exception = assertThrows(EntityNotFoundException.class, () -> {
                 userService.findByEmail(nonExistentEmail);
             });
-            
+
             assertEquals("User not found with email: " + nonExistentEmail, exception.getMessage());
             verify(userRepository, times(1)).findByEmail(nonExistentEmail);
         }
-        
+
         @Test
         void findByEmail_WithEmptyEmail_ReturnsNull() {
             String emptyEmail = "";
@@ -127,35 +131,35 @@ class UserServiceTest {
             Exception exception = assertThrows(EntityNotFoundException.class, () -> {
                 userService.findByEmail(emptyEmail);
             });
-            
+
             assertEquals("User not found with email: " + emptyEmail, exception.getMessage());
             verify(userRepository, times(1)).findByEmail(emptyEmail);
         }
     }
-    
+
     @Nested
     class UpdateUserTests {
         private List<String> preferredLocations;
         private UserRequestDTO updatedUserData;
-        
+
         @BeforeEach
         void setUp() {
             preferredLocations = new ArrayList<>();
             preferredLocations.add("Bekasi");
             preferredLocations.add("Depok");
             preferredLocations.add("Bogor");
-            
+
             updatedUserData = new UserRequestDTO();
             updatedUserData.setFirstName("Jane");
             updatedUserData.setLastName("Doe");
             updatedUserData.setEmail("jane.doe@example.com");
             updatedUserData.setNik("1234567891011121");
         }
-        
+
         @Test
         void editById_WithValidData_UpdatesSuccessfully() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            
+
             UserResponseDTO editResult = userService.editById(testUserId, updatedUserData);
 
             assertNotNull(editResult);
@@ -163,7 +167,7 @@ class UserServiceTest {
             assertEquals("Jane", editResult.getFirstName());
             assertEquals("Doe", editResult.getLastName());
             assertEquals("jane.doe@example.com", editResult.getEmail());
-            
+
             verify(userRepository, times(1)).findById(testUserId);
             verify(userRepository, times(1)).save(any(User.class));
         }
@@ -222,8 +226,8 @@ class UserServiceTest {
 
             UserRequestDTO invalidUserRequest = DTOMapper.map(user, UserRequestDTO.class);
 
-            Exception exception = assertThrows(RuntimeException.class, () -> 
-                userService.editById("invalid-id", invalidUserRequest)
+            Exception exception = assertThrows(RuntimeException.class, () ->
+                    userService.editById("invalid-id", invalidUserRequest)
             );
             assertEquals("User with ID invalid-id not found", exception.getMessage());
         }
@@ -233,7 +237,7 @@ class UserServiceTest {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             User invalidUser = new User();
             invalidUser.setId(testUserId);
-            
+
             String longName = "A".repeat(300);
             Field nameField = User.class.getDeclaredField("firstName");
             nameField.setAccessible(true);
@@ -250,7 +254,7 @@ class UserServiceTest {
 
     @Nested
     class UserDetailsServiceTests {
-        
+
         @Test
         void loadUserByUsername_WithValidEmail_ReturnsUser() {
             String testEmail = "john.doe@example.com";
@@ -274,9 +278,86 @@ class UserServiceTest {
             Exception exception = assertThrows(UsernameNotFoundException.class, () -> {
                 userService.loadUserByUsername(nonExistentEmail);
             });
-            
+
             assertEquals("User not found", exception.getMessage());
             verify(userRepository, times(1)).findByEmail(nonExistentEmail);
+        }
+    }
+    @Nested
+    class FilterTalentTest{
+        @Test
+        void filter_withValidName_returnsMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder().name("john").build();
+
+            User user = new User();
+            user.setFirstName("John");
+            user.setLastName("Doe");
+
+            Mockito.when(userRepository.findAll(any(Specification.class)))
+                    .thenReturn(List.of(user));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                UserResponseDTO dto = new UserResponseDTO();
+                dto.setFirstName("John");
+                dto.setLastName("Doe");
+
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(dto);
+
+                List<UserResponseDTO> result = userService.filter(filter);
+
+                Assertions.assertEquals(1, result.size());
+                Assertions.assertEquals("John", result.get(0).getFirstName());
+            }
+        }
+
+
+        @Test
+        void filter_withNonMatchingName_returnsEmptyList() {
+            FilterTalentDTO filter = FilterTalentDTO.builder().name("nonexistent").build();
+
+            Mockito.when(userRepository.findAll(any(Specification.class)))
+                    .thenReturn(Collections.emptyList());
+
+
+            EntityNotFoundException thrown = Assertions.assertThrows(
+                    EntityNotFoundException.class,
+                    () -> userService.filter(filter),
+                    "Expected filter() to throw, but it didn't"
+            );
+
+            Assertions.assertEquals("No users found", thrown.getMessage());
+        }
+
+        @Test
+        void filter_withNullName_returnsAllUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder().name(null).build();
+
+            User user1 = new User();
+            user1.setFirstName("Alice");
+            user1.setLastName("Smith");
+
+            User user2 = new User();
+            user2.setFirstName("Bob");
+            user2.setLastName("Johnson");
+
+            List<User> allUsers = List.of(user1, user2);
+
+            Mockito.when(userRepository.findAll(any(Specification.class)))
+                    .thenReturn(allUsers);
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(eq(user1), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder().firstName("Alice").lastName("Smith").build());
+
+                mockedMapper.when(() -> DTOMapper.map(eq(user2), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder().firstName("Bob").lastName("Johnson").build());
+
+                List<UserResponseDTO> result = userService.filter(filter);
+
+                Assertions.assertEquals(2, result.size());
+                Assertions.assertEquals("Alice", result.get(0).getFirstName());
+                Assertions.assertEquals("Bob", result.get(1).getFirstName());
+            }
         }
     }
 }
