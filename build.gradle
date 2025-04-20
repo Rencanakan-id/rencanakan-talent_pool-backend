@@ -72,6 +72,11 @@ dependencies {
 	// Pact for Contract Testing
 	implementation 'au.com.dius.pact:consumer:4.6.17'
 	implementation 'au.com.dius.pact:provider:4.6.17'
+
+	//Prometheus
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 }
 
 // Configure Test Task
