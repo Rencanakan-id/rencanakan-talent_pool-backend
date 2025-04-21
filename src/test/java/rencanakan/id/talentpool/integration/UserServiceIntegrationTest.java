@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.jpa.repository.JpaRepository;
+
 import org.springframework.test.context.ActiveProfiles;
 import rencanakan.id.talentpool.dto.FilterTalentDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-public class UserServiceIntegrationTest {
+class UserServiceIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;

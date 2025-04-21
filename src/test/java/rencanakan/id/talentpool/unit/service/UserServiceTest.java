@@ -1,7 +1,7 @@
 package rencanakan.id.talentpool.unit.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.*;
+
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
