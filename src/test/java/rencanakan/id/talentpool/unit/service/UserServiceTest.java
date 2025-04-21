@@ -1,5 +1,6 @@
 package rencanakan.id.talentpool.unit.service;
 
+import io.cucumber.java.sl.In;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Assertions;
@@ -16,10 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.lang.reflect.Field;
 
 import rencanakan.id.talentpool.dto.FilterTalentDTO;
@@ -55,6 +53,15 @@ class UserServiceTest {
         testUser.setPassword("password123");
         testUser.setNik("1234567891011121");
     }
+
+    private User mockUser(String firstName) {
+        User user = new User();
+        user.setFirstName(firstName);
+        return user;
+    }
+
+
+
 
     @Nested
     class ReadUserTests {
@@ -286,8 +293,8 @@ class UserServiceTest {
     @Nested
     class FilterTalentTest{
         @Test
-        void filter_withValidName_returnsMatchingUsers() {
-            FilterTalentDTO filter = FilterTalentDTO.builder().name("john").build();
+        void filter_withValidData_returnsMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder().name("john").preferredLocations( Arrays.asList("Jakarta")).priceRange(Arrays.asList(0.00,200000.00)).skills(Arrays.asList("Java")).build();
 
             User user = new User();
             user.setFirstName("John");
@@ -307,6 +314,103 @@ class UserServiceTest {
 
                 Assertions.assertEquals(1, result.size());
                 Assertions.assertEquals("John", result.get(0).getFirstName());
+            }
+        }
+
+        @Test
+        void filter_withOnlyName_shouldReturnMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder().name("doe").build();
+
+            User user = mockUser("Doe");
+
+            Mockito.when(userRepository.findAll(any(Specification.class)))
+                    .thenReturn(List.of(user));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(UserResponseDTO.builder().firstName("Doe").build());
+
+                List<UserResponseDTO> result = userService.filter(filter);
+
+                Assertions.assertEquals(1, result.size());
+            }
+        }
+
+        @Test
+        void filter_withOnlyPreferredLocations_shouldReturnMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder()
+                    .preferredLocations(List.of("Bandung"))
+                    .build();
+
+            User user = mockUser("A");
+
+            Mockito.when(userRepository.findAll(any(Specification.class)))
+                    .thenReturn(List.of(user));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(UserResponseDTO.builder().preferredLocations(Arrays.asList("Bandung")).build());
+
+                List<UserResponseDTO> result = userService.filter(filter);
+
+                Assertions.assertEquals(1, result.size());
+            }
+        }
+        @Test
+        void filter_withOnlySkills_shouldReturnMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder()
+                    .skills(List.of("React"))
+                    .build();
+
+            User user = mockUser("B");
+
+            Mockito.when(userRepository.findAll(any(Specification.class)))
+                    .thenReturn(List.of(user));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(UserResponseDTO.builder().skill("React").build());
+
+                List<UserResponseDTO> result = userService.filter(filter);
+
+                Assertions.assertEquals(1, result.size());
+            }
+        }
+
+        @Test
+        void filter_withOnlyPriceRange_shouldReturnMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder()
+                    .priceRange(List.of(100.0, 200.0))
+                    .build();
+
+            User user = mockUser("C");
+
+            Mockito.when(userRepository.findAll(any(Specification.class)))
+                    .thenReturn(List.of(user));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(UserResponseDTO.builder().price(150).build());
+
+                List<UserResponseDTO> result = userService.filter(filter);
+
+                Assertions.assertEquals(1, result.size());
+            }
+        }
+
+        @Test
+        void filter_withInvalidPriceRange_shouldIgnoreIt() {
+            FilterTalentDTO filter = FilterTalentDTO.builder()
+                    .priceRange(List.of(100.0)) // kurang dari dua
+                    .build();
+
+            User user = mockUser("D");
+
+            Mockito.when(userRepository.findAll(any(Specification.class)))
+                    .thenReturn(List.of(user));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(UserResponseDTO.builder().firstName("D").build());
+
+                List<UserResponseDTO> result = userService.filter(filter);
+
+                Assertions.assertEquals(1, result.size());
             }
         }
 
@@ -359,5 +463,12 @@ class UserServiceTest {
                 Assertions.assertEquals("Bob", result.get(1).getFirstName());
             }
         }
+
     }
+
+
+
+
+
+
 }
