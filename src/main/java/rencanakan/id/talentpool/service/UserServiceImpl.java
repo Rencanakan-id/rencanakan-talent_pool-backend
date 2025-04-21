@@ -1,6 +1,7 @@
 package rencanakan.id.talentpool.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -103,6 +104,29 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
                 predicates.add(builder.or(firstNamePredicate, lastNamePredicate));
             }
+
+            if (Objects.nonNull(filter.getPreferredLocations()) && !filter.getPreferredLocations().isEmpty()) {
+                Join<User, String> locationJoin = root.join("preferredLocations");
+
+                Predicate locationPredicate = locationJoin.in(filter.getPreferredLocations());
+
+                predicates.add(locationPredicate);
+            }
+
+            if (Objects.nonNull(filter.getSkills()) && !filter.getSkills().isEmpty()) {
+                Predicate skillsPredicate = root.get("skills").in(filter.getSkills());
+                predicates.add(skillsPredicate);
+            }
+
+            if (Objects.nonNull(filter.getPriceRange()) && filter.getPriceRange().size() == 2) {
+                Double minPrice = filter.getPriceRange().get(0);
+                Double maxPrice = filter.getPriceRange().get(1);
+
+                Predicate pricePredicate = builder.between(root.get("price"), minPrice, maxPrice);
+
+                predicates.add(pricePredicate);
+            }
+
 
             return builder.and(predicates.toArray(new Predicate[0]));
         };
