@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,9 +22,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import rencanakan.id.talentpool.controller.ErrorController;
 import rencanakan.id.talentpool.controller.UserController;
+import rencanakan.id.talentpool.dto.FilterTalentDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.model.User;
@@ -55,6 +59,7 @@ class UserControllerTest {
         
         mockMvc = MockMvcBuilders
             .standaloneSetup(userController)
+                .setControllerAdvice(new ErrorController())
             .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(testUser))
             .build();
             
@@ -276,6 +281,48 @@ class UserControllerTest {
                     .andExpect(jsonPath("$.errors").value("You are not authorized to edit this user."));
             
             verify(userService, never()).editById(eq(otherUserId), any(UserRequestDTO.class));
+        }
+    }
+    @Nested
+    class FilterTalent{
+        @Test
+        void getAllTalent_withNameFilter_returnsFilteredUsers() throws Exception {
+
+            UserResponseDTO userDto = UserResponseDTO.builder().firstName("John").lastName("Doe").build();
+
+            when(userService.filter(any(FilterTalentDTO.class))).thenReturn(List.of(userDto));
+
+            mockMvc.perform(get("/users/contractor")
+                            .param("name", "john"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data[0].firstName").value("John"))
+                    .andExpect(jsonPath("$.data[0].lastName").value("Doe"));
+        }
+
+        @Test
+        void getAllTalent_withNonMatchingName_throwsEntityNotFoundException() throws Exception {
+              when(userService.filter(any(FilterTalentDTO.class)))
+                    .thenThrow(new EntityNotFoundException("No users found"));
+            mockMvc.perform(get("/users/contractor")
+                            .param("name", "nonexistent"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("No users found"));
+        }
+
+        @Test
+        void getAllTalent_withNullName_returnsAllUsers() throws Exception {
+
+            UserResponseDTO user1 =UserResponseDTO.builder().firstName("Alice").build();
+            UserResponseDTO user2 = UserResponseDTO.builder().firstName("Bob").build();
+
+            List<UserResponseDTO> allUsers = List.of(user1, user2);
+
+            when(userService.filter(any(FilterTalentDTO.class))).thenReturn(allUsers);
+
+            mockMvc.perform(get("/users/contractor"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data[0].firstName").value("Alice"))
+                    .andExpect(jsonPath("$.data[1].firstName").value("Bob"));
         }
     }
 }
