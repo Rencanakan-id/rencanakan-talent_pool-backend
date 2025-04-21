@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             }
 
             if (Objects.nonNull(filter.getSkills()) && !filter.getSkills().isEmpty()) {
-                Predicate skillsPredicate = root.get("skills").in(filter.getSkills());
+                Predicate skillsPredicate = root.get("skill").in(filter.getSkills());
                 predicates.add(skillsPredicate);
             }
 

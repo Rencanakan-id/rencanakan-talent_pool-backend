@@ -1,7 +1,7 @@
 package rencanakan.id.talentpool.unit.service;
 
-import io.cucumber.java.sl.In;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.*;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +31,7 @@ import rencanakan.id.talentpool.service.UserServiceImpl;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
+
     @Mock
     private UserRepository userRepository;
 
@@ -52,6 +53,7 @@ class UserServiceTest {
         testUser.setEmail("john.doe@example.com");
         testUser.setPassword("password123");
         testUser.setNik("1234567891011121");
+
     }
 
     private User mockUser(String firstName) {
