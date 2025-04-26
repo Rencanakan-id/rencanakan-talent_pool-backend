@@ -2,6 +2,9 @@ package rencanakan.id.talentpool.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Join;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,9 +13,11 @@ import jakarta.persistence.criteria.Predicate;
 import rencanakan.id.talentpool.dto.FilterTalentDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
+import rencanakan.id.talentpool.dto.UserResponseWithPagingDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,7 +92,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public List<UserResponseDTO> filter(FilterTalentDTO filter) {
+    public UserResponseWithPagingDTO filter(FilterTalentDTO filter, Pageable page) {
         Specification<User> specification = (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -131,14 +136,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return builder.and(predicates.toArray(new Predicate[0]));
         };
 
-        List<User> users = userRepository.findAll(specification);
-        if(users.isEmpty()){
+        Page<User> userPage = userRepository.findAll(specification, page);
+        if(userPage.isEmpty()){
             throw  new EntityNotFoundException("No users found");
         }
 
-        return users.stream()
+        List<UserResponseDTO> userDTOs = userPage.getContent().stream()
                 .map(user -> DTOMapper.map(user, UserResponseDTO.class))
                 .collect(Collectors.toList());
+
+        return UserResponseWithPagingDTO.builder().users(userDTOs).page( userPage.getNumber()).size(userPage.getSize()).totalPages(userPage.getTotalPages()).build();
     }
 
 
