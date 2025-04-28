@@ -65,6 +65,7 @@ public class Experience {
     @PastOrPresent(message = "Last modified date cannot be in the future")
     private LocalDateTime lastModifiedDate;
     @AssertFalse(message = "End date must not be earlier than start date")
+    
     public boolean isEndDateBeforeStartDate() {
         if (endDate == null) {
             return false;
