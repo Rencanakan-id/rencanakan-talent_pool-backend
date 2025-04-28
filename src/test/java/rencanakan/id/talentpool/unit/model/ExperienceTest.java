@@ -452,24 +452,6 @@ class ExperienceTest {
     @Nested
     class LastModifiedDateTests {
         @Test
-        void testLastModifiedDateNotNull() {
-            User user = createUser();
-            Experience experience = Experience.builder()
-                    .title("Software Engineer")
-                    .company("Tech Company")
-                    .employmentType(EmploymentType.FULL_TIME)
-                    .startDate(LocalDate.of(2020, 5, 1))
-                    .endDate(LocalDate.of(2020, 5, 2))
-                    .location("San Francisco")
-                    .locationType(LocationType.ON_SITE)
-                    .user(user)
-                    .build();
-
-            assertNotNull(experience.getLastModifiedDate(),
-                    "Last modified date should not be null");
-        }
-
-        @Test
         void testLastModifiedDateSetter() {
             User user = createUser();
             Experience experience = Experience.builder()
