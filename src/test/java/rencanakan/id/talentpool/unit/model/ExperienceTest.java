@@ -11,9 +11,11 @@ import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 import rencanakan.id.talentpool.model.Experience;
+import rencanakan.id.talentpool.model.Experience;
 import rencanakan.id.talentpool.model.User;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -447,6 +449,107 @@ class ExperienceTest {
             Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
 
             assertTrue(violations.isEmpty(), "End date same as start date should be valid");
+        }
+    }
+
+    @Nested
+    class LastModifiedDateTests {
+        @Test
+        void testLastModifiedDateNotNull() {
+            User user = createUser();
+            Experience experience = Experience.builder()
+                    .title("Software Engineer")
+                    .company("Tech Company")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.of(2020, 5, 1))
+                    .endDate(LocalDate.of(2020, 5, 2))
+                    .location("San Francisco")
+                    .locationType(LocationType.ON_SITE)
+                    .user(user)
+                    .build();
+
+            assertNotNull(experience.getLastModifiedDate(),
+                    "Last modified date should not be null");
+        }
+
+        @Test
+        void testLastModifiedDateSetter() {
+            User user = createUser();
+            Experience experience = Experience.builder()
+                    .title("Software Engineer")
+                    .company("Tech Company")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.of(2020, 5, 1))
+                    .endDate(LocalDate.of(2020, 5, 2))
+                    .location("San Francisco")
+                    .locationType(LocationType.ON_SITE)
+                    .user(user)
+                    .build();
+            LocalDateTime testDate = LocalDateTime.of(2023, 1, 1, 12, 0);
+            experience.setLastModifiedDate(testDate);
+            assertEquals(testDate, experience.getLastModifiedDate(),
+                    "Should be able to set the last modified date");
+        }
+
+        @Test
+        void testLastModifiedDateInThePast() {
+            User user = createUser();
+            Experience experience = Experience.builder()
+                    .title("Software Engineer")
+                    .company("Tech Company")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.of(2020, 5, 1))
+                    .endDate(LocalDate.of(2020, 5, 2))
+                    .location("San Francisco")
+                    .locationType(LocationType.ON_SITE)
+                    .user(user)
+                    .build();
+            LocalDateTime pastDate = LocalDateTime.now().minusDays(5);
+            experience.setLastModifiedDate(pastDate);
+            Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+            assertTrue(violations.isEmpty(), "Past date should be valid for last modified date");
+        }
+
+        @Test
+        void testLastModifiedDateInPresent() {
+            User user = createUser();
+            Experience experience = Experience.builder()
+                    .title("Software Engineer")
+                    .company("Tech Company")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.of(2020, 5, 1))
+                    .endDate(LocalDate.of(2020, 5, 2))
+                    .location("San Francisco")
+                    .locationType(LocationType.ON_SITE)
+                    .user(user)
+                    .build();
+            LocalDateTime presentDate = LocalDateTime.now();
+            experience.setLastModifiedDate(presentDate);
+            Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+            assertTrue(violations.isEmpty(), "Present date should be valid for last modified date");
+        }
+
+        @Test
+        void testLastModifiedDateInFuture() {
+            User user = createUser();
+            Experience experience = Experience.builder()
+                    .title("Software Engineer")
+                    .company("Tech Company")
+                    .employmentType(EmploymentType.FULL_TIME)
+                    .startDate(LocalDate.of(2020, 5, 1))
+                    .endDate(LocalDate.of(2020, 5, 2))
+                    .location("San Francisco")
+                    .locationType(LocationType.ON_SITE)
+                    .user(user)
+                    .build();
+            LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
+            experience.setLastModifiedDate(futureDate);
+            Set<ConstraintViolation<Experience>> violations = validator.validate(experience);
+
+            assertFalse(violations.isEmpty(), "Future date should not be valid for last modified date");
+            assertTrue(violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Last modified date cannot be in the future")),
+                    "Should show appropriate error message for future date");
         }
     }
 }
