@@ -111,9 +111,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             }
 
             if (Objects.nonNull(filter.getPreferredLocations()) && !filter.getPreferredLocations().isEmpty()) {
-                Join<User, String> locationJoin = root.join("preferredLocations");
 
-                Predicate locationPredicate = locationJoin.in(filter.getPreferredLocations());
+                Predicate locationPredicate = root.get("currentLocation").in(filter.getPreferredLocations());
 
                 predicates.add(locationPredicate);
             }

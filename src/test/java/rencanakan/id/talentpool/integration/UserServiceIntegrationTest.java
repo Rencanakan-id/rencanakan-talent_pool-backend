@@ -42,6 +42,7 @@ class UserServiceIntegrationTest {
                 .password("SecurePass123!")
                 .phoneNumber("081234567890")
                 .nik("1234567890123456")
+                .currentLocation("Jakarta")
                 .preferredLocations(List.of("Jakarta", "Bandung","NY"))
                 .skill("Java")
                 .price(75)
@@ -55,7 +56,7 @@ class UserServiceIntegrationTest {
 
     @Test
     void testFilter_SuccessfulMatch() {
-        FilterTalentDTO filter = FilterTalentDTO.builder().name("john").preferredLocations( List.of("NY")).skills(List.of("Java")).priceRange(List.of(50.0, 100.0)).build();
+        FilterTalentDTO filter = FilterTalentDTO.builder().name("john").preferredLocations( List.of("Jakarta")).skills(List.of("Java")).priceRange(List.of(50.0, 100.0)).build();
 
         UserResponseWithPagingDTO result = userService.filter(filter,page);
         assertFalse(result.getUsers().isEmpty());
