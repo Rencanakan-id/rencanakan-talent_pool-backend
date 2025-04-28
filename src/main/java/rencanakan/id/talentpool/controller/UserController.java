@@ -86,9 +86,12 @@ public class UserController {
 
     @GetMapping("/contractor")
     public ResponseEntity<WebResponse<List<UserResponseDTO>>> getAllTalent(
-            @RequestParam(value = "name", required = false) String name
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "skills", required = false) List<String> skills,
+            @RequestParam(value = "preferred_locations", required = false) List<String> preferredLocations,
+            @RequestParam(value = "price_range", required = false) List<Double> priceRange
     ) {
-        FilterTalentDTO filter = FilterTalentDTO.builder().name(name).build();
+        FilterTalentDTO filter = FilterTalentDTO.builder().name(name).skills(skills).priceRange(priceRange).preferredLocations(preferredLocations).build();
 
         List<UserResponseDTO> results = userService.filter(filter);
 
