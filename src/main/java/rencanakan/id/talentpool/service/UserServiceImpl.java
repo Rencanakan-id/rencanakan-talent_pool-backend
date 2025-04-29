@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         Specification<User> specification = (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (Objects.nonNull(filter.getName())) {
+            if (Objects.nonNull(filter.getName()) && !filter.getName().trim().isEmpty()) {
                 String keyword = "%" + filter.getName().toLowerCase() + "%";
 
                 Predicate firstNamePredicate = builder.like(
@@ -107,7 +107,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                         builder.lower(root.get("lastName")), keyword
                 );
 
-                predicates.add(builder.or(firstNamePredicate, lastNamePredicate));
+                Predicate fullNamePredicate = builder.like(
+                        builder.lower(builder.concat(builder.concat(root.get("firstName"), " "), root.get("lastName"))), 
+                        keyword
+                );
+
+                predicates.add(builder.or(firstNamePredicate, lastNamePredicate, fullNamePredicate));
             }
 
             if (Objects.nonNull(filter.getPreferredLocations()) && !filter.getPreferredLocations().isEmpty()) {
