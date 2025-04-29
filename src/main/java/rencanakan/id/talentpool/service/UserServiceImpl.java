@@ -111,16 +111,27 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             }
 
             if (Objects.nonNull(filter.getPreferredLocations()) && !filter.getPreferredLocations().isEmpty()) {
+                List<Predicate> locationPredicates = filter.getPreferredLocations().stream()
+                        .map(location -> builder.equal(
+                                builder.lower(root.get("currentLocation")),
+                                location.toLowerCase()
+                        ))
+                        .collect(Collectors.toList());
 
-                Predicate locationPredicate = root.get("currentLocation").in(filter.getPreferredLocations());
-
-                predicates.add(locationPredicate);
+                predicates.add(builder.or(locationPredicates.toArray(new Predicate[0])));
             }
 
             if (Objects.nonNull(filter.getSkills()) && !filter.getSkills().isEmpty()) {
-                Predicate skillsPredicate = root.get("skill").in(filter.getSkills());
-                predicates.add(skillsPredicate);
+                List<Predicate> skillsPredicates = filter.getSkills().stream()
+                        .map(skill -> builder.equal(
+                                builder.lower(root.get("skill")),
+                                skill.toLowerCase()
+                        ))
+                        .collect(Collectors.toList());
+
+                predicates.add(builder.or(skillsPredicates.toArray(new Predicate[0])));
             }
+
 
             if (Objects.nonNull(filter.getPriceRange()) && filter.getPriceRange().size() == 2) {
                 Double minPrice = filter.getPriceRange().get(0);
