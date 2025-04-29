@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -30,6 +31,7 @@ import rencanakan.id.talentpool.controller.UserController;
 import rencanakan.id.talentpool.dto.FilterTalentDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
+import rencanakan.id.talentpool.dto.UserResponseWithPagingDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.UserService;
 
@@ -38,17 +40,17 @@ class UserControllerTest {
 
     @Mock
     private UserService userService;
-    
+
     @Mock
     private Validator validator;
 
     @InjectMocks
     private UserController userController;
-    
+
     private MockMvc mockMvc;
-    
+
     private ObjectMapper objectMapper;
-    
+
     private User testUser;
 
     @BeforeEach
@@ -56,13 +58,13 @@ class UserControllerTest {
         testUser = new User();
         testUser.setId("user123");
         testUser.setEmail("john.doe@example.com");
-        
+
         mockMvc = MockMvcBuilders
             .standaloneSetup(userController)
                 .setControllerAdvice(new ErrorController())
             .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(testUser))
             .build();
-            
+
         objectMapper = new ObjectMapper();
     }
 
@@ -115,7 +117,7 @@ class UserControllerTest {
     @Nested
     @DisplayName("Get User Tests")
     class GetUserTests {
-        
+
         @Test
         @DisplayName("Should return user when user exists")
         void testGetUserById_Success() throws Exception {
@@ -161,7 +163,7 @@ class UserControllerTest {
         @DisplayName("Should return 401 when user is unauthorized for get by ID")
         void testGetUserById_Unauthorized() throws Exception {
             String userId = "user123";
-            
+
             // Set up mock with null user (unauthorized)
             mockMvc = MockMvcBuilders
                 .standaloneSetup(userController)
@@ -175,7 +177,7 @@ class UserControllerTest {
 
             verify(userService, never()).getById(any());
         }
-        
+
         @Test
         @DisplayName("Should return current user when using /me endpoint")
         void testGetCurrentUser_Success() throws Exception {
@@ -209,17 +211,17 @@ class UserControllerTest {
 
             verify(userService, times(1)).getById(any());
         }
-        
+
         @Test
         @DisplayName("Should return 404 when user is not found")
         void testGetCurrentUser_NotFound() throws Exception {
             when(userService.getById(any())).thenReturn(null);
-            
+
             mockMvc.perform(get("/users/me")
                     .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.errors").value("User not found."));
-                    
+
             verify(userService, times(1)).getById(any());
         }
     }
@@ -227,7 +229,7 @@ class UserControllerTest {
     @Nested
     @DisplayName("Update User Tests")
     class UpdateUserTests {
-        
+
         @Test
         @DisplayName("Should update user with valid data")
         void testUpdateUser_Success() throws Exception {
@@ -235,11 +237,11 @@ class UserControllerTest {
             UserRequestDTO updatedUser = createUserRequestDTO();
             updatedUser.setFirstName("Jane");
             updatedUser.setLastName("Smith");
-            
+
             UserResponseDTO responseDTO = createUserResponseDTO();
             responseDTO.setFirstName("Jane");
             responseDTO.setLastName("Smith");
-            
+
             when(userService.editById(eq(userId), any(UserRequestDTO.class))).thenReturn(responseDTO);
 
             mockMvc.perform(put("/users/{id}", userId)
@@ -258,28 +260,28 @@ class UserControllerTest {
         void testUpdateUser_UserNotFound() throws Exception {
             String userId = "nonexistent";
             UserRequestDTO updatedUser = createUserRequestDTO();
-            
+
             mockMvc.perform(put("/users/{id}", userId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(updatedUser)))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.errors").value("You are not authorized to edit this user."));
-            
+
             verify(userService, never()).editById(eq(userId), any(UserRequestDTO.class));
         }
-        
+
         @Test
         @DisplayName("Should return forbidden when updating another user's profile")
         void testUpdateUser_Forbidden() throws Exception {
             String otherUserId = "other123";
             UserRequestDTO updatedUser = createUserRequestDTO();
-            
+
             mockMvc.perform(put("/users/{id}", otherUserId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(updatedUser)))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.errors").value("You are not authorized to edit this user."));
-            
+
             verify(userService, never()).editById(eq(otherUserId), any(UserRequestDTO.class));
         }
     }
@@ -290,7 +292,7 @@ class UserControllerTest {
 
             UserResponseDTO userDto = UserResponseDTO.builder().firstName("John").lastName("Doe").build();
 
-            when(userService.filter(any(FilterTalentDTO.class))).thenReturn(List.of(userDto));
+            when(userService.filter(any(FilterTalentDTO.class), any(Pageable.class))).thenReturn(UserResponseWithPagingDTO.builder().users(List.of(userDto)).build() );
 
             mockMvc.perform(get("/users/contractor")
                             .param("name", "john"))
@@ -301,7 +303,7 @@ class UserControllerTest {
 
         @Test
         void getAllTalent_withNonMatchingName_throwsEntityNotFoundException() throws Exception {
-              when(userService.filter(any(FilterTalentDTO.class)))
+              when(userService.filter(any(FilterTalentDTO.class), any(Pageable.class)))
                     .thenThrow(new EntityNotFoundException("No users found"));
             mockMvc.perform(get("/users/contractor")
                             .param("name", "nonexistent"))
@@ -317,7 +319,7 @@ class UserControllerTest {
 
             List<UserResponseDTO> allUsers = List.of(user1, user2);
 
-            when(userService.filter(any(FilterTalentDTO.class))).thenReturn(allUsers);
+            when(userService.filter(any(FilterTalentDTO.class), any(Pageable.class))).thenReturn(UserResponseWithPagingDTO.builder().users(allUsers).build());
 
             mockMvc.perform(get("/users/contractor"))
                     .andExpect(status().isOk())
