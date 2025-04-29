@@ -100,20 +100,23 @@ jobs:
             --build-arg JDBC_DATABASE_URL=${{ secrets.JDBC_DATABASE_URL }} \
             --build-arg JDBC_DATABASE_USERNAME=${{ secrets.JDBC_DATABASE_USERNAME }} \
             --build-arg JWT_KEY=${{ secrets.JWT_KEY }} \
-            -t rencanakan_talent_pool:latest .
+            -t rencanakan_talent_pool:${{ github.ref_name }} .
 
-      - name: Save Docker Image as Tar File
-        run: |
-          docker save rencanakan_talent_pool:latest -o myapp.tar
-      - name: check directory
+      - name: Save Docker Image (version) as Tar File
+        run: docker save rencanakan_talent_pool:${{ github.ref_name }} -o myapp_${{ github.ref_name }}.tar
+
+      - name: Check directory
         run: ls -al
-      - name: create ssh key
+
+      - name: Create SSH key
         run: echo "${{ secrets.SSH_PRIVATE_KEY_STAGING }}" > ssh-key.pem
-      - name: update permission
+
+      - name: Update permission
         run: chmod 400 ssh-key.pem
-      - name: Transfer Image to Server via SCP
+
+      - name: Transfer Images to Server via SCP
         run: |
-          scp -o StrictHostKeyChecking=no -i ssh-key.pem myapp.tar ${{ secrets.SERVER_USER_STAGING }}@${{ secrets.SERVER_IP_STAGING }}:~/myapp.tar
+          scp -o StrictHostKeyChecking=no -i ssh-key.pem myapp_${{ github.ref_name }}.tar ${{ secrets.SERVER_USER_STAGING }}@${{ secrets.SERVER_IP_STAGING }}:~/myapp_${{ github.ref_name }}.tar
 
   deploy:
     name: Deploy to GCP
@@ -133,10 +136,11 @@ jobs:
         run: chmod 400 ssh-key.pem
       - name: Deploy to Server
         run: |
-          ssh -o StrictHostKeyChecking=no -i ssh-key.pem ${{ secrets.SERVER_USER_STAGING }}@${{ secrets.SERVER_IP_STAGING }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ssh-key.pem ${{ secrets.SERVER_USER_STAGING }}@${{ secrets.SERVER_IP_STAGING }} << EOF
             docker stop talent_pool || true
             docker rm talent_pool || true
-            docker rmi rencanakan_talent_pool:latest || true
-            docker load -i ~/myapp.tar
-            docker run --name talent_pool -d -p 8080:8080 rencanakan_talent_pool:latest
+            docker rmi rencanakan_talent_pool:${{ github.ref_name }} || true
+            docker load -i ~/myapp_${{ github.ref_name }}.tar
+            docker run --name talent_pool -d -p 8080:8080 rencanakan_talent_pool:${{ github.ref_name }}
+            rm ~/myapp_${{ github.ref_name }}.tar
           EOF
