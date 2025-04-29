@@ -1,7 +1,9 @@
 package rencanakan.id.talentpool.unit.service;
 
 import jakarta.persistence.EntityNotFoundException;
+
 import jakarta.validation.Validator;
+import org.hibernate.query.Page;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -9,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -16,15 +21,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.lang.reflect.Field;
 
 import rencanakan.id.talentpool.dto.FilterTalentDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
+import rencanakan.id.talentpool.dto.UserResponseWithPagingDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
@@ -32,6 +35,7 @@ import rencanakan.id.talentpool.service.UserServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
+
 
     @Mock
     private UserRepository userRepository;
@@ -44,6 +48,8 @@ class UserServiceTest {
 
     private String testUserId = "user123";
     private User testUser;
+    Pageable page ; // page = 0, size = 1
+
 
     @BeforeEach
     void setUp() {
@@ -54,7 +60,19 @@ class UserServiceTest {
         testUser.setEmail("john.doe@example.com");
         testUser.setPassword("password123");
         testUser.setNik("1234567891011121");
+
+        page = PageRequest.of(0, 1);
+
     }
+
+    private User mockUser(String firstName) {
+        User user = new User();
+        user.setFirstName(firstName);
+        return user;
+    }
+
+
+
 
     @Nested
     class ReadUserTests {
@@ -286,15 +304,16 @@ class UserServiceTest {
     @Nested
     class FilterTalentTest{
         @Test
-        void filter_withValidName_returnsMatchingUsers() {
-            FilterTalentDTO filter = FilterTalentDTO.builder().name("john").build();
+        void filter_withValidData_returnsMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder().name("john").preferredLocations( Arrays.asList("Jakarta")).priceRange(Arrays.asList(0.00,200000.00)).skills(Arrays.asList("Java")).build();
 
             User user = new User();
             user.setFirstName("John");
             user.setLastName("Doe");
 
-            Mockito.when(userRepository.findAll(any(Specification.class)))
-                    .thenReturn(List.of(user));
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of(user)));
+
 
             try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
                 UserResponseDTO dto = new UserResponseDTO();
@@ -303,10 +322,113 @@ class UserServiceTest {
 
                 mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(dto);
 
-                List<UserResponseDTO> result = userService.filter(filter);
 
-                Assertions.assertEquals(1, result.size());
-                Assertions.assertEquals("John", result.get(0).getFirstName());
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+                Assertions.assertEquals(1, result.getUsers().size());
+                Assertions.assertEquals("John", result.getUsers().get(0).getFirstName());
+            }
+        }
+
+        @Test
+        void filter_withOnlyName_shouldReturnMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder().name("doe").build();
+
+            User user = mockUser("Doe");
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of(user)));
+
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(UserResponseDTO.builder().firstName("Doe").build());
+
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+                Assertions.assertEquals(1, result.getUsers().size());
+            }
+        }
+
+        @Test
+        void filter_withOnlyPreferredLocations_shouldReturnMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder()
+                    .preferredLocations(List.of("Bandung"))
+                    .build();
+
+            User user = mockUser("A");
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of(user)));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(UserResponseDTO.builder().preferredLocations(Arrays.asList("Bandung")).build());
+
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+
+                Assertions.assertEquals(1, result.getUsers().size());
+            }
+        }
+        @Test
+        void filter_withOnlySkills_shouldReturnMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder()
+                    .skills(List.of("React"))
+                    .build();
+
+            User user = mockUser("B");
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of(user)));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(UserResponseDTO.builder().skill("React").build());
+
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+
+                Assertions.assertEquals(1, result.getUsers().size());
+            }
+        }
+
+        @Test
+        void filter_withOnlyPriceRange_shouldReturnMatchingUsers() {
+            FilterTalentDTO filter = FilterTalentDTO.builder()
+                    .priceRange(List.of(100.0, 200.0))
+                    .build();
+
+            User user = mockUser("C");
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of(user)));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(UserResponseDTO.builder().price(150).build());
+
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+
+                Assertions.assertEquals(1, result.getUsers().size());
+            }
+        }
+
+        @Test
+        void filter_withInvalidPriceRange_shouldIgnoreIt() {
+            FilterTalentDTO filter = FilterTalentDTO.builder()
+                    .priceRange(List.of(100.0)) // kurang dari dua
+                    .build();
+
+            User user = mockUser("D");
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of(user)));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(user, UserResponseDTO.class)).thenReturn(UserResponseDTO.builder().firstName("D").build());
+
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+
+                Assertions.assertEquals(1, result.getUsers().size());
             }
         }
 
@@ -315,13 +437,13 @@ class UserServiceTest {
         void filter_withNonMatchingName_returnsEmptyList() {
             FilterTalentDTO filter = FilterTalentDTO.builder().name("nonexistent").build();
 
-            Mockito.when(userRepository.findAll(any(Specification.class)))
-                    .thenReturn(Collections.emptyList());
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(Collections.emptyList()));
 
 
             EntityNotFoundException thrown = Assertions.assertThrows(
                     EntityNotFoundException.class,
-                    () -> userService.filter(filter),
+                    () -> userService.filter(filter, page),
                     "Expected filter() to throw, but it didn't"
             );
 
@@ -342,8 +464,8 @@ class UserServiceTest {
 
             List<User> allUsers = List.of(user1, user2);
 
-            Mockito.when(userRepository.findAll(any(Specification.class)))
-                    .thenReturn(allUsers);
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(allUsers));
 
             try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
                 mockedMapper.when(() -> DTOMapper.map(eq(user1), eq(UserResponseDTO.class)))
@@ -352,12 +474,20 @@ class UserServiceTest {
                 mockedMapper.when(() -> DTOMapper.map(eq(user2), eq(UserResponseDTO.class)))
                         .thenReturn(UserResponseDTO.builder().firstName("Bob").lastName("Johnson").build());
 
-                List<UserResponseDTO> result = userService.filter(filter);
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
 
-                Assertions.assertEquals(2, result.size());
-                Assertions.assertEquals("Alice", result.get(0).getFirstName());
-                Assertions.assertEquals("Bob", result.get(1).getFirstName());
+
+                Assertions.assertEquals(2, result.getUsers().size());
+                Assertions.assertEquals("Alice", result.getUsers().get(0).getFirstName());
+                Assertions.assertEquals("Bob", result.getUsers().get(1).getFirstName());
             }
         }
+
     }
+
+
+
+
+
+
 }
