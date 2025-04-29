@@ -70,7 +70,7 @@ public class ExperienceController {
     @PutMapping("/{id}")
     public ResponseEntity<WebResponse<ExperienceResponseDTO>> editExperienceById(
             @AuthenticationPrincipal User user,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody @Valid ExperienceRequestDTO dto) {
 
         ExperienceResponseDTO updatedExperience = experienceService.editById(user.getId(), id, dto);
