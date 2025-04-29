@@ -7,6 +7,9 @@ import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Getter
@@ -57,11 +60,12 @@ public class Experience {
     @NotNull(message = "Talent (User) is required")
     private User user;
 
-    public static ExperienceBuilder builder() {
-        return new ExperienceBuilder();
-    }
-
+    @UpdateTimestamp
+    @Column(name = "last_modified_date", nullable = false)
+    @PastOrPresent(message = "Last modified date cannot be in the future")
+    private LocalDateTime lastModifiedDate;
     @AssertFalse(message = "End date must not be earlier than start date")
+    
     public boolean isEndDateBeforeStartDate() {
         if (endDate == null) {
             return false;

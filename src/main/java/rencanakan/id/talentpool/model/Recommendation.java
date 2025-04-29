@@ -3,9 +3,10 @@ package rencanakan.id.talentpool.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 import rencanakan.id.talentpool.enums.StatusType;
 
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -15,7 +16,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table(name = "recommendation")
 public class Recommendation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -43,7 +43,8 @@ public class Recommendation {
     @NotNull(message = "Status is required")
     private StatusType status;
 
-    public static RecommendationBuilder builder() {
-        return new RecommendationBuilder();
-    }
+    @UpdateTimestamp
+    @Column(name = "last_modified_date", nullable = false)
+    @PastOrPresent(message = "Last modified date cannot be in the future")
+    private LocalDateTime lastModifiedDate;
 }

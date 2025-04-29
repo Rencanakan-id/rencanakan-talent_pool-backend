@@ -92,9 +92,16 @@ jobs:
         run: ls -al
       - name: export buildkit
         run: export DOCKER_BUILDKIT=1
-      - name: Build Docker Image
+      - name: Build Docker image
         run: |
-          docker build -t rencanakan_talent_pool:latest .
+          docker build \
+            --build-arg PRODUCTION=${{ secrets.PRODUCTION }} \
+            --build-arg JDBC_DATABASE_PASSWORD=${{ secrets.JDBC_DATABASE_PASSWORD }} \
+            --build-arg JDBC_DATABASE_URL=${{ secrets.JDBC_DATABASE_URL }} \
+            --build-arg JDBC_DATABASE_USERNAME=${{ secrets.JDBC_DATABASE_USERNAME }} \
+            --build-arg JWT_KEY=${{ secrets.JWT_KEY }} \
+            -t rencanakan_talent_pool:latest .
+
       - name: Save Docker Image as Tar File
         run: |
           docker save rencanakan_talent_pool:latest -o myapp.tar
@@ -131,5 +138,5 @@ jobs:
             docker rm talent_pool || true
             docker rmi rencanakan_talent_pool:latest || true
             docker load -i ~/myapp.tar
-            docker run --name talent_pool -d -p 80:8080 rencanakan_talent_pool:latest
+            docker run --name talent_pool -d -p 8080:8080 rencanakan_talent_pool:latest
           EOF
