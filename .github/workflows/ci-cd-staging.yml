@@ -142,6 +142,11 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+      - name: Get latest tag from Git
+        run: |
+          TAG_NAME=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "Latest tag is: $TAG_NAME"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Install SSH client
         run: sudo apt-get install openssh-client
