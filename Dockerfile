@@ -10,10 +10,13 @@ ENV JDBC_DATABASE_PASSWORD ${JDBC_DATABASE_PASSWORD}
 ENV JDBC_DATABASE_URL ${JDBC_DATABASE_URL}
 ENV JDBC_DATABASE_USERNAME ${JDBC_DATABASE_USERNAME}
 ENV JWT_KEY ${JWT_KEY}
-
+ENV NEW_RELIC_LICENSE_KEY="19b1bf2296f692b628feefc9ab1e7abcFFFFNRAL"
+ENV NEW_RELIC_APP_NAME="talent_pool_be (${PRODUCTION:-development})"
 
 WORKDIR /app
 RUN ls -al
 COPY ./talentPool-0.0.1-SNAPSHOT.jar /app
+COPY ./newrelic/newrelic.jar /app/newrelic/newrelic.jar
+COPY ./newrelic/newrelic.yml /app/newrelic/newrelic.yml
 EXPOSE 8080
-CMD ["java","-jar","talentPool-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-javaagent:/app/newrelic/newrelic.jar", "-jar", "talentPool-0.0.1-SNAPSHOT.jar"]
