@@ -1,0 +1,31 @@
+2025-05-04T03:40:06,249+0700 [1428 1] com.newrelic INFO: Writing to New Relic log file: C:\Kuliah\Semester 6\PPL\Repo\talent_pool_be\newrelic\logs\newrelic_agent.log
+2025-05-04T03:40:06,250+0700 [1428 1] com.newrelic INFO: JRE vendor Oracle Corporation version 21.0.2
+2025-05-04T03:40:06,250+0700 [1428 1] com.newrelic INFO: JVM vendor Oracle Corporation Java HotSpot(TM) 64-Bit Server VM version 21.0.2+13-LTS-58
+2025-05-04T03:40:06,250+0700 [1428 1] com.newrelic INFO: OS Windows 11 version 10.0 arch amd64
+2025-05-04T03:40:06,250+0700 [1428 1] com.newrelic INFO: Agent Host: LAPTOP-PLQMD17K IP: 192.168.0.104
+2025-05-04T03:40:06,251+0700 [1428 1] com.newrelic INFO: New Relic Agent v8.20.0 is initializing...
+2025-05-04T03:40:08,497+0700 [1428 30] com.newrelic INFO: Instrumentation com.newrelic.instrumentation.jdbc-resultset is disabled. Skipping.
+2025-05-04T03:40:11,227+0700 [1428 1] com.newrelic.agent.RPMServiceManagerImpl INFO: Configured to connect to New Relic at collector.newrelic.com:443
+2025-05-04T03:40:12,334+0700 [1428 1] com.newrelic INFO: Setting audit_mode to false
+2025-05-04T03:40:12,889+0700 [1428 1] com.newrelic.agent.config.ConfigServiceImpl INFO: Configuration file is C:\Kuliah\Semester 6\PPL\Repo\talent_pool_be\newrelic\.\newrelic.yml
+2025-05-04T03:40:12,897+0700 [1428 1] com.newrelic INFO: New Relic Agent v8.20.0 has started
+2025-05-04T03:40:12,898+0700 [1428 1] com.newrelic INFO: Agent class loader: com.newrelic.bootstrap.BootstrapAgent$JVMAgentClassLoader@1e81f4dc
+2025-05-04T03:40:12,902+0700 [1428 1] com.newrelic INFO: Premain startup complete in 8,205ms
+2025-05-04T03:40:12,905+0700 [1428 1] com.newrelic INFO: New Relic Security is completely disabled by one of the user provided config `security.enabled`, `security.agent.enabled` or `high_security`. Not loading security capabilities.
+2025-05-04T03:40:26,017+0700 [1428 1] com.newrelic INFO: Server Info: Apache Tomcat/10.1.36
+2025-05-04T03:40:43,129+0700 [1428 48] com.newrelic INFO: Host name is LAPTOP-PLQMD17K, display host LAPTOP-PLQMD17K for application talent_pool_be
+2025-05-04T03:40:43,131+0700 [1428 48] com.newrelic INFO: New Relic JFR Monitor is disabled: JFR config has not been enabled in the Java agent.
+2025-05-04T03:40:44,592+0700 [1428 48] com.newrelic INFO: Collector redirection to collector.newrelic.com:443
+2025-05-04T03:40:45,864+0700 [1428 48] com.newrelic INFO: Max payload size is 1,000,000 bytes
+2025-05-04T03:40:45,864+0700 [1428 48] com.newrelic INFO: Agent run id: BVeBllfawq6dAGZ1dyBSan9oFn-YAAIBAAAnIQEAAAWUAgQgUo2mAwAGOC4yMC4wAA9MQVBUT1AtUExRTUQxN0sADnRhbGVudF9wb29sX2Jl
+2025-05-04T03:40:45,865+0700 [1428 48] com.newrelic INFO: Agent 1428@LAPTOP-PLQMD17K/talent_pool_be connected to collector.newrelic.com:443
+2025-05-04T03:40:45,865+0700 [1428 48] com.newrelic INFO: Reporting to: https://rpm.newrelic.com/accounts/6714743/applications/542281126
+2025-05-04T03:40:45,867+0700 [1428 48] com.newrelic INFO: Using default collector host: collector.newrelic.com
+2025-05-04T03:40:45,867+0700 [1428 48] com.newrelic INFO: Using default metric ingest URI: https://metric-api.newrelic.com/metric/v1
+2025-05-04T03:40:45,867+0700 [1428 48] com.newrelic INFO: Using default event ingest URI: https://insights-collector.newrelic.com/v1/accounts/events
+2025-05-04T03:40:45,870+0700 [1428 48] com.newrelic INFO: Using default collector host: collector.newrelic.com
+2025-05-04T03:40:45,870+0700 [1428 48] com.newrelic INFO: Using default metric ingest URI: https://metric-api.newrelic.com/metric/v1
+2025-05-04T03:40:45,870+0700 [1428 48] com.newrelic INFO: Using default event ingest URI: https://insights-collector.newrelic.com/v1/accounts/events
+2025-05-04T03:40:46,706+0700 [1428 48] com.newrelic INFO: Real user monitoring is enabled for application talent_pool_be. Auto instrumentation is enabled.
+2025-05-04T03:40:46,707+0700 [1428 48] com.newrelic INFO: New Relic JFR Monitor is disabled: JFR config has not been enabled in the Java agent.
+2025-05-04T03:57:01,278+0700 [1428 24] com.newrelic.agent.core.CoreServiceImpl INFO: JVM is shutting down
