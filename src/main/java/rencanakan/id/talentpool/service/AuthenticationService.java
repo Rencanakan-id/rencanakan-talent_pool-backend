@@ -13,7 +13,6 @@ import rencanakan.id.talentpool.repository.UserRepository;
 
 import java.util.Optional;
 
-
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
@@ -38,17 +37,14 @@ public class AuthenticationService {
         if (existingUserByEmail.isPresent()) {
             throw new BadRequestException("Email " + request.getEmail() + " is already in use.");
         }
-
         Optional<User> existingUserByNik = userRepository.findByNik(request.getNik());
         if (existingUserByNik.isPresent()) {
             throw new BadRequestException("NIK " + request.getNik() + " is already in use.");
         }
-
         Optional<User> existingUserByNpwp = userRepository.findByNpwp(request.getNpwp());
         if (existingUserByNpwp.isPresent()) {
             throw new BadRequestException("NPWP " + request.getNpwp() + " is already in use.");
         }
-
         Optional<User> existingUserByPhoneNumber = userRepository.findByPhoneNumber(request.getPhoneNumber());
         if (existingUserByPhoneNumber.isPresent()) {
             throw new BadRequestException("Phone number " + request.getPhoneNumber() + " is already in use.");
