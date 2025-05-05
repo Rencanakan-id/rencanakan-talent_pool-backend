@@ -149,6 +149,10 @@ task prepareNewRelic(dependsOn: [downloadNewrelic, unzipNewrelic]) {
 
 build.dependsOn prepareNewRelic
 
+tasks.named('processResources') {
+    dependsOn unzipNewrelic
+}
+
 tasks.named('compileJava') {
 	dependsOn prepareNewRelic
 }
