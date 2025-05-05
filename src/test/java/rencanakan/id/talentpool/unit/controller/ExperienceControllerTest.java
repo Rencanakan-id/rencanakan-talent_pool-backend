@@ -89,7 +89,6 @@ public class ExperienceControllerTest {
         return ExperienceRequestDTO.builder()
                 .title("Lead Construction Project Manager")
                 .company("Aman")
-                .companyImage("https://eternalsunshine.png")
                 .employmentType(EmploymentType.FULL_TIME)
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.now().plusDays(1))
