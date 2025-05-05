@@ -33,7 +33,7 @@ class UserServiceIntegrationTest {
 
     @BeforeEach
     void setup() {
-        userService = new UserServiceImpl(userRepository, null);
+        userService = new UserServiceImpl(userRepository, jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator());
         User user = User.builder()
                 .firstName("John")
                 .lastName("Doe")
