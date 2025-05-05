@@ -109,6 +109,16 @@ class UserTest {
    }
 
    @Test
+   void testInvalidEmailFormat() {
+       user.setEmail("invalid-email-format");
+       Set<ConstraintViolation<User>> violations = validator.validate(user);
+       assertThat(violations).isNotEmpty();
+       assertThat(violations.stream()
+               .anyMatch(v -> v.getPropertyPath().toString().equals("email")))
+               .isTrue();
+   }
+
+   @Test
    void testValidEmailFormat() {
        String validEmail = "test.user+123@example-domain.co.uk";
        user.setEmail(validEmail);
