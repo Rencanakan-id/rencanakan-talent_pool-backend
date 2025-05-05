@@ -3,7 +3,7 @@ package rencanakan.id.talentpool.specification;
 import org.springframework.data.jpa.domain.Specification;
 import rencanakan.id.talentpool.model.User;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 public class LocationSpecification {
     private LocationSpecification() {
