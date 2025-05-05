@@ -202,7 +202,7 @@ class UserServiceTest {
         }
 
         @Test
-        void editById_WithInvalidEmail_FailsValidation() throws Exception {
+        void editById_WithInvalidEmail_FailsValidation() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             
             UserRequestDTO invalidUserRequest = new UserRequestDTO();
@@ -227,7 +227,7 @@ class UserServiceTest {
         }
 
         @Test
-        void editById_WithInvalidNIK_FailsValidation() throws Exception {
+        void editById_WithInvalidNIK_FailsValidation() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             
             UserRequestDTO invalidUserRequest = new UserRequestDTO();
@@ -265,7 +265,7 @@ class UserServiceTest {
         }
 
         @Test
-        void editById_WithNameTooLong_FailsValidation() throws Exception {
+        void editById_WithNameTooLong_FailsValidation() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             
             UserRequestDTO invalidUserRequest = new UserRequestDTO();
