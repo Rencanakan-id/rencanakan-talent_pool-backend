@@ -2,9 +2,11 @@ name: Java CI/CD Pipeline STAGING
 
 on:
   push:
-    branches: ['*']
+    branches:
+      - staging
   pull_request:
-    branches: ['*']
+    branches:
+      - staging
 
 jobs:
   build:
@@ -104,6 +106,12 @@ jobs:
           TAG_NAME=$(git describe --tags `git rev-list --tags --max-count=1`)
           echo "Latest tag is: $TAG_NAME"
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+      - name: Prepare New Relic Agent
+        run: |
+          mkdir -p newrelic
+          curl -o newrelic.zip https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip
+          unzip newrelic.zip
+          ls -la newrelic/
       - name: Build Docker image
         run: |
           docker build \
@@ -112,6 +120,7 @@ jobs:
             --build-arg JDBC_DATABASE_URL=${{ secrets.JDBC_DATABASE_URL }} \
             --build-arg JDBC_DATABASE_USERNAME=${{ secrets.JDBC_DATABASE_USERNAME }} \
             --build-arg JWT_KEY=${{ secrets.JWT_KEY }} \
+            --build-arg NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }} \
             -t rencanakan_talent_pool:${{ env.TAG_NAME }} .
 
       - name: Save Docker Image (version) as Tar File
