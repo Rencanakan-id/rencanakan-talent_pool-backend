@@ -5,6 +5,10 @@ import rencanakan.id.talentpool.model.User;
 import java.util.List;
 
 public class PriceSpecification {
+    private PriceSpecification() {
+        // Private constructor to prevent instantiation
+    }
+
     public static Specification<User> inPriceRange(List<Double> priceRange) {
         return (root, query, builder) -> {
             if (priceRange == null || priceRange.size() != 2) return null;

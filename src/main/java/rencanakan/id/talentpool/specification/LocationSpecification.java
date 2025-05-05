@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class LocationSpecification {
+    private LocationSpecification() {
+        // Private constructor to prevent instantiation
+    }
+
     public static Specification<User> hasPreferredLocations(List<String> locations) {
         return (root, query, builder) -> {
             if (locations == null || locations.isEmpty()) return null;
@@ -14,7 +18,7 @@ public class LocationSpecification {
                     builder.lower(root.get("currentLocation")),
                     location.toLowerCase()
                 ))
-                .collect(Collectors.toList());
+                .toList();
             return builder.or(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
     }
