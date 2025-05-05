@@ -129,11 +129,15 @@ task downloadNewrelic(type: Download) {
     mkdir 'newrelic'
     src 'https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip'
     dest file('newrelic')
+    outputs.file(file('newrelic/newrelic-java.zip'))
 }
 
 task unzipNewrelic(type: Copy) {
+    dependsOn downloadNewrelic
     from zipTree(file('newrelic/newrelic-java.zip'))
     into rootDir
+    inputs.file(file('newrelic/newrelic-java.zip'))
+    outputs.dir(file("${rootDir}/newrelic"))
 }
 
 task prepareNewRelic(dependsOn: [downloadNewrelic, unzipNewrelic]) {
@@ -147,20 +151,30 @@ task prepareNewRelic(dependsOn: [downloadNewrelic, unzipNewrelic]) {
     }
 }
 
+// Proper task dependencies
 build.dependsOn prepareNewRelic
 
+// Make sure all resource processing happens after New Relic setup
 tasks.named('processResources') {
     dependsOn unzipNewrelic
 }
 
+// Ensure Java compilation happens after New Relic is prepared
 tasks.named('compileJava') {
-	dependsOn prepareNewRelic
+    dependsOn prepareNewRelic
 }
 
+// Make sure bootJar creation happens after New Relic is prepared
 tasks.named('bootJar') {
-	dependsOn prepareNewRelic
+    dependsOn prepareNewRelic
 }
 
+// Ensure jar creation happens after New Relic is prepared
 tasks.named('jar') {
+    dependsOn prepareNewRelic
+}
+
+// Add proper dependency for classes task
+tasks.named('classes') {
     dependsOn prepareNewRelic
 }
