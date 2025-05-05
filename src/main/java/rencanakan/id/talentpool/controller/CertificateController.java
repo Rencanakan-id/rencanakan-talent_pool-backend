@@ -86,7 +86,7 @@ public class CertificateController {
 
     @PutMapping("/{certificateId}")
     public ResponseEntity<WebResponse<CertificateResponseDTO>> editCertificateById(
-            @PathVariable Long certificateId,
+            @PathVariable("certificateId") Long certificateId,
             @AuthenticationPrincipal User user,
             @RequestBody @Valid CertificateRequestDTO dto) {
 
@@ -102,9 +102,9 @@ public class CertificateController {
         }
     }
 
-    @DeleteMapping("{certificateId}")
+    @DeleteMapping("/{certificateId}")
     public ResponseEntity<WebResponse<String>> deleteCertificateById(
-            @PathVariable Long certificateId,
+            @PathVariable("certificateId") Long certificateId,
             @AuthenticationPrincipal User user) {
 
         try {

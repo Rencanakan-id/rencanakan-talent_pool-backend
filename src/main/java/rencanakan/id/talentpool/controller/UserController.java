@@ -1,14 +1,14 @@
 package rencanakan.id.talentpool.controller;
 
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import rencanakan.id.talentpool.dto.FilterTalentDTO;
-import rencanakan.id.talentpool.dto.UserRequestDTO;
-import rencanakan.id.talentpool.dto.UserResponseDTO;
-import rencanakan.id.talentpool.dto.WebResponse;
+import rencanakan.id.talentpool.dto.*;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.UserService;
 
@@ -86,14 +86,22 @@ public class UserController {
 
     @GetMapping("/contractor")
     public ResponseEntity<WebResponse<List<UserResponseDTO>>> getAllTalent(
-            @RequestParam(value = "name", required = false) String name
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "skills", required = false) List<String> skills,
+            @RequestParam(value = "preferred_locations", required = false) List<String> preferredLocations,
+            @RequestParam(value = "price_range", required = false) List<Double> priceRange,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") Integer size
     ) {
-        FilterTalentDTO filter = FilterTalentDTO.builder().name(name).build();
-
-        List<UserResponseDTO> results = userService.filter(filter);
+        FilterTalentDTO filter = FilterTalentDTO.builder().name(name).skills(skills).priceRange(priceRange).preferredLocations(preferredLocations).build();
+        Pageable pageable = PageRequest.of(page, size);
+        UserResponseWithPagingDTO results = userService.filter(filter, pageable);
 
         WebResponse<List<UserResponseDTO>> response = WebResponse.<List<UserResponseDTO>>builder()
-                .data(results)
+                .data(results.getUsers())
+                .page(results.getPage())
+                .size(results.getSize())
+                .totalPages(results.getTotalPages())
                 .build();
 
         return ResponseEntity.ok(response);
