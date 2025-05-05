@@ -1,6 +1,8 @@
 package rencanakan.id.talentpool.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,15 +24,19 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Size(max = 32, message = "First name exceeds maximum length")
     @Column(name = "first_name", length = 32, nullable = false)
     private String firstName;
 
+    @Size(max = 32, message = "Last name exceeds maximum length")
     @Column(name = "last_name", length = 32, nullable = false)
     private String lastName;
 
+    @Email(message = "Invalid email format")
     @Column(name = "email", length = 255, unique = true, nullable = false)
     private String email;
 
+    @Size(min = 8, message = "Password must be at least 8 characters")
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -43,6 +49,7 @@ public class User implements UserDetails {
     @Column(name = "about_me", columnDefinition = "TEXT")
     private String aboutMe;
 
+    @Size(min = 16, max = 16, message = "NIK must be exactly 16 digits")
     @Column(name = "nik", length = 16, unique = true, nullable = false)
     private String nik;
 
@@ -80,34 +87,6 @@ public class User implements UserDetails {
 
     public void setId(String id) {
         this.id = (id == null) ? UUID.randomUUID().toString() : id;
-    }
-
-    public void setFirstName(String firstName) {
-        if (firstName.length() > 32) {
-            throw new IllegalArgumentException("First name exceeds maximum length");
-        }
-        this.firstName = firstName;
-    }
-
-    public void setEmail(String email) {
-        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new IllegalArgumentException("Invalid email format");
-        }
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        if (password.length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters");
-        }
-        this.password = password;
-    }
-
-    public void setNik(String nik) {
-        if (nik.length() != 16) {
-            throw new IllegalArgumentException("NIK must be exactly 16 digits");
-        }
-        this.nik = nik;
     }
 
     @Override
