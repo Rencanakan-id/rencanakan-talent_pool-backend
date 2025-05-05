@@ -1,0 +1,8 @@
+### GET User as DTO - Fast and Lightweight
+GET http://localhost:8080/api/ir/user-dto
+Accept: application/json
+
+
+### GET User as Entity - Heavy and Exposes Sensitive Fields
+GET http://localhost:8080/api/ir/user
+Accept: application/json
