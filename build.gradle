@@ -148,3 +148,15 @@ task prepareNewRelic(dependsOn: [downloadNewrelic, unzipNewrelic]) {
 }
 
 build.dependsOn prepareNewRelic
+
+tasks.named('compileJava') {
+	dependsOn prepareNewRelic
+}
+
+tasks.named('bootJar') {
+	dependsOn prepareNewRelic
+}
+
+tasks.named('jar') {
+    dependsOn prepareNewRelic
+}
