@@ -33,26 +33,30 @@ public class AuthenticationService {
         this.userService = userService;
     }
 
+    private void validateUserUniqueness(UserRequestDTO request) {
+        userRepository.findByEmail(request.getEmail())
+                .ifPresent(user -> {
+                    throw new RuntimeException("Email " + request.getEmail() + " sudah terdaftar.");
+                });
+
+        userRepository.findByNik(request.getNik())
+                .ifPresent(user -> {
+                    throw new RuntimeException("NIK " + request.getNik() + " sudah terdaftar.");
+                });
+
+        userRepository.findByNpwp(request.getNpwp())
+                .ifPresent(user -> {
+                    throw new RuntimeException("NPWP " + request.getNpwp() + " sudah terdaftar.");
+                });
+
+        userRepository.findByPhoneNumber(request.getPhoneNumber())
+                .ifPresent(user -> {
+                    throw new RuntimeException("Nomor telepon " + request.getPhoneNumber() + " sudah terdaftar.");
+                });
+    }
+
     public User signup(@Valid UserRequestDTO request) throws BadRequestException {
-        Optional<User> existingUserByEmail = userRepository.findByEmail(request.getEmail());
-        if (existingUserByEmail.isPresent()) {
-            throw new BadRequestException("Email " + request.getEmail() + " sudah terdaftar.");
-        }
-
-        Optional<User> existingUserByNik = userRepository.findByNik(request.getNik());
-        if (existingUserByNik.isPresent()) {
-            throw new BadRequestException("NIK " + request.getNik() + " sudah terdaftar.");
-        }
-
-        Optional<User> existingUserByNpwp = userRepository.findByNpwp(request.getNpwp());
-        if (existingUserByNpwp.isPresent()) {
-            throw new BadRequestException("NPWP " + request.getNpwp() + " sudah terdaftar.");
-        }
-
-        Optional<User> existingUserByPhoneNumber = userRepository.findByPhoneNumber(request.getPhoneNumber());
-        if (existingUserByPhoneNumber.isPresent()) {
-            throw new BadRequestException("Nomor telepon " + request.getPhoneNumber() + " sudah terdaftar.");
-        }
+        validateUserUniqueness(request);
 
         User newUser = User.builder()
                 .firstName(request.getFirstName())
