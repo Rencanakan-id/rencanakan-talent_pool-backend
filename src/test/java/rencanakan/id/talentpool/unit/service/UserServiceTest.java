@@ -3,7 +3,6 @@ package rencanakan.id.talentpool.unit.service;
 import jakarta.persistence.EntityNotFoundException;
 
 import jakarta.validation.Validator;
-import org.hibernate.query.Page;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -22,7 +21,6 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
-import java.lang.reflect.Field;
 
 import rencanakan.id.talentpool.dto.FilterTalentDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
@@ -36,7 +34,6 @@ import rencanakan.id.talentpool.service.UserServiceImpl;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-
     @Mock
     private UserRepository userRepository;
 
@@ -48,7 +45,7 @@ class UserServiceTest {
 
     private String testUserId = "user123";
     private User testUser;
-    Pageable page ; // page = 0, size = 1
+    Pageable page;
 
 
     @BeforeEach
@@ -205,14 +202,23 @@ class UserServiceTest {
         }
 
         @Test
-        void editById_WithInvalidEmail_ThrowsException() throws Exception {
+        void editById_WithInvalidEmail_FailsValidation() throws Exception {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            User invalidUser = new User();
-            Field emailField = User.class.getDeclaredField("email");
-            emailField.setAccessible(true);
-            emailField.set(invalidUser, "invalid-email");
-
-            UserRequestDTO invalidUserRequest = DTOMapper.map(invalidUser, UserRequestDTO.class);
+            
+            UserRequestDTO invalidUserRequest = new UserRequestDTO();
+            invalidUserRequest.setEmail("invalid-email");
+            
+            when(mockValidator.validate(any(User.class)))
+                .thenAnswer(invocation -> {
+                    Set<jakarta.validation.ConstraintViolation<User>> violations = new HashSet<>();
+                    @SuppressWarnings("unchecked")
+                    jakarta.validation.ConstraintViolation<User> violation = mock(jakarta.validation.ConstraintViolation.class);
+                    when(violation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
+                    when(violation.getPropertyPath().toString()).thenReturn("email");
+                    when(violation.getMessage()).thenReturn("Invalid email format");
+                    violations.add(violation);
+                    return violations;
+                });
 
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editById(testUserId, invalidUserRequest);
@@ -221,15 +227,23 @@ class UserServiceTest {
         }
 
         @Test
-        void editById_WithInvalidNIK_ThrowsException() throws Exception {
+        void editById_WithInvalidNIK_FailsValidation() throws Exception {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            User invalidUser = new User();
-            Field nikField = User.class.getDeclaredField("nik");
-            nikField.setAccessible(true);
-            nikField.set(invalidUser, "invalid-nik");
-            invalidUser.setId(testUserId);
-
-            UserRequestDTO invalidUserRequest = DTOMapper.map(invalidUser, UserRequestDTO.class);
+            
+            UserRequestDTO invalidUserRequest = new UserRequestDTO();
+            invalidUserRequest.setNik("12345");
+            
+            when(mockValidator.validate(any(User.class)))
+                .thenAnswer(invocation -> {
+                    Set<jakarta.validation.ConstraintViolation<User>> violations = new HashSet<>();
+                    @SuppressWarnings("unchecked")
+                    jakarta.validation.ConstraintViolation<User> violation = mock(jakarta.validation.ConstraintViolation.class);
+                    when(violation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
+                    when(violation.getPropertyPath().toString()).thenReturn("nik");
+                    when(violation.getMessage()).thenReturn("NIK must be exactly 16 digits");
+                    violations.add(violation);
+                    return violations;
+                });
 
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editById(testUserId, invalidUserRequest);
@@ -251,17 +265,23 @@ class UserServiceTest {
         }
 
         @Test
-        void editById_WithNameTooLong_ThrowsException() throws Exception {
+        void editById_WithNameTooLong_FailsValidation() throws Exception {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            User invalidUser = new User();
-            invalidUser.setId(testUserId);
-
-            String longName = "A".repeat(300);
-            Field nameField = User.class.getDeclaredField("firstName");
-            nameField.setAccessible(true);
-            nameField.set(invalidUser, longName);
-
-            UserRequestDTO invalidUserRequest = DTOMapper.map(invalidUser, UserRequestDTO.class);
+            
+            UserRequestDTO invalidUserRequest = new UserRequestDTO();
+            invalidUserRequest.setFirstName("A".repeat(100));
+            
+            when(mockValidator.validate(any(User.class)))
+                .thenAnswer(invocation -> {
+                    Set<jakarta.validation.ConstraintViolation<User>> violations = new HashSet<>();
+                    @SuppressWarnings("unchecked")
+                    jakarta.validation.ConstraintViolation<User> violation = mock(jakarta.validation.ConstraintViolation.class);
+                    when(violation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
+                    when(violation.getPropertyPath().toString()).thenReturn("firstName");
+                    when(violation.getMessage()).thenReturn("First name exceeds maximum length");
+                    violations.add(violation);
+                    return violations;
+                });
 
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editById(testUserId, invalidUserRequest);
@@ -482,12 +502,5 @@ class UserServiceTest {
                 Assertions.assertEquals("Bob", result.getUsers().get(1).getFirstName());
             }
         }
-
     }
-
-
-
-
-
-
 }
