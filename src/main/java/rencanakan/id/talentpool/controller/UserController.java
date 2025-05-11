@@ -1,6 +1,5 @@
 package rencanakan.id.talentpool.controller;
 
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +41,6 @@ public class UserController {
                     .errors("User not found.")
                     .build());
         }
-
         return ResponseEntity.ok(WebResponse.<UserResponseDTO>builder()
                 .data(resp)
                 .build());
