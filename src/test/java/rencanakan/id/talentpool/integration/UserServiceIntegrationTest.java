@@ -165,4 +165,20 @@ class UserServiceIntegrationTest {
         assertEquals("John", result.getUsers().get(1).getFirstName());
         assertEquals("Zack", result.getUsers().get(2).getFirstName());
     }
+
+    @Test
+    void testFilter_WithNullName_ShouldNoApplyNameFilter() {
+        // Test specifically for Objects.nonNull(filter.getName()) condition
+        FilterTalentDTO filter = new FilterTalentDTO();
+        filter.setName(null);
+
+        // Use a larger page size to get all results
+        Pageable testPage = PageRequest.of(0, 10);
+        
+        UserResponseWithPagingDTO result = userService.filter(filter, testPage);
+        
+        // Verify results are returned (no name filter applied)
+        assertFalse(result.getUsers().isEmpty());
+        assertTrue(result.getUsers().size() >= 1);
+    }
 }

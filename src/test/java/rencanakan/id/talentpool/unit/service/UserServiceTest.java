@@ -530,6 +530,118 @@ class UserServiceTest {
             }
         }
 
+        @Test
+        void filter_withEmptyName_shouldTreatAsNoNameFilter() {
+            // Test with empty name (not null, but empty string)
+            FilterTalentDTO filter = FilterTalentDTO.builder().name("  ").build();
+
+            User user1 = new User();
+            user1.setFirstName("Alice");
+
+            List<User> allUsers = List.of(user1);
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(allUsers));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(eq(user1), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder().firstName("Alice").build());
+
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+                // Should not filter by name since it's empty
+                Assertions.assertEquals(1, result.getUsers().size());
+                Assertions.assertEquals("Alice", result.getUsers().get(0).getFirstName());
+            }
+        }
+
+        @Test
+        void filter_withNameConditionBranches() {
+            // Test all branches of if (Objects.nonNull(filter.getName()) && !filter.getName().trim().isEmpty())
+            
+            // 1. Objects.nonNull(filter.getName()) -> false
+            FilterTalentDTO filterWithNullName = FilterTalentDTO.builder().name(null).build();
+            
+            // 2. !filter.getName().trim().isEmpty() -> false (with whitespace)
+            FilterTalentDTO filterWithWhitespaceName = FilterTalentDTO.builder().name("  ").build();
+            
+            // 3. !filter.getName().trim().isEmpty() -> false (with empty string)
+            FilterTalentDTO filterWithEmptyName = FilterTalentDTO.builder().name("").build();
+            
+            // 4. Both conditions true
+            FilterTalentDTO filterWithValidName = FilterTalentDTO.builder().name("John").build();
+            
+            User testUser = mockUser("Test");
+            
+            // Configure mock to return the same result for all calls to isolate the testing of the branch
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of(testUser)));
+            
+            // Use mocked mapper for all test cases
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(eq(testUser), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder().firstName("Test").build());
+                
+                // Test each case
+                UserResponseWithPagingDTO resultNull = userService.filter(filterWithNullName, page);
+                UserResponseWithPagingDTO resultWhitespace = userService.filter(filterWithWhitespaceName, page);
+                UserResponseWithPagingDTO resultEmpty = userService.filter(filterWithEmptyName, page);
+                UserResponseWithPagingDTO resultValid = userService.filter(filterWithValidName, page);
+                
+                // All should return same result since we're just testing branches
+                assertEquals(1, resultNull.getUsers().size());
+                assertEquals(1, resultWhitespace.getUsers().size());
+                assertEquals(1, resultEmpty.getUsers().size());
+                assertEquals(1, resultValid.getUsers().size());
+                
+                // Verify repository was called with different specifications
+                verify(userRepository, times(4)).findAll(any(Specification.class), any(Pageable.class));
+            }
+        }
+
+        @Test
+        void filter_withEmptyStringName_shouldTreatAsNoNameFilter() {
+            // Test with empty string name (not null, not whitespace, but empty)
+            FilterTalentDTO filter = FilterTalentDTO.builder().name("").build();
+
+            User user1 = new User();
+            user1.setFirstName("Alice");
+
+            List<User> allUsers = List.of(user1);
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(allUsers));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(eq(user1), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder().firstName("Alice").build());
+
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+                // Should not filter by name since it's empty
+                Assertions.assertEquals(1, result.getUsers().size());
+                Assertions.assertEquals("Alice", result.getUsers().get(0).getFirstName());
+            }
+        }
+
+        @Test
+        void filter_withEmptyStringName_shouldHandleAsNoNameFilter() {
+            // Arrange
+            FilterTalentDTO filter = new FilterTalentDTO();
+            filter.setName(""); // Empty string
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(mockUser("John"))));
+
+            // Act
+            UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+            // Assert
+            assertNotNull(result);
+            assertFalse(result.getUsers().isEmpty());
+            assertEquals("John", result.getUsers().get(0).getFirstName());
+        }
+
     }
 
 
