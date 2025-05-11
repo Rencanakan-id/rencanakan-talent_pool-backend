@@ -4,7 +4,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Join;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -151,7 +153,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return builder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Page<User> userPage = userRepository.findAll(specification, page);
+        Pageable pageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), Sort.by("firstName"));
+        Page<User> userPage = userRepository.findAll(specification, pageable);
+
         if(userPage.isEmpty()){
             throw  new EntityNotFoundException("No users found");
         }
