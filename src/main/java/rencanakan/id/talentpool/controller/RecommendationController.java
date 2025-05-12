@@ -3,12 +3,9 @@ package rencanakan.id.talentpool.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import rencanakan.id.talentpool.dto.RecommendationRequestDTO;import org.springframework.web.server.ResponseStatusException;
+
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.dto.*;
 import rencanakan.id.talentpool.enums.StatusType;
@@ -42,8 +39,8 @@ public class RecommendationController {
                 .build();
 
         return ResponseEntity.ok(response);
-
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
             @PathVariable("id") String id,
@@ -53,9 +50,19 @@ public class RecommendationController {
                 .data(res)
                 .build();
         return ResponseEntity.ok(response);
-
     }
 
+    @PatchMapping("/{recommendationId}/accept")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> acceptById(
+            @PathVariable("recommendationId") String recommendationId,
+            @AuthenticationPrincipal User user) {
+
+        RecommendationResponseDTO resp = recommendationService.editStatusById(user.getId(), recommendationId, StatusType.ACCEPTED);
+
+        return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                    .data(resp)
+                    .build());
+    }
 
     @GetMapping("/{recommendationId}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> getRecommendationById(
@@ -194,6 +201,5 @@ public class RecommendationController {
 
         RecommendationResponseDTO response = recommendationService.createRecommendation(user.getId(), request);
         return ResponseEntity.ok(response);
-        }
-
     }
+}
