@@ -1,6 +1,5 @@
 package rencanakan.id.talentpool.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rencanakan.id.talentpool.service.EmailService;
