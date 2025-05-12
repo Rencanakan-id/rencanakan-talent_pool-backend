@@ -16,8 +16,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import rencanakan.id.talentpool.controller.AuthenticationController;
 import rencanakan.id.talentpool.dto.LoginRequestDTO;
+import rencanakan.id.talentpool.dto.ResetPasswordDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.model.User;
+import rencanakan.id.talentpool.repository.PasswordResetTokenRepository;
 import rencanakan.id.talentpool.service.AuthenticationService;
 import rencanakan.id.talentpool.service.JwtService;
 
@@ -26,6 +28,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -35,6 +38,9 @@ class AuthenticationControllerTest {
 
     @Mock
     private AuthenticationService authenticationService;
+
+    @Mock
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Mock
     private JwtService jwtService;
@@ -228,5 +234,20 @@ class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.data").doesNotExist());
 
         verify(authenticationService, times(1)).signup(any(UserRequestDTO.class));
+    }
+
+    @Test
+    void patchPassword_shouldCallServiceAndReturn200() throws Exception {
+        ResetPasswordDTO dto = new ResetPasswordDTO();
+        dto.setToken("abc");
+        dto.setNewPassword("newpass");
+
+        mockMvc.perform(patch("/auth/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Password berhasil direset."));
+
+        verify(authenticationService).resetPasswordWithToken("abc", "newpass");
     }
 }
