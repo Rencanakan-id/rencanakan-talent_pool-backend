@@ -4,13 +4,12 @@ import org.junit.jupiter.api.Test;
 import rencanakan.id.talentpool.model.PasswordResetToken;
 
 import java.time.LocalDateTime;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PasswordResetTokenTest {
 
     @Test
-    void itShouldCreatePasswordResetTokenWithBuilder() {
+    void builder_shouldCreateTokenCorrectly() {
         LocalDateTime now = LocalDateTime.now();
         PasswordResetToken token = PasswordResetToken.builder()
                 .id(1L)
@@ -28,7 +27,7 @@ class PasswordResetTokenTest {
     }
 
     @Test
-    void itShouldAllowSettersAndGetters() {
+    void setters_shouldUpdateFieldsCorrectly() {
         PasswordResetToken token = new PasswordResetToken();
         token.setId(2L);
         token.setEmail("test@example.com");
