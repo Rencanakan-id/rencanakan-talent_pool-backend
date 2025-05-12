@@ -229,8 +229,6 @@ public class RecommendationController {
             @RequestBody @Valid RecommendationRequestDTO editRequest) {
 
         try {
-            editRequest.setContractorId(contractorId);
-            
             RecommendationResponseDTO resp = recommendationService.editById(contractorId.toString(), recommendationId, editRequest);
 
             return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
