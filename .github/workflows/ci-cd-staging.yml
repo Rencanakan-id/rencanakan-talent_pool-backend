@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -50,6 +53,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -82,6 +88,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - name: check directory
         run: ls -al
       - name: Download Artifact
@@ -92,21 +101,36 @@ jobs:
         run: ls -al
       - name: export buildkit
         run: export DOCKER_BUILDKIT=1
-      - name: Build Docker Image
+      - name: Get latest tag from Git
         run: |
-          docker build --build-arg PRODUCTION=${{ secrets.PRODUCTION }} --build-arg JDBC_DATABASE_PASSWORD=${{ secrets.JDBC_DATABASE_PASSWORD }} --build-arg JDBC_DATABASE_URL=${{ secrets.JDBC_DATABASE_URL }} --build-arg JDBC_DATABASE_USERNAME=${{ secrets.JDBC_DATABASE_USERNAME}} -t rencanakan_talent_pool:latest .
-      - name: Save Docker Image as Tar File
+          TAG_NAME=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "Latest tag is: $TAG_NAME"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+      - name: Build Docker image
         run: |
-          docker save rencanakan_talent_pool:latest -o myapp.tar
-      - name: check directory
+          docker build \
+            --build-arg PRODUCTION=${{ secrets.PRODUCTION }} \
+            --build-arg JDBC_DATABASE_PASSWORD=${{ secrets.JDBC_DATABASE_PASSWORD }} \
+            --build-arg JDBC_DATABASE_URL=${{ secrets.JDBC_DATABASE_URL }} \
+            --build-arg JDBC_DATABASE_USERNAME=${{ secrets.JDBC_DATABASE_USERNAME }} \
+            --build-arg JWT_KEY=${{ secrets.JWT_KEY }} \
+            -t rencanakan_talent_pool:${{ env.TAG_NAME }} .
+
+      - name: Save Docker Image (version) as Tar File
+        run: docker save rencanakan_talent_pool:${{ env.TAG_NAME }} -o myapp_${{ env.TAG_NAME }}.tar
+
+      - name: Check directory
         run: ls -al
-      - name: create ssh key
+
+      - name: Create SSH key
         run: echo "${{ secrets.SSH_PRIVATE_KEY_STAGING }}" > ssh-key.pem
-      - name: update permission
+
+      - name: Update permission
         run: chmod 400 ssh-key.pem
-      - name: Transfer Image to Server via SCP
+
+      - name: Transfer Images to Server via SCP
         run: |
-          scp -o StrictHostKeyChecking=no -i ssh-key.pem myapp.tar ${{ secrets.SERVER_USER_STAGING }}@${{ secrets.SERVER_IP_STAGING }}:~/myapp.tar
+          scp -o StrictHostKeyChecking=no -i ssh-key.pem myapp_${{ env.TAG_NAME }}.tar ${{ secrets.SERVER_USER_STAGING }}@${{ secrets.SERVER_IP_STAGING }}:~/myapp_${{ env.TAG_NAME }}.tar
 
   deploy:
     name: Deploy to GCP
@@ -115,6 +139,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Get latest tag from Git
+        run: |
+          TAG_NAME=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "Latest tag is: $TAG_NAME"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Install SSH client
         run: sudo apt-get install openssh-client
@@ -126,10 +158,11 @@ jobs:
         run: chmod 400 ssh-key.pem
       - name: Deploy to Server
         run: |
-          ssh -o StrictHostKeyChecking=no -i ssh-key.pem ${{ secrets.SERVER_USER_STAGING }}@${{ secrets.SERVER_IP_STAGING }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ssh-key.pem ${{ secrets.SERVER_USER_STAGING }}@${{ secrets.SERVER_IP_STAGING }} << EOF
             docker stop talent_pool || true
             docker rm talent_pool || true
-            docker rmi rencanakan_talent_pool:latest || true
-            docker load -i ~/myapp.tar
-            docker run --name talent_pool -d -p 80:8080 rencanakan_talent_pool:latest
+            docker rmi rencanakan_talent_pool:${{ env.TAG_NAME }} || true
+            docker load -i ~/myapp_${{ env.TAG_NAME }}.tar
+            docker run --name talent_pool -d -p 8080:8080 rencanakan_talent_pool:${{ env.TAG_NAME }}
+            rm ~/myapp_${{ env.TAG_NAME }}.tar
           EOF

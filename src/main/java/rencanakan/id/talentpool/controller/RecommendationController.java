@@ -17,7 +17,6 @@ import rencanakan.id.talentpool.service.RecommendationService;
 import java.util.List;
 import java.util.Map;
 
-
 @RestController
 @RequestMapping("/recommendations")
 public class RecommendationController {
@@ -33,7 +32,7 @@ public class RecommendationController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> editStatusById(
-            @PathVariable String id,
+            @PathVariable("id") String id,
             @RequestBody StatusType status,
             @AuthenticationPrincipal User user){
 
@@ -42,6 +41,17 @@ public class RecommendationController {
                 .data(res)
                 .build();
 
+        return ResponseEntity.ok(response);
+
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
+            @PathVariable("id") String id,
+            @AuthenticationPrincipal User user ){
+        RecommendationResponseDTO res = this.recommendationService.deleteById(user.getId(),  id);
+        WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
+                .data(res)
+                .build();
         return ResponseEntity.ok(response);
 
     }

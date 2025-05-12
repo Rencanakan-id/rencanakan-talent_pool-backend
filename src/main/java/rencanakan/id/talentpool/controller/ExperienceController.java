@@ -28,6 +28,8 @@ public class ExperienceController {
             @PathVariable("talent_id") String talentId,
             @AuthenticationPrincipal User user) {
 
+        System.out.println("masuk sini kok");
+
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(WebResponse.<List<ExperienceResponseDTO>>builder()
@@ -68,7 +70,7 @@ public class ExperienceController {
     @PutMapping("/{id}")
     public ResponseEntity<WebResponse<ExperienceResponseDTO>> editExperienceById(
             @AuthenticationPrincipal User user,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody @Valid ExperienceRequestDTO dto) {
 
         ExperienceResponseDTO updatedExperience = experienceService.editById(user.getId(), id, dto);

@@ -221,12 +221,10 @@ class RecommendationControllerTest {
         @Test
         public void testEditStatus_UserNotAuthorized_ReturnsForbidden() throws Exception {
 
-            Long experienceId = 1L;
-
             when(recommendationService.editStatusById(any(), eq(id), any()))
                     .thenThrow(new AccessDeniedException("You are not allowed to edit this recommendation."));
 
-            mockMvc.perform(patch("/recommendations/{id}", experienceId)
+            mockMvc.perform(patch("/recommendations/{id}", id)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(StatusType.ACCEPTED)))
                     .andExpect(status().isForbidden()) // Expect 403 Forbidden status
@@ -253,6 +251,49 @@ class RecommendationControllerTest {
                     .andExpect(jsonPath("$.data.status").value(modifiedResponseDTO.getStatus().toString()))
                     .andExpect(jsonPath("$.errors").isEmpty());
 
+
+        }
+    }
+
+    @Nested
+    class DeleteRecommendationTests{
+        @Test
+        void deleteByStatusId_NotFound_ShouldReturn404() throws Exception {
+            String notFoundId = "999";
+            doThrow(new EntityNotFoundException("Recommendation with id " + notFoundId + " not found."))
+                    .when(recommendationService).deleteById(any(), any());
+
+            mockMvc.perform(delete("/recommendations/{id}", notFoundId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("Recommendation with id " + notFoundId + " not found."));
+
+        }
+
+        @Test
+        public void testDelete_UserNotAuthorized_ReturnsForbidden() throws Exception {
+
+            when(recommendationService.deleteById(any(), eq(id)))
+                    .thenThrow(new AccessDeniedException("You are not allowed to delete this recommendation."));
+
+            mockMvc.perform(delete("/recommendations/{id}", id)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(StatusType.ACCEPTED)))
+                    .andExpect(status().isForbidden()) // Expect 403 Forbidden status
+                    .andExpect(jsonPath("$.errors").value("You are not allowed to delete this recommendation.")); // Check error message
+        }
+        @Test
+        void deleteByStatusId_Success_ShouldReturn200() throws Exception {
+            when(recommendationService.deleteById(any(), eq(id))).thenReturn(responseDTO);
+            mockMvc.perform(delete("/recommendations/{id}", id)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk()) // Harus 200 OK
+                    .andExpect(jsonPath("$.data.id").value(id))
+                    .andExpect(jsonPath("$.data.talentId").value("talentId"))
+                    .andExpect(jsonPath("$.data.contractorId").value(123L))
+                    .andExpect(jsonPath("$.data.contractorName").value("contractorName"))
+                    .andExpect(jsonPath("$.data.message").value("Some message"))
+                    .andExpect(jsonPath("$.data.status").value("ACCEPTED"));
 
         }
     }

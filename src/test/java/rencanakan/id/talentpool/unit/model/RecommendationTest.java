@@ -12,6 +12,7 @@ import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.model.User;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,6 +48,7 @@ class RecommendationTest {
                 .contractorName("Test Contractor")
                 .message("Test recommendation message")
                 .status(StatusType.PENDING)
+                .lastModifiedDate(LocalDateTime.now())
                 .build();
     }
 
@@ -164,6 +166,51 @@ class RecommendationTest {
                 assertTrue(violations.isEmpty(),
                         String.format("Status %s should be valid", status));
             }
+        }
+    }
+
+    @Nested
+    class LastModifiedDateTests {
+        @Test
+        void testLastModifiedDateNotNull() {
+            assertNotNull(recommendation.getLastModifiedDate(),
+                    "Last modified date should not be null");
+        }
+
+        @Test
+        void testLastModifiedDateSetter() {
+            LocalDateTime testDate = LocalDateTime.of(2023, 1, 1, 12, 0);
+            recommendation.setLastModifiedDate(testDate);
+            assertEquals(testDate, recommendation.getLastModifiedDate(),
+                    "Should be able to set the last modified date");
+        }
+
+        @Test
+        void testLastModifiedDateInThePast() {
+            LocalDateTime pastDate = LocalDateTime.now().minusDays(5);
+            recommendation.setLastModifiedDate(pastDate);
+            Set<ConstraintViolation<Recommendation>> violations = validator.validate(recommendation);
+            assertTrue(violations.isEmpty(), "Past date should be valid for last modified date");
+        }
+
+        @Test
+        void testLastModifiedDateInPresent() {
+            LocalDateTime presentDate = LocalDateTime.now();
+            recommendation.setLastModifiedDate(presentDate);
+            Set<ConstraintViolation<Recommendation>> violations = validator.validate(recommendation);
+            assertTrue(violations.isEmpty(), "Present date should be valid for last modified date");
+        }
+
+        @Test
+        void testLastModifiedDateInFuture() {
+            LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
+            recommendation.setLastModifiedDate(futureDate);
+            Set<ConstraintViolation<Recommendation>> violations = validator.validate(recommendation);
+
+            assertFalse(violations.isEmpty(), "Future date should not be valid for last modified date");
+            assertTrue(violations.stream()
+                    .anyMatch(v -> v.getMessage().equals("Last modified date cannot be in the future")),
+                    "Should show appropriate error message for future date");
         }
     }
 }

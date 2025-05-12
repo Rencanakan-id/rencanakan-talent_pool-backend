@@ -3,7 +3,10 @@ package rencanakan.id.talentpool.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 import rencanakan.id.talentpool.enums.StatusType;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -40,4 +43,9 @@ public class Recommendation {
     @Column(name = "status_type", nullable = false)
     @NotNull(message = "Status is required")
     private StatusType status;
+
+    @UpdateTimestamp
+    @Column(name = "last_modified_date", nullable = false)
+    @PastOrPresent(message = "Last modified date cannot be in the future")
+    private LocalDateTime lastModifiedDate;
 }

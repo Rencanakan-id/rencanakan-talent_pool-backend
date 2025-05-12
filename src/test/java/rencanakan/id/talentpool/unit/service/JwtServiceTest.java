@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.JwtService;
 
 import java.lang.reflect.Field;
@@ -23,7 +23,7 @@ class JwtServiceTest {
     private JwtService jwtService;
 
     @Mock
-    private UserDetails userDetails;
+    private User user;
 
     private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
     private static final long JWT_EXPIRATION = 3600000; // 1 hour
@@ -34,38 +34,44 @@ class JwtServiceTest {
         setPrivateField(jwtService, "secretKey", SECRET_KEY);
         setPrivateField(jwtService, "jwtExpiration", JWT_EXPIRATION);
 
-        userDetails = User.withUsername("brighterdaysahead")
-                .password("password")
+        user = User.builder()
+                .id("1")
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
                 .build();
     }
 
     @Test
     void testGenerateToken() {
-        String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(user);
         assertNotNull(token);
         assertFalse(token.isEmpty());
     }
 
     @Test
     void testExtractUsername() {
-        String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(user);
         String username = jwtService.extractUsername(token);
-        assertEquals("brighterdaysahead", username);
+        assertEquals("john.doe@example.com", username);
     }
 
     @Test
     void testIsTokenValid() {
-        String token = jwtService.generateToken(userDetails);
-        boolean isValid = jwtService.isTokenValid(token, userDetails);
+        String token = jwtService.generateToken(user);
+        boolean isValid = jwtService.isTokenValid(token, user);
         assertTrue(isValid, "Token should be valid for the correct user.");
     }
 
     @Test
     void testIsTokenInvalidForDifferentUser() {
-        String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(user);
 
-        UserDetails otherUser = User.withUsername("eternalsunshine")
-                .password("password")
+        User otherUser = User.builder()
+                .id("1")
+                .firstName("ariana")
+                .lastName("Doe")
+                .email("grande.doe@example.com")
                 .build();
 
         boolean isValid = jwtService.isTokenValid(token, otherUser);
@@ -77,8 +83,8 @@ class JwtServiceTest {
         Map<String, Object> claims = new HashMap<>();
         long shortExpiration = -1000;
 
-        String token = jwtService.buildToken(claims, userDetails, shortExpiration);
-        boolean isValid = jwtService.isTokenValid(token, userDetails);
+        String token = jwtService.buildToken(claims, user, shortExpiration);
+        boolean isValid = jwtService.isTokenValid(token, user);
 
         assertFalse(isValid, "Token should be invalid if it has expired.");
     }
@@ -88,11 +94,14 @@ class JwtServiceTest {
         Map<String, Object> claims = new HashMap<>();
         long shortExpiration = -1000;
 
-        UserDetails otherUser = User.withUsername("eternalsunshine")
-                .password("password")
+        User otherUser = User.builder()
+                .id("1")
+                .firstName("ariana")
+                .lastName("Doe")
+                .email("grande.doe@example.com")
                 .build();
 
-        String token = jwtService.buildToken(claims, userDetails, shortExpiration);
+        String token = jwtService.buildToken(claims, user, shortExpiration);
         boolean isValid = jwtService.isTokenValid(token, otherUser);
 
         assertFalse(isValid, "Token should be invalid if it has expired or the user does not match.");
@@ -102,7 +111,7 @@ class JwtServiceTest {
     void testExtractClaim() {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("customClaim", "customValue");
-        String token = jwtService.generateToken(extraClaims, userDetails);
+        String token = jwtService.generateToken(extraClaims, user);
 
         String customClaimValue = jwtService.extractClaim(token, claims -> (String) claims.get("customClaim"));
         assertEquals("customValue", customClaimValue);
