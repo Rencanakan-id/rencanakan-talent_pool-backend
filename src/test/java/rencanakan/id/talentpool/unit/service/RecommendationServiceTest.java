@@ -588,6 +588,43 @@ class RecommendationServiceTest {
             verify(recommendationRepository).findById(recommendationId);
             verify(recommendationRepository).save(recommendation3);
         }
+        
+        @Test
+        void editById_KeepAcceptedStatus_WhenRequestingSameStatus() {
+            String userId = "contractor-id";
+            String recommendationId = "rec-id-2";
+            
+            // Original recommendation is ACCEPTED
+            recommendation2.setStatus(StatusType.ACCEPTED);
+            
+            RecommendationRequestDTO editRequest = new RecommendationRequestDTO();
+            editRequest.setContractorId(102L);
+            editRequest.setContractorName("Contractor B");
+            editRequest.setMessage("Updated message but keep status");
+            editRequest.setStatus(StatusType.ACCEPTED); // Same status as original
+            
+            when(recommendationRepository.findById(recommendationId)).thenReturn(Optional.of(recommendation2));
+            
+            Recommendation updatedRecommendation = new Recommendation();
+            updatedRecommendation.setId(recommendationId);
+            updatedRecommendation.setTalent(talent1);
+            updatedRecommendation.setContractorId(102L);
+            updatedRecommendation.setContractorName("Contractor B");
+            updatedRecommendation.setMessage("Updated message but keep status");
+            updatedRecommendation.setStatus(StatusType.ACCEPTED); // Should stay ACCEPTED
+            
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(updatedRecommendation);
+            
+            RecommendationResponseDTO result = recommendationService.editById(userId, recommendationId, editRequest);
+            
+            assertNotNull(result);
+            assertEquals(recommendationId, result.getId());
+            assertEquals("Updated message but keep status", result.getMessage());
+            assertEquals(StatusType.ACCEPTED, result.getStatus()); // Status remains ACCEPTED
+            
+            verify(recommendationRepository).findById(recommendationId);
+            verify(recommendationRepository).save(recommendation2);
+        }
     }
 
     @Nested

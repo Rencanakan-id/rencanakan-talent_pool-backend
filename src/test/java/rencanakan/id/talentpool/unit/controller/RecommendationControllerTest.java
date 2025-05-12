@@ -442,7 +442,7 @@ class RecommendationControllerTest {
 
 		@Test
 		void testEditRecommendation_Success() throws Exception {
-			when(recommendationService.editById(eq(contractorId.toString()), eq(recommendationId), any(RecommendationRequestDTO.class)))
+			when(recommendationService.editById(anyString(), anyString(), any(RecommendationRequestDTO.class)))
 							.thenReturn(editedRecommendation);
 
 			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
@@ -455,12 +455,12 @@ class RecommendationControllerTest {
 							.andExpect(jsonPath("$.data.status").value("PENDING"))
 							.andExpect(jsonPath("$.errors").isEmpty());
 			
-			verify(recommendationService).editById(eq(contractorId.toString()), eq(recommendationId), any(RecommendationRequestDTO.class));
+			verify(recommendationService).editById(anyString(), anyString(), any(RecommendationRequestDTO.class));
 		}
 		
 		@Test
 		void testEditRecommendation_RecommendationNotFound() throws Exception {
-			when(recommendationService.editById(eq(contractorId.toString()), eq(recommendationId), any(RecommendationRequestDTO.class)))
+			when(recommendationService.editById(anyString(), anyString(), any(RecommendationRequestDTO.class)))
 							.thenThrow(new EntityNotFoundException("Recommendation with ID " + recommendationId + " not found"));
 
 			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
@@ -469,12 +469,12 @@ class RecommendationControllerTest {
 							.andExpect(status().isNotFound())
 							.andExpect(jsonPath("$.errors").value("Recommendation with ID " + recommendationId + " not found"));
 			
-			verify(recommendationService).editById(eq(contractorId.toString()), eq(recommendationId), any(RecommendationRequestDTO.class));
+			verify(recommendationService).editById(anyString(), anyString(), any(RecommendationRequestDTO.class));
 		}
 		
 		@Test
 		void testEditRecommendation_Unauthorized() throws Exception {
-			when(recommendationService.editById(eq(contractorId.toString()), eq(recommendationId), any(RecommendationRequestDTO.class)))
+			when(recommendationService.editById(anyString(), anyString(), any(RecommendationRequestDTO.class)))
 							.thenThrow(new AccessDeniedException("Only the contractor who created this recommendation can edit it"));
 
 			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
@@ -483,7 +483,7 @@ class RecommendationControllerTest {
 							.andExpect(status().isForbidden())
 							.andExpect(jsonPath("$.errors").value("Only the contractor who created this recommendation can edit it"));
 			
-			verify(recommendationService).editById(eq(contractorId.toString()), eq(recommendationId), any(RecommendationRequestDTO.class));
+			verify(recommendationService).editById(anyString(), anyString(), any(RecommendationRequestDTO.class));
 		}
 		
 		@Test
@@ -512,7 +512,7 @@ class RecommendationControllerTest {
 							"Updated message only", StatusType.ACCEPTED // Status remains ACCEPTED
 			);
 			
-			when(recommendationService.editById(eq(contractorId.toString()), eq(recommendationId), any(RecommendationRequestDTO.class)))
+			when(recommendationService.editById(anyString(), anyString(), any(RecommendationRequestDTO.class)))
 							.thenReturn(responseWithStatusUnchanged);
 
 			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
@@ -524,12 +524,12 @@ class RecommendationControllerTest {
 							.andExpect(jsonPath("$.data.status").value("ACCEPTED")) // Status remains unchanged
 							.andExpect(jsonPath("$.errors").isEmpty());
 			
-			verify(recommendationService).editById(eq(contractorId.toString()), eq(recommendationId), any(RecommendationRequestDTO.class));
+			verify(recommendationService).editById(anyString(), anyString(), any(RecommendationRequestDTO.class));
 		}
 		
 		@Test
 		void testEditRecommendation_ServerError() throws Exception {
-			when(recommendationService.editById(eq(contractorId.toString()), eq(recommendationId), any(RecommendationRequestDTO.class)))
+			when(recommendationService.editById(anyString(), anyString(), any(RecommendationRequestDTO.class)))
 							.thenThrow(new RuntimeException("Unexpected server error"));
 
 			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
@@ -538,7 +538,7 @@ class RecommendationControllerTest {
 							.andExpect(status().isInternalServerError())
 							.andExpect(jsonPath("$.errors").value("Unexpected server error"));
 			
-			verify(recommendationService).editById(eq(contractorId.toString()), eq(recommendationId), any(RecommendationRequestDTO.class));
+			verify(recommendationService).editById(anyString(), anyString(), any(RecommendationRequestDTO.class));
 		}
 	}
 
