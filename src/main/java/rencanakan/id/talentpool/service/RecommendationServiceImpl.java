@@ -113,4 +113,30 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         return DTOMapper.map(savedRecommendation, RecommendationResponseDTO.class);
     }
+
+    @Override
+    public RecommendationResponseDTO editById(String contractorId, String id, RecommendationRequestDTO editRequest) {
+        Recommendation recommendation = recommendationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Recommendation with ID " + id + " not found"));
+
+        if (!recommendation.getContractorId().equals(editRequest.getContractorId())) {
+            throw new AccessDeniedException("Only the contractor who created this recommendation can edit it");
+        }
+
+        recommendation.setMessage(editRequest.getMessage());
+        
+        StatusType currentStatus = recommendation.getStatus();
+        StatusType requestedStatus = editRequest.getStatus();
+        
+        if ((currentStatus == StatusType.ACCEPTED || currentStatus == StatusType.DECLINED) 
+                && requestedStatus != currentStatus) {
+            recommendation.setStatus(StatusType.PENDING);
+        } else {
+            recommendation.setStatus(requestedStatus);
+        }
+
+        Recommendation updatedRecommendation = recommendationRepository.save(recommendation);
+
+        return DTOMapper.map(updatedRecommendation, RecommendationResponseDTO.class);
+    }
 }
