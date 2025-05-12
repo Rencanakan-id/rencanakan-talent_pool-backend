@@ -8,9 +8,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rencanakan.id.talentpool.dto.LoginRequestDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
+import rencanakan.id.talentpool.model.PasswordResetToken;
 import rencanakan.id.talentpool.model.User;
+import rencanakan.id.talentpool.repository.PasswordResetTokenRepository;
 import rencanakan.id.talentpool.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -20,17 +23,19 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
-            UserService userService
-    ) {
+            UserService userService,
+            PasswordResetTokenRepository passwordResetTokenRepository) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     public User signup(@Valid UserRequestDTO request) throws BadRequestException {
@@ -85,5 +90,23 @@ public class AuthenticationService {
                 )
         );
         return userRepository.findByEmail(input.getEmail()).orElse(null);
+    }
+
+    public void resetPasswordWithToken(String token, String newPassword) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token tidak valid"));
+
+        if (resetToken.isUsed() || resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Token sudah kadaluarsa atau sudah digunakan");
+        }
+
+        var user = userRepository.findByEmail(resetToken.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User tidak ditemukan"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        resetToken.setUsed(true);
+        passwordResetTokenRepository.save(resetToken);
     }
 }
