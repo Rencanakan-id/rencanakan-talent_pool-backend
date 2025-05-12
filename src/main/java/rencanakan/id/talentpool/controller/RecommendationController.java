@@ -221,4 +221,36 @@ public class RecommendationController {
         RecommendationResponseDTO response = recommendationService.createRecommendation(user.getId(), request);
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{recommendationId}/contractor/{contractorId}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> editRecommendationById(
+            @PathVariable("recommendationId") String recommendationId,
+            @PathVariable("contractorId") Long contractorId,
+            @RequestBody @Valid RecommendationRequestDTO editRequest) {
+
+        try {
+            editRequest.setContractorId(contractorId);
+            
+            RecommendationResponseDTO resp = recommendationService.editById(contractorId.toString(), recommendationId, editRequest);
+
+            return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                    .data(resp)
+                    .build());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                            .errors(e.getMessage())
+                            .build());
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                            .errors(e.getMessage())
+                            .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                            .errors(e.getMessage())
+                            .build());
+        }
+    }
 }
