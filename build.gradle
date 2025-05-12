@@ -77,6 +77,18 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
 
+	// Datadog dependencies - using the latest version
+	implementation 'com.datadoghq:dd-trace-api:1.16.0'
+	implementation 'com.datadoghq:dd-trace-ot:1.16.0'
+	implementation 'com.datadoghq:dd-java-agent:1.12.0'
+//	implementation 'com.datadoghq:logback-datadog-encoder:1.7.0'
+
+	// For StatsD metrics
+	implementation 'com.datadoghq:java-dogstatsd-client:4.2.0'
+	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
+
+
 }
 
 // Configure Test Task

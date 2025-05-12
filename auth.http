@@ -1,0 +1,34 @@
+### Register a new user
+POST http://localhost:8081/api/auth/register
+Content-Type: application/json
+
+{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "phoneNumber": "1234567890",
+    "photo": "url-to-photo",
+    "aboutMe": "I am a software developer.",
+    "nik": "1234567890123456",
+    "npwp": "123456789012345",
+    "photoKtp": "url-to-photo-ktp",
+    "photoNpwp": "url-to-photo-npwp",
+    "photoIjazah": "url-to-photo-ijazah",
+    "experienceYears": 5,
+    "skkLevel": "Intermediate",
+    "currentLocation": "Jakarta",
+    "preferredLocations": ["Jakarta", "Bandung"],
+    "skill": "Java, Spring Boot",
+    "password": "securePassword123",
+    "price": 10000
+}
+
+
+### Login with registered user
+POST http://localhost:8081/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "securePassword123"
+}
