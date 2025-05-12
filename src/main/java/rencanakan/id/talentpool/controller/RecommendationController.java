@@ -1,5 +1,6 @@
 package rencanakan.id.talentpool.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.dto.*;
 import rencanakan.id.talentpool.enums.StatusType;
 import rencanakan.id.talentpool.service.RecommendationService;
+import rencanakan.id.talentpool.service.UserService;
 
 import java.util.List;
 import java.util.Map;
@@ -183,17 +185,21 @@ public class RecommendationController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<RecommendationResponseDTO> createRecommendation(
-            @RequestBody @Valid RecommendationRequestDTO request,
-            @AuthenticationPrincipal User user) {
+    @PostMapping("/contractor/{talentId}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> createRecommendation(
+            @PathVariable("talentId") String talentId,
+            @RequestBody @Valid RecommendationRequestDTO request) {
 
-        if (user == null) {
-            return ResponseEntity.badRequest().build();
+        try {
+            RecommendationResponseDTO response = recommendationService.createRecommendation(talentId, request);
+            return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                    .data(response)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                            .errors(e.getMessage())
+                            .build());
         }
-
-        RecommendationResponseDTO response = recommendationService.createRecommendation(user.getId(), request);
-        return ResponseEntity.ok(response);
-        }
-
     }
+}
