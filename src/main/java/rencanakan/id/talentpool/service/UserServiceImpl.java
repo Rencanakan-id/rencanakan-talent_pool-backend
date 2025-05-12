@@ -1,6 +1,10 @@
 package rencanakan.id.talentpool.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.Join;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -9,9 +13,11 @@ import jakarta.persistence.criteria.Predicate;
 import rencanakan.id.talentpool.dto.FilterTalentDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
 import rencanakan.id.talentpool.dto.UserResponseDTO;
+import rencanakan.id.talentpool.dto.UserResponseWithPagingDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,11 +92,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public List<UserResponseDTO> filter(FilterTalentDTO filter) {
+    public UserResponseWithPagingDTO filter(FilterTalentDTO filter, Pageable page) {
         Specification<User> specification = (root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (Objects.nonNull(filter.getName())) {
+            if (Objects.nonNull(filter.getName()) && !filter.getName().trim().isEmpty()) {
                 String keyword = "%" + filter.getName().toLowerCase() + "%";
 
                 Predicate firstNamePredicate = builder.like(
@@ -101,20 +107,60 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                         builder.lower(root.get("lastName")), keyword
                 );
 
-                predicates.add(builder.or(firstNamePredicate, lastNamePredicate));
+                Predicate fullNamePredicate = builder.like(
+                        builder.lower(builder.concat(builder.concat(root.get("firstName"), " "), root.get("lastName"))), 
+                        keyword
+                );
+
+                predicates.add(builder.or(firstNamePredicate, lastNamePredicate, fullNamePredicate));
             }
+
+            if (Objects.nonNull(filter.getPreferredLocations()) && !filter.getPreferredLocations().isEmpty()) {
+                List<Predicate> locationPredicates = filter.getPreferredLocations().stream()
+                        .map(location -> builder.equal(
+                                builder.lower(root.get("currentLocation")),
+                                location.toLowerCase()
+                        ))
+                        .collect(Collectors.toList());
+
+                predicates.add(builder.or(locationPredicates.toArray(new Predicate[0])));
+            }
+
+            if (Objects.nonNull(filter.getSkills()) && !filter.getSkills().isEmpty()) {
+                List<Predicate> skillsPredicates = filter.getSkills().stream()
+                        .map(skill -> builder.equal(
+                                builder.lower(root.get("skill")),
+                                skill.toLowerCase()
+                        ))
+                        .collect(Collectors.toList());
+
+                predicates.add(builder.or(skillsPredicates.toArray(new Predicate[0])));
+            }
+
+
+            if (Objects.nonNull(filter.getPriceRange()) && filter.getPriceRange().size() == 2) {
+                Double minPrice = filter.getPriceRange().get(0);
+                Double maxPrice = filter.getPriceRange().get(1);
+
+                Predicate pricePredicate = builder.between(root.get("price"), minPrice, maxPrice);
+
+                predicates.add(pricePredicate);
+            }
+
 
             return builder.and(predicates.toArray(new Predicate[0]));
         };
 
-        List<User> users = userRepository.findAll(specification);
-        if(users.isEmpty()){
+        Page<User> userPage = userRepository.findAll(specification, page);
+        if(userPage.isEmpty()){
             throw  new EntityNotFoundException("No users found");
         }
 
-        return users.stream()
+        List<UserResponseDTO> userDTOs = userPage.getContent().stream()
                 .map(user -> DTOMapper.map(user, UserResponseDTO.class))
                 .collect(Collectors.toList());
+
+        return UserResponseWithPagingDTO.builder().users(userDTOs).page( userPage.getNumber()).size(userPage.getSize()).totalPages(userPage.getTotalPages()).build();
     }
 
 

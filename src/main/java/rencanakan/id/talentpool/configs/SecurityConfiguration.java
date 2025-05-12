@@ -40,6 +40,7 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/users/contractor").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().denyAll()
@@ -57,7 +58,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://rencanakanid-stg.netlify.app/", "https://rencanakan-system.netlify.app/"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173","http://localhost:8080", "https://rencanakanid-stg.netlify.app/", "https://rencanakan-system.netlify.app/"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 

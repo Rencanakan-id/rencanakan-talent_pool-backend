@@ -1,10 +1,12 @@
 package rencanakan.id.talentpool.unit.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,13 +15,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.servlet.mvc.method.annotation.PrincipalMethodArgumentResolver;
-import rencanakan.id.talentpool.controller.ErrorController;
-import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
+import org.springframework.web.servlet.mvc.method.annotation.PrincipalMethodArgumentResolver;import rencanakan.id.talentpool.controller.ErrorController;
+import rencanakan.id.talentpool.dto.*;
 import rencanakan.id.talentpool.service.RecommendationService;
 import rencanakan.id.talentpool.enums.StatusType;
 
@@ -30,6 +33,11 @@ import org.mockito.InjectMocks;
 import rencanakan.id.talentpool.controller.RecommendationController;
 import rencanakan.id.talentpool.model.User;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -38,19 +46,42 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.anyString;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @ExtendWith(MockitoExtension.class)
 class RecommendationControllerTest {
-
-    private MockMvc mockMvc;
 
     @Mock
     private RecommendationService recommendationService;
 
     @InjectMocks
     private RecommendationController recommendationController;
+
+    private MockMvc mockMvc;
+
+    private ObjectMapper mapper;
+
+    private User mockTalent;
+
+    private RecommendationRequestDTO createValidRequestDTO() {
+        return RecommendationRequestDTO.builder()
+                .contractorId(1L)
+                .contractorName("Contractor name")
+                .message("Test controller message")
+                .status(StatusType.PENDING)
+                .build();
+    }
+
+    private RecommendationResponseDTO createMockResponseDTO() {
+        return RecommendationResponseDTO.builder()
+                .id("recommendation123")
+                .talentId("user123")
+                .contractorId(1L)
+                .contractorName("Contractor name")
+                .message("Test controller message")
+                .status(StatusType.PENDING)
+                .build();
+    }
 
     private ObjectMapper objectMapper;
 
@@ -63,6 +94,82 @@ class RecommendationControllerTest {
                 .standaloneSetup(recommendationController)
                 .setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(null))
                 .build();
+    }
+
+    @Nested
+    class CreateRecommendationTest {
+
+        @BeforeEach
+    void setUp() {
+        mapper = Jackson2ObjectMapperBuilder.json()
+                .modules(new JavaTimeModule())
+                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .build();
+
+        mockMvc = MockMvcBuilders.standaloneSetup(recommendationController)
+                .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
+                .build();
+
+        mockTalent = User.builder()
+                .id("user123")
+                .firstName("Test")
+                .lastName("Talent")
+                .email("test@example.com")
+                .password("Password123")
+                .phoneNumber("081234567890")
+                .nik("1234567890123456")
+                .build();
+    }
+
+        @Test
+        void testCreateRecommendation_Success() throws Exception {
+
+            RecommendationRequestDTO request = createValidRequestDTO();
+            RecommendationResponseDTO mockResponseDTO = createMockResponseDTO();
+
+            when(recommendationService.createRecommendation(any(), any(RecommendationRequestDTO.class)))
+                    .thenReturn(mockResponseDTO);
+
+            mockMvc.perform(post("/recommendations")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
+                            .content(mapper.writeValueAsString(request)))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value("recommendation123")) // Change from $.data.id
+                    .andExpect(jsonPath("$.contractorId").value(1L))
+                    .andExpect(jsonPath("$.contractorName").value("Contractor name"))
+                    .andExpect(jsonPath("$.message").value("Test controller message"))
+                    .andExpect(jsonPath("$.status").value("PENDING"));
+
+        }
+
+        @Test
+        void testCreateRecommendation_BadRequest() throws Exception {
+            RecommendationRequestDTO invalidRequest = new RecommendationRequestDTO();
+
+            mockMvc.perform(post("/recommendations")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .requestAttr("currentUser", mockTalent)
+                            .content(mapper.writeValueAsString(invalidRequest)))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void testCreateRecommendation_Unauthorized() throws Exception {
+            setupUnauthorizedMockMvc();
+
+            RecommendationRequestDTO request = createValidRequestDTO();
+
+            mockMvc.perform(post("/recommendations")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
+                            .content(mapper.writeValueAsString(request)))
+                            .andDo(print())
+                            .andExpect(status().isBadRequest());
+
+        }
     }
 
     @BeforeEach
@@ -318,7 +425,7 @@ class RecommendationControllerTest {
 
                 verify(recommendationService).getByTalentIdAndGroupedByStatus(talentId);
             }
-
+    
             @Test
             void getRecommendationById_NotFound_ReturnsErrorResponse() throws Exception {
                 String nonExistentId = "non-existent-id";
@@ -479,3 +586,6 @@ class RecommendationControllerTest {
         }
 
 }
+
+ 
+
