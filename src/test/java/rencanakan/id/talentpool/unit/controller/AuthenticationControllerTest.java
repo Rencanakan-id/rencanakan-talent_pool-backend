@@ -246,7 +246,7 @@ class AuthenticationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Password berhasil direset."));
+                .andExpect(content().string("Password successfully reset."));
 
         verify(authenticationService).resetPasswordWithToken("abc", "newpass");
     }

@@ -63,6 +63,6 @@ public class AuthenticationController {
     @PatchMapping("/password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDTO request) {
         authenticationService.resetPasswordWithToken(request.getToken(), request.getNewPassword());
-        return ResponseEntity.ok("Password berhasil direset.");
+        return ResponseEntity.ok("Password successfully reset.");
     }
 }
