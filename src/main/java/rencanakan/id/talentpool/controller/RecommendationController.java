@@ -83,6 +83,18 @@ public class RecommendationController {
         }
     }
 
+    @PatchMapping("/{recommendationId}/reject")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> rejectById(
+            @PathVariable("recommendationId") String recommendationId,
+            @AuthenticationPrincipal User user) {
+
+        RecommendationResponseDTO resp = recommendationService.editStatusById(user.getId(), recommendationId, StatusType.DECLINED);
+
+        return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                    .data(resp)
+                    .build());
+    }
+
     @GetMapping("/{recommendationId}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> getRecommendationById(
             @PathVariable("recommendationId") String recommendationId,
