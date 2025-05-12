@@ -88,11 +88,28 @@ public class RecommendationController {
             @PathVariable("recommendationId") String recommendationId,
             @AuthenticationPrincipal User user) {
 
-        RecommendationResponseDTO resp = recommendationService.editStatusById(user.getId(), recommendationId, StatusType.DECLINED);
+        try {
+            RecommendationResponseDTO resp = recommendationService.editStatusById(user.getId(), recommendationId, StatusType.DECLINED);
 
-        return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
-                    .data(resp)
-                    .build());
+            return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                        .data(resp)
+                        .build());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        }
     }
 
     @GetMapping("/{recommendationId}")
