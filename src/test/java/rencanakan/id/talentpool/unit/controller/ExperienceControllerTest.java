@@ -23,7 +23,6 @@ import rencanakan.id.talentpool.controller.ErrorController;
 import rencanakan.id.talentpool.controller.ExperienceController;
 import rencanakan.id.talentpool.dto.ExperienceRequestDTO;
 import rencanakan.id.talentpool.dto.ExperienceResponseDTO;
-import rencanakan.id.talentpool.dto.WebResponse;
 import rencanakan.id.talentpool.enums.EmploymentType;
 import rencanakan.id.talentpool.enums.LocationType;
 import rencanakan.id.talentpool.model.User;
