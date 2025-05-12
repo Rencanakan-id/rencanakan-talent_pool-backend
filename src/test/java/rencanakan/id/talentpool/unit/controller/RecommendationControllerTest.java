@@ -323,7 +323,7 @@ class RecommendationControllerTest {
 					recommendationId, "user-id-1", 123L, "contractorName", "Some message", StatusType.ACCEPTED
 			);
 			
-			when(recommendationService.editStatusById(eq(testUser.getId()), eq(recommendationId), eq(StatusType.ACCEPTED)))
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED))
 					.thenReturn(acceptedRecommendation);
 
 			mockMvc.perform(patch("/recommendations/{recommendationId}/accept", recommendationId)
@@ -333,14 +333,14 @@ class RecommendationControllerTest {
 					.andExpect(jsonPath("$.data.status").value("ACCEPTED"))
 					.andExpect(jsonPath("$.errors").isEmpty());
 			
-			verify(recommendationService).editStatusById(eq(testUser.getId()), eq(recommendationId), eq(StatusType.ACCEPTED));
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED);
 		}
 		
 		@Test
 		void testAcceptRecommendation_NotFound() throws Exception {
 			String nonExistingId = "non-existing-id";
 			
-			when(recommendationService.editStatusById(eq(testUser.getId()), eq(nonExistingId), eq(StatusType.ACCEPTED)))
+			when(recommendationService.editStatusById(testUser.getId(), nonExistingId, StatusType.ACCEPTED))
 					.thenThrow(new EntityNotFoundException("Recommendation with ID " + nonExistingId + " not found"));
 
 			mockMvc.perform(patch("/recommendations/{recommendationId}/accept", nonExistingId)
@@ -348,14 +348,14 @@ class RecommendationControllerTest {
 					.andExpect(status().isNotFound())
 					.andExpect(jsonPath("$.errors").value("Recommendation with ID " + nonExistingId + " not found"));
 			
-			verify(recommendationService).editStatusById(eq(testUser.getId()), eq(nonExistingId), eq(StatusType.ACCEPTED));
+			verify(recommendationService).editStatusById(testUser.getId(), nonExistingId, StatusType.ACCEPTED);
 		}
 		
 		@Test
 		void testAcceptRecommendation_Unauthorized() throws Exception {
 			String recommendationId = "rec-id-1";
 			
-			when(recommendationService.editStatusById(eq(testUser.getId()), eq(recommendationId), eq(StatusType.ACCEPTED)))
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED))
 					.thenThrow(new AccessDeniedException("You are not allowed to edit this recommendation."));
 
 			mockMvc.perform(patch("/recommendations/{recommendationId}/accept", recommendationId)
@@ -363,7 +363,7 @@ class RecommendationControllerTest {
 					.andExpect(status().isForbidden())
 					.andExpect(jsonPath("$.errors").value("You are not allowed to edit this recommendation."));
 			
-			verify(recommendationService).editStatusById(eq(testUser.getId()), eq(recommendationId), eq(StatusType.ACCEPTED));
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED);
 		}
 		
 		@Test
@@ -373,7 +373,7 @@ class RecommendationControllerTest {
 					recommendationId, "user-id-1", 123L, "contractorName", "Already accepted message", StatusType.ACCEPTED
 			);
 			
-			when(recommendationService.editStatusById(eq(testUser.getId()), eq(recommendationId), eq(StatusType.ACCEPTED)))
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED))
 					.thenReturn(alreadyAcceptedRecommendation);
 
 			mockMvc.perform(patch("/recommendations/{recommendationId}/accept", recommendationId)
@@ -383,14 +383,14 @@ class RecommendationControllerTest {
 					.andExpect(jsonPath("$.data.status").value("ACCEPTED"))
 					.andExpect(jsonPath("$.errors").isEmpty());
 			
-			verify(recommendationService).editStatusById(eq(testUser.getId()), eq(recommendationId), eq(StatusType.ACCEPTED));
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED);
 		}
 		
 		@Test
 		void testAcceptRecommendation_ServerError() throws Exception {
 			String recommendationId = "error-id";
 			
-			when(recommendationService.editStatusById(eq(testUser.getId()), eq(recommendationId), eq(StatusType.ACCEPTED)))
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED))
 					.thenThrow(new RuntimeException("Unexpected server error"));
 
 			mockMvc.perform(patch("/recommendations/{recommendationId}/accept", recommendationId)
@@ -398,7 +398,7 @@ class RecommendationControllerTest {
 					.andExpect(status().isInternalServerError())
 					.andExpect(jsonPath("$.errors").value("Unexpected server error"));
 			
-			verify(recommendationService).editStatusById(eq(testUser.getId()), eq(recommendationId), eq(StatusType.ACCEPTED));
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED);
 		}
 	}
 
