@@ -100,77 +100,77 @@ class RecommendationControllerTest {
     class CreateRecommendationTest {
 
         @BeforeEach
-    void setUp() {
-        mapper = Jackson2ObjectMapperBuilder.json()
-                .modules(new JavaTimeModule())
-                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .build();
+        void setUp() {
+            mapper = Jackson2ObjectMapperBuilder.json()
+                    .modules(new JavaTimeModule())
+                    .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    .build();
 
-        mockMvc = MockMvcBuilders.standaloneSetup(recommendationController)
-                .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
-                .build();
+            mockMvc = MockMvcBuilders.standaloneSetup(recommendationController)
+                    .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
+                    .build();
 
-        mockTalent = User.builder()
-                .id("user123")
-                .firstName("Test")
-                .lastName("Talent")
-                .email("test@example.com")
-                .password("Password123")
-                .phoneNumber("081234567890")
-                .nik("1234567890123456")
-                .build();
-    }
+            mockTalent = User.builder()
+                    .id("user123")
+                    .firstName("Test")
+                    .lastName("Talent")
+                    .email("test@example.com")
+                    .password("Password123")
+                    .phoneNumber("081234567890")
+                    .nik("1234567890123456")
+                    .build();
+        }
 
         @Test
         void testCreateRecommendation_Success() throws Exception {
-
             RecommendationRequestDTO request = createValidRequestDTO();
             RecommendationResponseDTO mockResponseDTO = createMockResponseDTO();
 
-            when(recommendationService.createRecommendation(any(), any(RecommendationRequestDTO.class)))
+            when(recommendationService.createRecommendation(eq("user123"), any(RecommendationRequestDTO.class)))
                     .thenReturn(mockResponseDTO);
 
-            mockMvc.perform(post("/recommendations")
+            mockMvc.perform(post("/recommendations/contractor/{talentId}", "user123")
                             .contentType(MediaType.APPLICATION_JSON)
                             .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
                             .content(mapper.writeValueAsString(request)))
                     .andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value("recommendation123")) // Change from $.data.id
-                    .andExpect(jsonPath("$.contractorId").value(1L))
-                    .andExpect(jsonPath("$.contractorName").value("Contractor name"))
-                    .andExpect(jsonPath("$.message").value("Test controller message"))
-                    .andExpect(jsonPath("$.status").value("PENDING"));
-
+                    .andExpect(jsonPath("$.data.id").value("recommendation123"))
+                    .andExpect(jsonPath("$.data.contractorId").value(1L))
+                    .andExpect(jsonPath("$.data.contractorName").value("Contractor name"))
+                    .andExpect(jsonPath("$.data.message").value("Test controller message"))
+                    .andExpect(jsonPath("$.data.status").value("PENDING"));
         }
 
         @Test
         void testCreateRecommendation_BadRequest() throws Exception {
             RecommendationRequestDTO invalidRequest = new RecommendationRequestDTO();
 
-            mockMvc.perform(post("/recommendations")
+            mockMvc.perform(post("/recommendations/contractor/{talentId}", "user123")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .requestAttr("currentUser", mockTalent)
+                            .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
                             .content(mapper.writeValueAsString(invalidRequest)))
                     .andDo(print())
                     .andExpect(status().isBadRequest());
         }
 
         @Test
-        void testCreateRecommendation_Unauthorized() throws Exception {
-            setupUnauthorizedMockMvc();
-
+        void testCreateRecommendation_NotFound() throws Exception {
             RecommendationRequestDTO request = createValidRequestDTO();
 
-            mockMvc.perform(post("/recommendations")
+            when(recommendationService.createRecommendation(eq("user123"), any(RecommendationRequestDTO.class)))
+                    .thenThrow(new RuntimeException("Talent not found"));
+
+            mockMvc.perform(post("/recommendations/contractor/{talentId}", "user123")
                             .contentType(MediaType.APPLICATION_JSON)
                             .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
                             .content(mapper.writeValueAsString(request)))
-                            .andDo(print())
-                            .andExpect(status().isBadRequest());
-
+                    .andDo(print())
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("Talent not found"));
         }
     }
+
 
     @BeforeEach
     void setUp() {
