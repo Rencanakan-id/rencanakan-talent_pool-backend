@@ -11,7 +11,7 @@ public interface RecommendationService {
     RecommendationResponseDTO createRecommendation(String talentId, RecommendationRequestDTO recommendation);
     RecommendationResponseDTO deleteById(String userId,  String id);
     RecommendationResponseDTO editStatusById(String userId, String id, StatusType status);
-    RecommendationResponseDTO editById(String userId, String id, RecommendationRequestDTO request);
+    RecommendationResponseDTO editById(Long contractorId, String id, RecommendationRequestDTO request);
     RecommendationResponseDTO getById(String id);
     List<RecommendationResponseDTO> getByTalentId(String talentId);
     List<RecommendationResponseDTO> getByTalentIdAndStatus(String talentId, StatusType status);

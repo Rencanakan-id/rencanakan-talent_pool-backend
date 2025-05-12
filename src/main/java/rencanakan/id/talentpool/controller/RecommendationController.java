@@ -229,7 +229,7 @@ public class RecommendationController {
             @RequestBody @Valid RecommendationRequestDTO editRequest) {
 
         try {
-            RecommendationResponseDTO resp = recommendationService.editById(contractorId.toString(), recommendationId, editRequest);
+            RecommendationResponseDTO resp = recommendationService.editById(contractorId, recommendationId, editRequest);
 
             return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
                     .data(resp)

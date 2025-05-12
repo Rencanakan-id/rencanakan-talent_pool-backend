@@ -115,11 +115,11 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public RecommendationResponseDTO editById(String contractorId, String id, RecommendationRequestDTO editRequest) {
+    public RecommendationResponseDTO editById(Long contractorId, String id, RecommendationRequestDTO editRequest) {
         Recommendation recommendation = recommendationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Recommendation with ID " + id + " not found"));
 
-        if (!recommendation.getContractorId().equals(editRequest.getContractorId())) {
+        if (!recommendation.getContractorId().equals(contractorId)) {
             throw new AccessDeniedException("Only the contractor who created this recommendation can edit it");
         }
 
@@ -128,10 +128,9 @@ public class RecommendationServiceImpl implements RecommendationService {
         StatusType currentStatus = recommendation.getStatus();
         StatusType requestedStatus = editRequest.getStatus();
         
-        if ((currentStatus == StatusType.ACCEPTED || currentStatus == StatusType.DECLINED) 
-                && requestedStatus != currentStatus) {
+        if (currentStatus == StatusType.ACCEPTED || currentStatus == StatusType.DECLINED) {
             recommendation.setStatus(StatusType.PENDING);
-        } else {
+        } else if (requestedStatus != null) {
             recommendation.setStatus(requestedStatus);
         }
 
