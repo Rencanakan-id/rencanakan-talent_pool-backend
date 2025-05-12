@@ -106,11 +106,12 @@ public class RecommendationServiceImpl implements RecommendationService {
             throw new IllegalArgumentException("Recommendation request cannot be null");
         }
 
+        User talent = userRepository.findById(talentId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + talentId));
+
         Recommendation newRecommendation = DTOMapper.map(recommendation, Recommendation.class);
-        newRecommendation.setTalent(User.builder().id(talentId).build());
-
+        newRecommendation.setTalent(talent);
         Recommendation savedRecommendation = recommendationRepository.save(newRecommendation);
-
         return DTOMapper.map(savedRecommendation, RecommendationResponseDTO.class);
     }
 }
