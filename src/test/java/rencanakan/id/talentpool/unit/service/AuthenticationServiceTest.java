@@ -234,10 +234,8 @@ class AuthenticationServiceTest {
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
 
-        // Act
         authenticationService.resetPasswordWithToken(token, newPassword);
 
-        // Assert
         verify(userRepository).save(user);
         verify(passwordResetTokenRepository).save(resetToken);
         assertThat(user.getPassword()).isEqualTo(encodedPassword);
