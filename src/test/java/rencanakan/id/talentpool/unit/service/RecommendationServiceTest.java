@@ -182,18 +182,18 @@ class RecommendationServiceTest {
 
     @Nested
     class CreateRecommendation {
+
         private RecommendationResponseDTO testCreateRecommendationWithMessage(String message) {
             try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
-                // Setup modified DTOs with the custom message
                 requestDTO.setMessage(message);
 
                 Recommendation modifiedRecommendation = new Recommendation();
-                modifiedRecommendation.setId(recommendation.getId());
-                modifiedRecommendation.setContractorId(recommendation.getContractorId());
-                modifiedRecommendation.setContractorName(recommendation.getContractorName());
+                modifiedRecommendation.setId("recommendation123");
+                modifiedRecommendation.setContractorId(1L);
+                modifiedRecommendation.setContractorName("Test Contractor");
                 modifiedRecommendation.setMessage(message);
-                modifiedRecommendation.setStatus(recommendation.getStatus());
-                modifiedRecommendation.setTalent(recommendation.getTalent());
+                modifiedRecommendation.setStatus(StatusType.PENDING);
+                modifiedRecommendation.setTalent(mockTalent);
 
                 RecommendationResponseDTO modifiedResponseDTO = new RecommendationResponseDTO();
                 modifiedResponseDTO.setId("recommendation123");
@@ -203,17 +203,13 @@ class RecommendationServiceTest {
                 modifiedResponseDTO.setMessage(message);
                 modifiedResponseDTO.setStatus(StatusType.PENDING);
 
-                // Setup mocks
+                when(userRepository.findById("user123")).thenReturn(Optional.of(mockTalent));
                 mockedMapper.when(() -> DTOMapper.map(requestDTO, Recommendation.class)).thenReturn(modifiedRecommendation);
                 mockedMapper.when(() -> DTOMapper.map(modifiedRecommendation, RecommendationResponseDTO.class)).thenReturn(modifiedResponseDTO);
                 when(recommendationRepository.save(any(Recommendation.class))).thenReturn(modifiedRecommendation);
 
-                // Execute the method
-                RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
-
-                // Verify repository was called
+                RecommendationResponseDTO result = recommendationService.createRecommendation("user123", requestDTO);
                 verify(recommendationRepository, times(1)).save(any(Recommendation.class));
-
                 return result;
             }
         }
@@ -223,7 +219,7 @@ class RecommendationServiceTest {
         @Test
         void testCreateRecommendationSuccess() {
             try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
-                mockedMapper.when(() -> DTOMapper.map(userResponseDTO, User.class)).thenReturn(mockTalent);
+                when(userRepository.findById(mockTalent.getId())).thenReturn(Optional.of(mockTalent));
                 mockedMapper.when(() -> DTOMapper.map(requestDTO, Recommendation.class)).thenReturn(recommendation);
                 mockedMapper.when(() -> DTOMapper.map(recommendation, RecommendationResponseDTO.class)).thenReturn(responseDTO);
                 when(recommendationRepository.save(any(Recommendation.class))).thenReturn(recommendation);
@@ -236,7 +232,6 @@ class RecommendationServiceTest {
                 assertEquals("Test recommendation message", result.getMessage());
                 assertEquals(StatusType.PENDING, result.getStatus());
                 verify(recommendationRepository, times(1)).save(any(Recommendation.class));
-
             }
         }
 
@@ -257,35 +252,42 @@ class RecommendationServiceTest {
 
         @Test
         void testCreateRecommendationWithNullRequest() {
-            // Act & Assert
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> recommendationService.createRecommendation(null, null));
-
             assertEquals("Recommendation request cannot be null", exception.getMessage());
             verify(recommendationRepository, never()).save(any(Recommendation.class));
         }
 
         @Test
-        void testCreateRecommendationWithNullTalent() {
-            // Act & Assert
+        void testCreateRecommendationWithNullTalentId() {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> recommendationService.createRecommendation(null, requestDTO));
-
             assertEquals("Recommendation request cannot be null", exception.getMessage());
             verify(recommendationRepository, never()).save(any(Recommendation.class));
         }
 
         @Test
-        void testCreateRecommendationWithNullRecommendation() {
+        void testCreateRecommendationWithNullRequestDTO() {
             String talentId = mockTalent.getId();
-            // Act & Assert
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> recommendationService.createRecommendation(talentId, null));
-
             assertEquals("Recommendation request cannot be null", exception.getMessage());
+            verify(recommendationRepository, never()).save(any(Recommendation.class));
+        }
+
+        @Test
+        void testCreateRecommendation_UserNotFound() {
+            when(userRepository.findById("nonexistentUser")).thenReturn(Optional.empty());
+
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                    () -> recommendationService.createRecommendation("nonexistentUser", requestDTO));
+
+            assertEquals("User not found with id: nonexistentUser", exception.getMessage());
+            verify(userRepository, times(1)).findById("nonexistentUser");
             verify(recommendationRepository, never()).save(any(Recommendation.class));
         }
     }
+
 
     @Nested
     class DeleteRecommendation{
