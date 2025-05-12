@@ -1,8 +1,10 @@
 package rencanakan.id.talentpool.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,11 +59,28 @@ public class RecommendationController {
             @PathVariable("recommendationId") String recommendationId,
             @AuthenticationPrincipal User user) {
 
-        RecommendationResponseDTO resp = recommendationService.editStatusById(user.getId(), recommendationId, StatusType.ACCEPTED);
+        try {
+            RecommendationResponseDTO resp = recommendationService.editStatusById(user.getId(), recommendationId, StatusType.ACCEPTED);
 
-        return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
-                    .data(resp)
-                    .build());
+            return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                        .data(resp)
+                        .build());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        }
     }
 
     @GetMapping("/{recommendationId}")
