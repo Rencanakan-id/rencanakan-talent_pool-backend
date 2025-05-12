@@ -1,8 +1,9 @@
 package rencanakan.id.talentpool.unit.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import rencanakan.id.talentpool.model.PasswordResetToken;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class EmailServiceTest {
 
     @Mock
@@ -30,11 +32,6 @@ class EmailServiceTest {
 
     @Captor
     private ArgumentCaptor<SimpleMailMessage> mailCaptor;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void itShouldGenerateAndSaveTokenAndSendEmail() {
