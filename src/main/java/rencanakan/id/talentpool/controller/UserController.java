@@ -24,6 +24,23 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/contractor/{id}")
+    public ResponseEntity<WebResponse<UserResponseDTO>> getTalentFromContractorById(
+            @PathVariable("id") String id) {
+
+        UserResponseDTO userData = userService.getById(id);
+
+        if (userData == null) {
+            return ResponseEntity.status(404).body(WebResponse.<UserResponseDTO>builder()
+                    .errors("User not found.")
+                    .build());
+        }
+
+        return ResponseEntity.ok(WebResponse.<UserResponseDTO>builder()
+                .data(userData)
+                .build());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<WebResponse<UserResponseDTO>> getUserById(
             @PathVariable("id") String id, 
@@ -105,22 +122,5 @@ public class UserController {
                 .build();
 
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/contractor/{id}")
-    public ResponseEntity<WebResponse<UserResponseDTO>> getTalentFromContractorById(
-            @PathVariable("id") String id) {
-
-        UserResponseDTO userData = userService.getById(id);
-
-        if (userData == null) {
-            return ResponseEntity.status(404).body(WebResponse.<UserResponseDTO>builder()
-                    .errors("User not found.")
-                    .build());
-        }
-
-        return ResponseEntity.ok(WebResponse.<UserResponseDTO>builder()
-                .data(userData)
-                .build());
     }
 }
