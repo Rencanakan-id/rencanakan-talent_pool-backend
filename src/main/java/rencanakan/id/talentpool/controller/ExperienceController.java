@@ -23,6 +23,20 @@ public class ExperienceController {
         this.experienceService = experienceService;
     }
 
+    @GetMapping("/user/contractor/{talent_id}")
+    public ResponseEntity<WebResponse<List<ExperienceResponseDTO>>> getExperiencesTalentFromContractorById(
+            @PathVariable("talent_id") String talentId) {
+
+        List<ExperienceResponseDTO> resp = experienceService.getByTalentId(talentId);
+        if (resp == null) {
+            return ResponseEntity.status(404).body(WebResponse.<List<ExperienceResponseDTO>>builder()
+                    .errors("Experience not found.")
+                    .build());
+        }
+        return ResponseEntity.ok(WebResponse.<List<ExperienceResponseDTO>>builder()
+                .data(resp)
+                .build());
+    }
     @GetMapping("/user/{talent_id}")
     public ResponseEntity<WebResponse<List<ExperienceResponseDTO>>> getExperiencesByTalentId(
             @PathVariable("talent_id") String talentId,

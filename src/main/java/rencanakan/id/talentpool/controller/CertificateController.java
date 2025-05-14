@@ -23,7 +23,23 @@ public class CertificateController {
     public CertificateController(CertificateService certificateService) {
         this.certificateService = certificateService;
     }
-    
+
+    @GetMapping("/user/contractor/{userId}")
+    public ResponseEntity<WebResponse<List<CertificateResponseDTO>>> getCertificatesByUserIdFromContractor(
+            @PathVariable("userId") String userId) {
+
+        List<CertificateResponseDTO> certificates = certificateService.getByUserId(userId);
+
+        if (certificates == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(WebResponse.<List<CertificateResponseDTO>>builder()
+                    .errors("Certificates not found.")
+                    .build());
+        }
+
+        return ResponseEntity.ok(WebResponse.<List<CertificateResponseDTO>>builder()
+                .data(certificates)
+                .build());
+    }
     @GetMapping("/user/{userId}")
     public ResponseEntity<WebResponse<List<CertificateResponseDTO>>> getCertificatesByUserId(
             @PathVariable("userId") String userId,
