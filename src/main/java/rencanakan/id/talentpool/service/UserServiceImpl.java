@@ -17,6 +17,10 @@ import rencanakan.id.talentpool.dto.UserResponseWithPagingDTO;
 import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
+import rencanakan.id.talentpool.specification.NameSpecification;
+import rencanakan.id.talentpool.specification.LocationSpecification;
+import rencanakan.id.talentpool.specification.SkillsSpecification;
+import rencanakan.id.talentpool.specification.PriceSpecification;
 
 
 import java.util.ArrayList;
@@ -93,63 +97,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserResponseWithPagingDTO filter(FilterTalentDTO filter, Pageable page) {
-        Specification<User> specification = (root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (Objects.nonNull(filter.getName()) && !filter.getName().trim().isEmpty()) {
-                String keyword = "%" + filter.getName().toLowerCase() + "%";
-
-                Predicate firstNamePredicate = builder.like(
-                        builder.lower(root.get("firstName")), keyword
-                );
-
-                Predicate lastNamePredicate = builder.like(
-                        builder.lower(root.get("lastName")), keyword
-                );
-
-                Predicate fullNamePredicate = builder.like(
-                        builder.lower(builder.concat(builder.concat(root.get("firstName"), " "), root.get("lastName"))), 
-                        keyword
-                );
-
-                predicates.add(builder.or(firstNamePredicate, lastNamePredicate, fullNamePredicate));
-            }
-
-            if (Objects.nonNull(filter.getPreferredLocations()) && !filter.getPreferredLocations().isEmpty()) {
-                List<Predicate> locationPredicates = filter.getPreferredLocations().stream()
-                        .map(location -> builder.equal(
-                                builder.lower(root.get("currentLocation")),
-                                location.toLowerCase()
-                        ))
-                        .collect(Collectors.toList());
-
-                predicates.add(builder.or(locationPredicates.toArray(new Predicate[0])));
-            }
-
-            if (Objects.nonNull(filter.getSkills()) && !filter.getSkills().isEmpty()) {
-                List<Predicate> skillsPredicates = filter.getSkills().stream()
-                        .map(skill -> builder.equal(
-                                builder.lower(root.get("skill")),
-                                skill.toLowerCase()
-                        ))
-                        .collect(Collectors.toList());
-
-                predicates.add(builder.or(skillsPredicates.toArray(new Predicate[0])));
-            }
-
-
-            if (Objects.nonNull(filter.getPriceRange()) && filter.getPriceRange().size() == 2) {
-                Double minPrice = filter.getPriceRange().get(0);
-                Double maxPrice = filter.getPriceRange().get(1);
-
-                Predicate pricePredicate = builder.between(root.get("price"), minPrice, maxPrice);
-
-                predicates.add(pricePredicate);
-            }
-
-
-            return builder.and(predicates.toArray(new Predicate[0]));
-        };
+        Specification<User> specification = Specification.<User>where(null)
+            .and(NameSpecification.hasName(filter.getName()))
+            .and(LocationSpecification.hasPreferredLocations(filter.getPreferredLocations()))
+            .and(SkillsSpecification.hasSkills(filter.getSkills()))
+            .and(PriceSpecification.inPriceRange(filter.getPriceRange()));
 
         Page<User> userPage = userRepository.findAll(specification, page);
         if(userPage.isEmpty()){
@@ -160,7 +112,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .map(user -> DTOMapper.map(user, UserResponseDTO.class))
                 .collect(Collectors.toList());
 
-        return UserResponseWithPagingDTO.builder().users(userDTOs).page( userPage.getNumber()).size(userPage.getSize()).totalPages(userPage.getTotalPages()).build();
+        return UserResponseWithPagingDTO.builder()
+            .users(userDTOs)
+            .page(userPage.getNumber())
+            .size(userPage.getSize())
+            .totalPages(userPage.getTotalPages())
+            .build();
     }
 
 
