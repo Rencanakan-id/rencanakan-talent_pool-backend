@@ -3,12 +3,8 @@ package rencanakan.id.talentpool.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import rencanakan.id.talentpool.dto.RecommendationRequestDTO;import org.springframework.web.server.ResponseStatusException;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.dto.*;
 import rencanakan.id.talentpool.enums.StatusType;
@@ -194,6 +190,23 @@ public class RecommendationController {
 
         RecommendationResponseDTO response = recommendationService.createRecommendation(user.getId(), request);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/user/contractor/{userId}")
+    public ResponseEntity<WebResponse<List<RecommendationResponseDTO>>> getRecommendationTalentFromContractorById(
+            @PathVariable("userId") String userId) {
+
+        List<RecommendationResponseDTO> recommendations = recommendationService.getByTalentId(userId);
+
+        if (recommendations.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<List<RecommendationResponseDTO>>builder()
+                        .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
+                        .build());
         }
 
+        return ResponseEntity.ok(WebResponse.<List<RecommendationResponseDTO>>builder()
+                    .data(recommendations)
+                    .build());
     }
+}
