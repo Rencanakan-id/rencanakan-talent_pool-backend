@@ -31,6 +31,10 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
     private static final String FIRST_NAME = "firstName";
+    private static final String LAST_NAME = "lastName";
+    private static final String CURRENT_LOCATION = "currentLocation";
+    private static final String SKILL = "skill";
+    private static final String PRICE = "price";
     private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
@@ -108,11 +112,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 );
 
                 Predicate lastNamePredicate = builder.like(
-                        builder.lower(root.get("lastName")), keyword
+                        builder.lower(root.get(LAST_NAME)), keyword
                 );
 
                 Predicate fullNamePredicate = builder.like(
-                        builder.lower(builder.concat(builder.concat(root.get(FIRST_NAME), " "), root.get("lastName"))), 
+                        builder.lower(builder.concat(builder.concat(root.get(FIRST_NAME), " "), root.get(LAST_NAME))), 
                         keyword
                 );
 
@@ -122,10 +126,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             if (Objects.nonNull(filter.getPreferredLocations()) && !filter.getPreferredLocations().isEmpty()) {
                 List<Predicate> locationPredicates = filter.getPreferredLocations().stream()
                         .map(location -> builder.equal(
-                                builder.lower(root.get("currentLocation")),
+                                builder.lower(root.get(CURRENT_LOCATION)),
                                 location.toLowerCase()
                         ))
-                        .collect(Collectors.toList());
+                        .toList();
 
                 predicates.add(builder.or(locationPredicates.toArray(new Predicate[0])));
             }
@@ -133,10 +137,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             if (Objects.nonNull(filter.getSkills()) && !filter.getSkills().isEmpty()) {
                 List<Predicate> skillsPredicates = filter.getSkills().stream()
                         .map(skill -> builder.equal(
-                                builder.lower(root.get("skill")),
+                                builder.lower(root.get(SKILL)),
                                 skill.toLowerCase()
                         ))
-                        .collect(Collectors.toList());
+                        .toList();
 
                 predicates.add(builder.or(skillsPredicates.toArray(new Predicate[0])));
             }
@@ -145,7 +149,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 Double minPrice = filter.getPriceRange().get(0);
                 Double maxPrice = filter.getPriceRange().get(1);
 
-                Predicate pricePredicate = builder.between(root.get("price"), minPrice, maxPrice);
+                Predicate pricePredicate = builder.between(root.get(PRICE), minPrice, maxPrice);
 
                 predicates.add(pricePredicate);
             }
@@ -154,7 +158,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         };
 
         // Create a Sort object that orders by firstName and then by lastName
-        Sort sort = Sort.by(FIRST_NAME).and(Sort.by("lastName"));
+        Sort sort = Sort.by(FIRST_NAME).and(Sort.by(LAST_NAME));
         Pageable pageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
         Page<User> userPage = userRepository.findAll(specification, pageable);
 
