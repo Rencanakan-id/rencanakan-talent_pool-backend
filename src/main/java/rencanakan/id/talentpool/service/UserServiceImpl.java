@@ -153,7 +153,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return builder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Pageable pageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), Sort.by(FIRST_NAME));
+        // Create a Sort object that orders by firstName and then by lastName
+        Sort sort = Sort.by(FIRST_NAME).and(Sort.by("lastName"));
+        Pageable pageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
         Page<User> userPage = userRepository.findAll(specification, pageable);
 
         if(userPage.isEmpty()){
@@ -162,7 +164,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         List<UserResponseDTO> userDTOs = userPage.getContent().stream()
                 .map(user -> DTOMapper.map(user, UserResponseDTO.class))
-                .collect(Collectors.toList());
+                .toList();
 
         return UserResponseWithPagingDTO.builder().users(userDTOs).page( userPage.getNumber()).size(userPage.getSize()).totalPages(userPage.getTotalPages()).build();
     }
