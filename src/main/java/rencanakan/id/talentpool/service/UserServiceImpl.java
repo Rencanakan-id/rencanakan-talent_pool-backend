@@ -1,10 +1,12 @@
 package rencanakan.id.talentpool.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.Join;
+
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
+    private static final String FIRST_NAME = "firstName";
     private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
@@ -91,6 +94,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userOptional.orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
     }
 
+    // Ensure proper usage of builder and root within the Specification lambda
     @Override
     public UserResponseWithPagingDTO filter(FilterTalentDTO filter, Pageable page) {
         Specification<User> specification = (root, query, builder) -> {
@@ -100,7 +104,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 String keyword = "%" + filter.getName().toLowerCase() + "%";
 
                 Predicate firstNamePredicate = builder.like(
-                        builder.lower(root.get("firstName")), keyword
+                        builder.lower(root.get(FIRST_NAME)), keyword
                 );
 
                 Predicate lastNamePredicate = builder.like(
@@ -108,7 +112,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 );
 
                 Predicate fullNamePredicate = builder.like(
-                        builder.lower(builder.concat(builder.concat(root.get("firstName"), " "), root.get("lastName"))), 
+                        builder.lower(builder.concat(builder.concat(root.get(FIRST_NAME), " "), root.get("lastName"))), 
                         keyword
                 );
 
@@ -137,7 +141,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 predicates.add(builder.or(skillsPredicates.toArray(new Predicate[0])));
             }
 
-
             if (Objects.nonNull(filter.getPriceRange()) && filter.getPriceRange().size() == 2) {
                 Double minPrice = filter.getPriceRange().get(0);
                 Double maxPrice = filter.getPriceRange().get(1);
@@ -147,11 +150,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 predicates.add(pricePredicate);
             }
 
-
             return builder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Page<User> userPage = userRepository.findAll(specification, page);
+        Pageable pageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), Sort.by(FIRST_NAME));
+        Page<User> userPage = userRepository.findAll(specification, pageable);
+
         if(userPage.isEmpty()){
             throw  new EntityNotFoundException("No users found");
         }
