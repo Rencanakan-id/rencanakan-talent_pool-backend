@@ -583,9 +583,39 @@ class RecommendationControllerTest {
 
                 verify(recommendationService, never()).getByTalentIdAndGroupedByStatus(anyString());
             }
-        }
+            
+            @Test
+            void getRecommendationTalentFromContractorById_ExistingContractor_ReturnsRecommendations() throws Exception {
+                String contractorId = "contractor-id-1";
+                List<RecommendationResponseDTO> contractorRecommendations = Arrays.asList(recommendation1, recommendation2);
+                
+                when(recommendationService.getByTalentId(contractorId)).thenReturn(contractorRecommendations);
 
+                mockMvc.perform(get("/recommendations/user/contractor/{userId}", contractorId))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.data", hasSize(2)))
+                        .andExpect(jsonPath("$.data[0].id", is(recommendation1.getId())))
+                        .andExpect(jsonPath("$.data[1].id", is(recommendation2.getId())));
+
+                verify(recommendationService).getByTalentId(contractorId);
+            }
+            
+            @Test
+            void getRecommendationTalentFromContractorById_NoRecommendations_ReturnsNotFound() throws Exception {
+                String talentId = "contractor-with-no-recommendations";
+                
+                when(recommendationService.getByTalentId(talentId)).thenReturn(Collections.emptyList());
+
+                mockMvc.perform(get("/recommendations/user/contractor/{userId}", talentId))
+                        .andExpect(status().isNotFound())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.errors", containsString("No recommendations found for user with id: " + talentId)));
+
+                verify(recommendationService).getByTalentId(talentId);
+            }
+        }
 }
 
- 
+
 
