@@ -1,5 +1,6 @@
 package rencanakan.id.talentpool.unit.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -9,6 +10,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import rencanakan.id.talentpool.model.PasswordResetToken;
 import rencanakan.id.talentpool.repository.PasswordResetTokenRepository;
 import rencanakan.id.talentpool.service.EmailServiceImpl;
+import rencanakan.id.talentpool.service.UserService;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +26,9 @@ class EmailServiceTest {
     @Mock
     private PasswordResetTokenRepository tokenRepository;
 
+    @Mock
+    private UserService userService;
+
     @InjectMocks
     private EmailServiceImpl emailService;
 
@@ -33,6 +38,12 @@ class EmailServiceTest {
     @Captor
     private ArgumentCaptor<SimpleMailMessage> mailCaptor;
 
+    @BeforeEach
+    void setup() {
+        // Inject mock base URL for testing
+        emailService.setResetBaseUrl("https://mock-reset.com/reset");
+    }
+
     @Test
     void itShouldGenerateAndSaveTokenAndSendEmail() {
         // Given
@@ -41,7 +52,7 @@ class EmailServiceTest {
         // When
         emailService.processResetPassword(email);
 
-        // Then
+        // Then: verify token is saved
         verify(tokenRepository, times(1)).save(tokenCaptor.capture());
         PasswordResetToken savedToken = tokenCaptor.getValue();
 
@@ -50,6 +61,7 @@ class EmailServiceTest {
         assertThat(savedToken.getExpiryDate()).isAfter(LocalDateTime.now());
         assertThat(savedToken.isUsed()).isFalse();
 
+        // Then: verify email is sent
         verify(mailSender, times(1)).send(mailCaptor.capture());
         SimpleMailMessage message = mailCaptor.getValue();
 
@@ -57,5 +69,6 @@ class EmailServiceTest {
         assertThat(message.getSubject()).contains("Reset Password");
         assertThat(message.getText()).contains("Klik link berikut");
         assertThat(message.getText()).contains(savedToken.getToken());
+        assertThat(message.getText()).contains("https://mock-reset.com/reset");
     }
 }
