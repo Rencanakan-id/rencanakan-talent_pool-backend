@@ -307,25 +307,34 @@ class UserServiceTest {
     class FilterTalentTest{
         @Test
         void filter_ShouldReturnUsersOrderedAlphabeticallyByName() {
-
             FilterTalentDTO filter = new FilterTalentDTO();
             Pageable pageable = PageRequest.of(0, 10);
 
-            User user1 = mockUser("Alice");
-            User user2 = mockUser("Bob");
-            User user3 = mockUser("Charlie");
+            // Create users with different combinations of first and last names
+            User user1 = new User();
+            user1.setFirstName("Alice");
+            user1.setLastName("Smith");
+            
+            User user2 = new User();
+            user2.setFirstName("Bob");
+            user2.setLastName("Jones");
+            
+            User user3 = new User();
+            user3.setFirstName("Alice");
+            user3.setLastName("Johnson");
 
             List<User> users = Arrays.asList(user2, user3, user1); // Unordered list
             
             // Mock that the repository will return the users in alphabetical order
-            // This simulates what Spring Data JPA would do with Sort.by("firstName")
+            // This simulates what Spring Data JPA would do with Sort.by("firstName").and(Sort.by("lastName"))
             when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
                     .thenAnswer(invocation -> {
                         Pageable pageableArg = invocation.getArgument(1);
                         if (pageableArg.getSort().isSorted()) {
-                            // Sort the list by firstName
+                            // Sort the list by firstName and then by lastName
                             List<User> sortedUsers = new ArrayList<>(users);
-                            sortedUsers.sort(Comparator.comparing(User::getFirstName));
+                            sortedUsers.sort(Comparator.comparing(User::getFirstName)
+                                             .thenComparing(User::getLastName));
                             return new PageImpl<>(sortedUsers, pageableArg, sortedUsers.size());
                         }
                         return new PageImpl<>(users, pageableArg, users.size());
@@ -334,19 +343,31 @@ class UserServiceTest {
             // Mock the DTOMapper to return DTOs with the same names
             try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
                 mockedMapper.when(() -> DTOMapper.map(eq(user1), eq(UserResponseDTO.class)))
-                        .thenReturn(UserResponseDTO.builder().firstName("Alice").build());
+                        .thenReturn(UserResponseDTO.builder()
+                                   .firstName("Alice")
+                                   .lastName("Smith")
+                                   .build());
                 mockedMapper.when(() -> DTOMapper.map(eq(user2), eq(UserResponseDTO.class)))
-                        .thenReturn(UserResponseDTO.builder().firstName("Bob").build());
+                        .thenReturn(UserResponseDTO.builder()
+                                   .firstName("Bob")
+                                   .lastName("Jones")
+                                   .build());
                 mockedMapper.when(() -> DTOMapper.map(eq(user3), eq(UserResponseDTO.class)))
-                        .thenReturn(UserResponseDTO.builder().firstName("Charlie").build());
+                        .thenReturn(UserResponseDTO.builder()
+                                   .firstName("Alice")
+                                   .lastName("Johnson")
+                                   .build());
                 
                 UserResponseWithPagingDTO result = userService.filter(filter, pageable);
                 
-                List<String> names = result.getUsers().stream()
-                        .map(UserResponseDTO::getFirstName)
-                        .toList();
-                
-                assertEquals(Arrays.asList("Alice", "Bob", "Charlie"), names);
+                // Check that users are sorted first by firstName, then by lastName
+                List<UserResponseDTO> sortedUsers = result.getUsers();
+                assertEquals(3, sortedUsers.size());
+                assertEquals("Alice", sortedUsers.get(0).getFirstName());
+                assertEquals("Johnson", sortedUsers.get(0).getLastName());
+                assertEquals("Alice", sortedUsers.get(1).getFirstName());
+                assertEquals("Smith", sortedUsers.get(1).getLastName());
+                assertEquals("Bob", sortedUsers.get(2).getFirstName());
             }
         }
         @Test
