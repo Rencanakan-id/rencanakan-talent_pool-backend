@@ -5,7 +5,9 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import rencanakan.id.talentpool.model.PasswordResetToken;
+import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.PasswordResetTokenRepository;
+import rencanakan.id.talentpool.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,9 +18,11 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
     private final PasswordResetTokenRepository tokenRepository;
+    private final UserService userService;
 
     @Override
     public void sendResetPasswordEmail(String to, String resetLink) {
+        userService.findByEmail(to);
         System.out.println("Sending reset password email to " + to);
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
