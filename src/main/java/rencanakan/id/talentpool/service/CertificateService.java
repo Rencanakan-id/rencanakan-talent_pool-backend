@@ -8,7 +8,7 @@ import java.util.List;
 public interface CertificateService {
     List<CertificateResponseDTO> getByUserId(String talentId);
     CertificateResponseDTO getById(Long certificateId);
-    CertificateResponseDTO editById(Long id, CertificateRequestDTO dto);
+    CertificateResponseDTO editById(Long id, CertificateRequestDTO dto, String userId);
     CertificateResponseDTO create(String userId, CertificateRequestDTO certificateRequest);
     void deleteById(Long certificateId, String id);
 }

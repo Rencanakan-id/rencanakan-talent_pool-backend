@@ -91,7 +91,7 @@ public class CertificateController {
             @RequestBody @Valid CertificateRequestDTO dto) {
 
         try {
-            CertificateResponseDTO updatedCertificate = certificateService.editById(certificateId, dto);
+            CertificateResponseDTO updatedCertificate = certificateService.editById(certificateId, dto, user.getId());
             return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
                     .data(updatedCertificate)
                     .build());

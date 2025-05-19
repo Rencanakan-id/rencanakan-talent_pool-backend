@@ -42,7 +42,7 @@ public class EmailServiceImpl implements EmailService {
                 .build();
         tokenRepository.save(resetToken);
 
-        String resetLink = "https://rencanakanid-stg.netlify.app/nando-tolong-ubah-ini?token=" + token;
+        String resetLink = "https://rencanakanid-stg.netlify.app/reset-password?token=" + token;
         sendResetPasswordEmail(email, resetLink);
     }
 }
