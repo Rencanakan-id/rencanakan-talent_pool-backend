@@ -273,7 +273,7 @@ class RecommendationControllerTest {
             }
 
             @Test
-            public void deleteByTalent_UserNotAuthorized_ShouldReturn403() throws Exception {
+            void deleteByTalent_UserNotAuthorized_ShouldReturn403() throws Exception {
                 when(recommendationService.deleteByIdTalent(any(), eq(id)))
                         .thenThrow(new AccessDeniedException("You are not allowed to delete this recommendation."));
 
@@ -308,7 +308,7 @@ class RecommendationControllerTest {
                 Long contractorId = 999L;
 
                 doThrow(new EntityNotFoundException("Recommendation with id " + notFoundId + " not found."))
-                        .when(recommendationService).deleteByIdContractor(eq(contractorId), eq(notFoundId));
+                        .when(recommendationService).deleteByIdContractor(contractorId, notFoundId);
 
                 mockMvc.perform(delete("/recommendations/{recommendationId}/contractor/{contractorId}", notFoundId, contractorId)
                                 .contentType(MediaType.APPLICATION_JSON))
@@ -320,7 +320,7 @@ class RecommendationControllerTest {
             void deleteByContractor_Success_ShouldReturn200() throws Exception {
                 Long contractorId = 123L;
 
-                when(recommendationService.deleteByIdContractor(eq(contractorId), eq(id))).thenReturn(responseDTO);
+                when(recommendationService.deleteByIdContractor(contractorId, id)).thenReturn(responseDTO);
 
                 mockMvc.perform(delete("/recommendations/{recommendationId}/contractor/{contractorId}", id, contractorId)
                                 .contentType(MediaType.APPLICATION_JSON))
