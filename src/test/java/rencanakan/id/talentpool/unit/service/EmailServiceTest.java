@@ -46,13 +46,10 @@ class EmailServiceTest {
 
     @Test
     void itShouldGenerateAndSaveTokenAndSendEmail() {
-        // Given
         String email = "user@example.com";
 
-        // When
         emailService.processResetPassword(email);
 
-        // Then: verify token is saved
         verify(tokenRepository, times(1)).save(tokenCaptor.capture());
         PasswordResetToken savedToken = tokenCaptor.getValue();
 
@@ -61,7 +58,6 @@ class EmailServiceTest {
         assertThat(savedToken.getExpiryDate()).isAfter(LocalDateTime.now());
         assertThat(savedToken.isUsed()).isFalse();
 
-        // Then: verify email is sent
         verify(mailSender, times(1)).send(mailCaptor.capture());
         SimpleMailMessage message = mailCaptor.getValue();
 
