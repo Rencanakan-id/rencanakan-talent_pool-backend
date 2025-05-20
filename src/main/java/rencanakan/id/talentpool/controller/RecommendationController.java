@@ -43,7 +43,7 @@ public class RecommendationController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{recommendationId}/contractor/{contractorId}")
+    @DeleteMapping("/user/contractor/{recommendationId}/{contractorId}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
             @PathVariable("recommendationId") String recommendationId,
             @PathVariable("contractorId") Long contractorId){

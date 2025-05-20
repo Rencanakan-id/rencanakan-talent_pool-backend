@@ -310,7 +310,7 @@ class RecommendationControllerTest {
                 doThrow(new EntityNotFoundException("Recommendation with id " + notFoundId + " not found."))
                         .when(recommendationService).deleteByIdContractor(contractorId, notFoundId);
 
-                mockMvc.perform(delete("/recommendations/{recommendationId}/contractor/{contractorId}", notFoundId, contractorId)
+                mockMvc.perform(delete("/recommendations//user/contractor/{recommendationId}/{contractorId}", notFoundId, contractorId)
                                 .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isNotFound())
                         .andExpect(jsonPath("$.errors").value("Recommendation with id " + notFoundId + " not found."));
@@ -322,7 +322,7 @@ class RecommendationControllerTest {
 
                 when(recommendationService.deleteByIdContractor(contractorId, id)).thenReturn(responseDTO);
 
-                mockMvc.perform(delete("/recommendations/{recommendationId}/contractor/{contractorId}", id, contractorId)
+                mockMvc.perform(delete("/recommendations//user/contractor/{recommendationId}/{contractorId}", id, contractorId)
                                 .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.data.id").value(id))
