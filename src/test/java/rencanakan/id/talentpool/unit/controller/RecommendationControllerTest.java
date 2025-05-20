@@ -129,7 +129,7 @@ class RecommendationControllerTest {
             when(recommendationService.createRecommendation(eq("user123"), any(RecommendationRequestDTO.class)))
                     .thenReturn(mockResponseDTO);
 
-            mockMvc.perform(post("/recommendations/contractor/{talentId}", "user123")
+            mockMvc.perform(post("/recommendations/user/contractor/{talentId}", "user123")
                             .contentType(MediaType.APPLICATION_JSON)
                             .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
                             .content(mapper.writeValueAsString(request)))
@@ -146,7 +146,7 @@ class RecommendationControllerTest {
         void testCreateRecommendation_BadRequest() throws Exception {
             RecommendationRequestDTO invalidRequest = new RecommendationRequestDTO();
 
-            mockMvc.perform(post("/recommendations/contractor/{talentId}", "user123")
+            mockMvc.perform(post("/recommendations/user/contractor/{talentId}", "user123")
                             .contentType(MediaType.APPLICATION_JSON)
                             .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
                             .content(mapper.writeValueAsString(invalidRequest)))
@@ -161,7 +161,7 @@ class RecommendationControllerTest {
             when(recommendationService.createRecommendation(eq("user123"), any(RecommendationRequestDTO.class)))
                     .thenThrow(new RuntimeException("Talent not found"));
 
-            mockMvc.perform(post("/recommendations/contractor/{talentId}", "user123")
+            mockMvc.perform(post("/recommendations/user/contractor/{talentId}", "user123")
                             .contentType(MediaType.APPLICATION_JSON)
                             .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
                             .content(mapper.writeValueAsString(request)))

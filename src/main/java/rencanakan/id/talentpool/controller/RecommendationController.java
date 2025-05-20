@@ -238,7 +238,7 @@ public class RecommendationController {
         }
     }
 
-    @PostMapping("/contractor/{talentId}")
+    @PostMapping("/user/contractor/{talentId}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> createRecommendation(
             @PathVariable("talentId") String talentId,
             @RequestBody @Valid RecommendationRequestDTO request) {
