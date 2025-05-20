@@ -1,5 +1,6 @@
 package rencanakan.id.talentpool.unit.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -7,12 +8,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import rencanakan.id.talentpool.model.PasswordResetToken;
+import rencanakan.id.talentpool.model.User;
+import java.util.Optional;
 import rencanakan.id.talentpool.repository.PasswordResetTokenRepository;
+import rencanakan.id.talentpool.repository.UserRepository;
 import rencanakan.id.talentpool.service.EmailServiceImpl;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,6 +28,8 @@ class EmailServiceTest {
 
     @Mock
     private PasswordResetTokenRepository tokenRepository;
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private EmailServiceImpl emailService;
@@ -37,6 +44,9 @@ class EmailServiceTest {
     void itShouldGenerateAndSaveTokenAndSendEmail() {
         // Given
         String email = "user@example.com";
+        User dummyUser = new User();
+        dummyUser.setEmail(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(dummyUser));
 
         // When
         emailService.processResetPassword(email);
@@ -57,5 +67,19 @@ class EmailServiceTest {
         assertThat(message.getSubject()).contains("Reset Password");
         assertThat(message.getText()).contains("Klik link berikut");
         assertThat(message.getText()).contains(savedToken.getToken());
+    }
+
+    @Test
+    void itShouldThrowWhenUserDoesNotExist() {
+        // Given
+        String email = "nonexistent@example.com";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        // When & Then
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            emailService.processResetPassword(email);
+        });
+
+        assertThat(exception.getMessage()).contains(email);
     }
 }

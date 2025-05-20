@@ -16,15 +16,20 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rencanakan.id.talentpool.dto.LoginRequestDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
+import rencanakan.id.talentpool.model.PasswordResetToken;
 import rencanakan.id.talentpool.model.User;
+import rencanakan.id.talentpool.repository.PasswordResetTokenRepository;
 import rencanakan.id.talentpool.repository.UserRepository;
 import rencanakan.id.talentpool.service.AuthenticationService;
 import rencanakan.id.talentpool.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -34,6 +39,9 @@ class AuthenticationServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Mock
     private UserService userService;
@@ -204,5 +212,41 @@ class AuthenticationServiceTest {
         );
         assertEquals("Invalid credentials", exception.getMessage());
         verify(authenticationManager, times(1)).authenticate(any());
+    }
+
+    @Test
+    void resetPasswordWithToken_shouldUpdatePasswordAndMarkTokenUsed() {
+        // Arrange
+        String token = "abc";
+        String newPassword = "Dummy123#";
+        String encodedPassword = "Dummy123#";
+        String email = "user@email.com";
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .email(email)
+                .expiryDate(LocalDateTime.now().plusMinutes(10))
+                .used(false)
+                .build();
+        User user = new User();
+        user.setEmail(email);
+
+        when(passwordResetTokenRepository.findByToken(token)).thenReturn(Optional.of(resetToken));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
+
+        authenticationService.resetPasswordWithToken(token, newPassword);
+
+        verify(userRepository).save(user);
+        verify(passwordResetTokenRepository).save(resetToken);
+        assertThat(user.getPassword()).isEqualTo(encodedPassword);
+        assertThat(resetToken.isUsed()).isTrue();
+    }
+
+    @Test
+    void resetPasswordWithToken_shouldThrowIfTokenInvalid() {
+        when(passwordResetTokenRepository.findByToken("notfound")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authenticationService.resetPasswordWithToken("notfound", "pw"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Token tidak valid");
     }
 }

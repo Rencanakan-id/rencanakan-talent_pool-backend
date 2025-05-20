@@ -107,8 +107,7 @@ public class CertificateController {
             @RequestBody @Valid CertificateRequestDTO dto) {
 
         try {
-            CertificateResponseDTO updatedCertificate = certificateService.editById(certificateId, dto);
-            return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
+            CertificateResponseDTO updatedCertificate = certificateService.editById(certificateId, dto);            return ResponseEntity.ok(WebResponse.<CertificateResponseDTO>builder()
                     .data(updatedCertificate)
                     .build());
         } catch (Exception e) {

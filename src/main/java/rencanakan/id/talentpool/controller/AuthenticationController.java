@@ -5,10 +5,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import rencanakan.id.talentpool.dto.LoginRequestDTO;
-import rencanakan.id.talentpool.dto.LoginResponseDTO;
-import rencanakan.id.talentpool.dto.UserRequestDTO;
-import rencanakan.id.talentpool.dto.WebResponse;
+import rencanakan.id.talentpool.dto.*;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.service.AuthenticationService;
 import rencanakan.id.talentpool.service.JwtService;
@@ -61,5 +58,11 @@ public class AuthenticationController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDTO request) {
+        authenticationService.resetPasswordWithToken(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok("Password successfully reset.");
     }
 }
