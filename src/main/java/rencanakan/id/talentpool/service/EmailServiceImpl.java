@@ -2,6 +2,8 @@ package rencanakan.id.talentpool.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,11 @@ public class EmailServiceImpl implements EmailService {
     private final PasswordResetTokenRepository tokenRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+
+    @Setter
+    @Value("${app.reset-password.base-url}")
+    private String resetBaseUrl;
+
 
     @Override
     public void sendResetPasswordEmail(String to, String resetLink) {
@@ -42,7 +49,6 @@ public class EmailServiceImpl implements EmailService {
         String token = UUID.randomUUID().toString();
         LocalDateTime expiry = LocalDateTime.now().plusHours(1);
 
-        // Simpan token ke DB
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .email(email)
                 .token(token)
@@ -51,7 +57,7 @@ public class EmailServiceImpl implements EmailService {
                 .build();
         tokenRepository.save(resetToken);
 
-        String resetLink = "https://rencanakanid-stg.netlify.app/reset-password?token=" + token;
+        String resetLink = resetBaseUrl + "?token=" + token;
         sendResetPasswordEmail(email, resetLink);
     }
 }

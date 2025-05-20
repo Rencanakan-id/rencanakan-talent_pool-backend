@@ -1,5 +1,6 @@
 package rencanakan.id.talentpool.unit.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,7 @@ class EmailServiceTest {
     @Mock
     private UserService userService;
 
+
     @InjectMocks
     private EmailServiceImpl emailService;
 
@@ -43,18 +45,21 @@ class EmailServiceTest {
     @Captor
     private ArgumentCaptor<SimpleMailMessage> mailCaptor;
 
+    @BeforeEach
+    void setup() {
+        // Inject mock base URL for testing
+        emailService.setResetBaseUrl("https://mock-reset.com/reset");
+    }
+
     @Test
     void itShouldGenerateAndSaveTokenAndSendEmail() {
-        // Given
         String email = "user@example.com";
         User dummyUser = new User();
         dummyUser.setEmail(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(dummyUser));
 
-        // When
         emailService.processResetPassword(email);
 
-        // Then
         verify(tokenRepository, times(1)).save(tokenCaptor.capture());
         PasswordResetToken savedToken = tokenCaptor.getValue();
 
@@ -70,6 +75,7 @@ class EmailServiceTest {
         assertThat(message.getSubject()).contains("Reset Password");
         assertThat(message.getText()).contains("Klik link berikut");
         assertThat(message.getText()).contains(savedToken.getToken());
+        assertThat(message.getText()).contains("https://mock-reset.com/reset");
     }
 
     @Test
