@@ -54,8 +54,18 @@ public class RecommendationController {
                 .build();
         return ResponseEntity.ok(response);
     }
+      
+    @DeleteMapping("/{recommendationId}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
+            @PathVariable("recommendationId") String recommendationId,
+            @AuthenticationPrincipal User user ){
+        RecommendationResponseDTO res = this.recommendationService.deleteByIdTalent(user.getId(),  recommendationId);
+        WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
+                .data(res)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 
-    
     @PatchMapping("/{recommendationId}/accept")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> acceptById(
             @PathVariable("recommendationId") String recommendationId,
