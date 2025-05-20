@@ -255,6 +255,24 @@ public class RecommendationController {
         }
     }
 
+    @GetMapping("/user/contractor/{userId}")
+    public ResponseEntity<WebResponse<List<RecommendationResponseDTO>>> getRecommendationTalentFromContractorById(
+            @PathVariable("userId") String userId) {
+
+        List<RecommendationResponseDTO> recommendations = recommendationService.getByTalentId(userId);
+
+        if (recommendations.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<List<RecommendationResponseDTO>>builder()
+                        .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
+                        .build());
+        }
+
+        return ResponseEntity.ok(WebResponse.<List<RecommendationResponseDTO>>builder()
+                    .data(recommendations)
+                    .build());
+    }
+
     @PutMapping("/{recommendationId}/contractor/{contractorId}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> editRecommendationById(
             @PathVariable("recommendationId") String recommendationId,
