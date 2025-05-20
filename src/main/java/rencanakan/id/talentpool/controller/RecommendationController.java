@@ -4,10 +4,10 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
+import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
+import org.springframework.security.access.AccessDeniedException;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.dto.*;
 import rencanakan.id.talentpool.enums.StatusType;
@@ -238,16 +238,20 @@ public class RecommendationController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<RecommendationResponseDTO> createRecommendation(
-            @RequestBody @Valid RecommendationRequestDTO request,
-            @AuthenticationPrincipal User user) {
-
-        if (user == null) {
-            return ResponseEntity.badRequest().build();
+    @PostMapping("/contractor/{talentId}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> createRecommendation(
+            @PathVariable("talentId") String talentId,
+            @RequestBody @Valid RecommendationRequestDTO request) {
+        try {
+            RecommendationResponseDTO response = recommendationService.createRecommendation(talentId, request);
+            return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                    .data(response)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                            .errors(e.getMessage())
+                            .build());
         }
-
-        RecommendationResponseDTO response = recommendationService.createRecommendation(user.getId(), request);
-        return ResponseEntity.ok(response);
     }
 }
