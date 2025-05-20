@@ -1,14 +1,13 @@
 package rencanakan.id.talentpool.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import rencanakan.id.talentpool.dto.RecommendationRequestDTO;import org.springframework.web.server.ResponseStatusException;
+import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
+import org.springframework.security.access.AccessDeniedException;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.dto.*;
 import rencanakan.id.talentpool.enums.StatusType;
@@ -42,8 +41,8 @@ public class RecommendationController {
                 .build();
 
         return ResponseEntity.ok(response);
-
     }
+  
     @DeleteMapping("/{recommendationId}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
             @PathVariable("recommendationId") String recommendationId,
@@ -65,6 +64,64 @@ public class RecommendationController {
                 .data(res)
                 .build();
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{recommendationId}/accept")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> acceptById(
+            @PathVariable("recommendationId") String recommendationId,
+            @AuthenticationPrincipal User user) {
+
+        try {
+            RecommendationResponseDTO resp = recommendationService.editStatusById(user.getId(), recommendationId, StatusType.ACCEPTED);
+
+            return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                        .data(resp)
+                        .build());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        }
+    }
+
+    @PatchMapping("/{recommendationId}/reject")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> rejectById(
+            @PathVariable("recommendationId") String recommendationId,
+            @AuthenticationPrincipal User user) {
+
+        try {
+            RecommendationResponseDTO resp = recommendationService.editStatusById(user.getId(), recommendationId, StatusType.DECLINED);
+
+            return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                        .data(resp)
+                        .build());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                        .errors(e.getMessage())
+                        .build());
+        }
     }
 
     @GetMapping("/{recommendationId}")
@@ -193,16 +250,68 @@ public class RecommendationController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<RecommendationResponseDTO> createRecommendation(
-            @RequestBody @Valid RecommendationRequestDTO request,
-            @AuthenticationPrincipal User user) {
+    @PostMapping("/contractor/{talentId}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> createRecommendation(
+            @PathVariable("talentId") String talentId,
+            @RequestBody @Valid RecommendationRequestDTO request) {
+        try {
+            RecommendationResponseDTO response = recommendationService.createRecommendation(talentId, request);
+            return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                    .data(response)
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                            .errors(e.getMessage())
+                            .build());
+        }
+    }
 
-        if (user == null) {
-            return ResponseEntity.badRequest().build();
+    @GetMapping("/user/contractor/{userId}")
+    public ResponseEntity<WebResponse<List<RecommendationResponseDTO>>> getRecommendationTalentFromContractorById(
+            @PathVariable("userId") String userId) {
+
+        List<RecommendationResponseDTO> recommendations = recommendationService.getByTalentId(userId);
+
+        if (recommendations.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<List<RecommendationResponseDTO>>builder()
+                        .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
+                        .build());
         }
 
-        RecommendationResponseDTO response = recommendationService.createRecommendation(user.getId(), request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(WebResponse.<List<RecommendationResponseDTO>>builder()
+                    .data(recommendations)
+                    .build());
+    }
+
+    @PutMapping("/{recommendationId}/contractor/{contractorId}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> editRecommendationById(
+            @PathVariable("recommendationId") String recommendationId,
+            @PathVariable("contractorId") Long contractorId,
+            @RequestBody @Valid RecommendationRequestDTO editRequest) {
+
+        try {
+            RecommendationResponseDTO resp = recommendationService.editById(contractorId, recommendationId, editRequest);
+
+            return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
+                    .data(resp)
+                    .build());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                            .errors(e.getMessage())
+                            .build());
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                            .errors(e.getMessage())
+                            .build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    WebResponse.<RecommendationResponseDTO>builder()
+                            .errors(e.getMessage())
+                            .build());
+        }
     }
 }

@@ -12,6 +12,7 @@ public interface RecommendationService {
     RecommendationResponseDTO deleteByIdTalent(String userId,  String id);
     RecommendationResponseDTO deleteByIdContractor(Long contractorId,  String id);
     RecommendationResponseDTO editStatusById(String userId, String id, StatusType status);
+    RecommendationResponseDTO editById(Long contractorId, String id, RecommendationRequestDTO request);
     RecommendationResponseDTO getById(String id);
     List<RecommendationResponseDTO> getByTalentId(String talentId);
     List<RecommendationResponseDTO> getByTalentIdAndStatus(String talentId, StatusType status);

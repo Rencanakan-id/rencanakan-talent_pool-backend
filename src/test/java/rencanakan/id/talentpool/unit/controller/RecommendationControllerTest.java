@@ -100,77 +100,77 @@ class RecommendationControllerTest {
     class CreateRecommendationTest {
 
         @BeforeEach
-    void setUp() {
-        mapper = Jackson2ObjectMapperBuilder.json()
-                .modules(new JavaTimeModule())
-                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .build();
+        void setUp() {
+            mapper = Jackson2ObjectMapperBuilder.json()
+                    .modules(new JavaTimeModule())
+                    .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    .build();
 
-        mockMvc = MockMvcBuilders.standaloneSetup(recommendationController)
-                .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
-                .build();
+            mockMvc = MockMvcBuilders.standaloneSetup(recommendationController)
+                    .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
+                    .build();
 
-        mockTalent = User.builder()
-                .id("user123")
-                .firstName("Test")
-                .lastName("Talent")
-                .email("test@example.com")
-                .password("Password123")
-                .phoneNumber("081234567890")
-                .nik("1234567890123456")
-                .build();
-    }
+            mockTalent = User.builder()
+                    .id("user123")
+                    .firstName("Test")
+                    .lastName("Talent")
+                    .email("test@example.com")
+                    .password("Password123")
+                    .phoneNumber("081234567890")
+                    .nik("1234567890123456")
+                    .build();
+        }
 
         @Test
         void testCreateRecommendation_Success() throws Exception {
-
             RecommendationRequestDTO request = createValidRequestDTO();
             RecommendationResponseDTO mockResponseDTO = createMockResponseDTO();
 
-            when(recommendationService.createRecommendation(any(), any(RecommendationRequestDTO.class)))
+            when(recommendationService.createRecommendation(eq("user123"), any(RecommendationRequestDTO.class)))
                     .thenReturn(mockResponseDTO);
 
-            mockMvc.perform(post("/recommendations")
+            mockMvc.perform(post("/recommendations/contractor/{talentId}", "user123")
                             .contentType(MediaType.APPLICATION_JSON)
                             .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
                             .content(mapper.writeValueAsString(request)))
                     .andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value("recommendation123")) // Change from $.data.id
-                    .andExpect(jsonPath("$.contractorId").value(1L))
-                    .andExpect(jsonPath("$.contractorName").value("Contractor name"))
-                    .andExpect(jsonPath("$.message").value("Test controller message"))
-                    .andExpect(jsonPath("$.status").value("PENDING"));
-
+                    .andExpect(jsonPath("$.data.id").value("recommendation123"))
+                    .andExpect(jsonPath("$.data.contractorId").value(1L))
+                    .andExpect(jsonPath("$.data.contractorName").value("Contractor name"))
+                    .andExpect(jsonPath("$.data.message").value("Test controller message"))
+                    .andExpect(jsonPath("$.data.status").value("PENDING"));
         }
 
         @Test
         void testCreateRecommendation_BadRequest() throws Exception {
             RecommendationRequestDTO invalidRequest = new RecommendationRequestDTO();
 
-            mockMvc.perform(post("/recommendations")
+            mockMvc.perform(post("/recommendations/contractor/{talentId}", "user123")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .requestAttr("currentUser", mockTalent)
+                            .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
                             .content(mapper.writeValueAsString(invalidRequest)))
                     .andDo(print())
                     .andExpect(status().isBadRequest());
         }
 
         @Test
-        void testCreateRecommendation_Unauthorized() throws Exception {
-            setupUnauthorizedMockMvc();
-
+        void testCreateRecommendation_NotFound() throws Exception {
             RecommendationRequestDTO request = createValidRequestDTO();
 
-            mockMvc.perform(post("/recommendations")
+            when(recommendationService.createRecommendation(eq("user123"), any(RecommendationRequestDTO.class)))
+                    .thenThrow(new RuntimeException("Talent not found"));
+
+            mockMvc.perform(post("/recommendations/contractor/{talentId}", "user123")
                             .contentType(MediaType.APPLICATION_JSON)
                             .with(SecurityMockMvcRequestPostProcessors.user(mockTalent))
                             .content(mapper.writeValueAsString(request)))
-                            .andDo(print())
-                            .andExpect(status().isBadRequest());
-
+                    .andDo(print())
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("Talent not found"));
         }
     }
+
 
     @BeforeEach
     void setUp() {
@@ -335,6 +335,353 @@ class RecommendationControllerTest {
         }
     }
 
+	@Nested
+	class AcceptRecommendationTests {
+		private User testUser;
+
+		@BeforeEach
+		void setUp() {
+			testUser = new User();
+			testUser.setId("user-id-1");
+			testUser.setEmail("john.doe@email.com");
+
+			mockMvc = MockMvcBuilders
+					.standaloneSetup(recommendationController)
+					.setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(testUser))
+					.setControllerAdvice(new ErrorController())
+					.setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+					.build();
+		}
+
+		@Test
+		void testAcceptRecommendation_Success() throws Exception {
+			String recommendationId = "rec-id-1";
+			RecommendationResponseDTO acceptedRecommendation = new RecommendationResponseDTO(
+					recommendationId, "user-id-1", 123L, "contractorName", "Some message", StatusType.ACCEPTED
+			);
+			
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED))
+					.thenReturn(acceptedRecommendation);
+
+			mockMvc.perform(patch("/recommendations/{recommendationId}/accept", recommendationId)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.data.id").value(recommendationId))
+					.andExpect(jsonPath("$.data.status").value("ACCEPTED"))
+					.andExpect(jsonPath("$.errors").isEmpty());
+			
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED);
+		}
+		
+		@Test
+		void testAcceptRecommendation_NotFound() throws Exception {
+			String nonExistingId = "non-existing-id";
+			
+			when(recommendationService.editStatusById(testUser.getId(), nonExistingId, StatusType.ACCEPTED))
+					.thenThrow(new EntityNotFoundException("Recommendation with ID " + nonExistingId + " not found"));
+
+			mockMvc.perform(patch("/recommendations/{recommendationId}/accept", nonExistingId)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isNotFound())
+					.andExpect(jsonPath("$.errors").value("Recommendation with ID " + nonExistingId + " not found"));
+			
+			verify(recommendationService).editStatusById(testUser.getId(), nonExistingId, StatusType.ACCEPTED);
+		}
+		
+		@Test
+		void testAcceptRecommendation_Unauthorized() throws Exception {
+			String recommendationId = "rec-id-1";
+			
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED))
+					.thenThrow(new AccessDeniedException("You are not allowed to edit this recommendation."));
+
+			mockMvc.perform(patch("/recommendations/{recommendationId}/accept", recommendationId)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isForbidden())
+					.andExpect(jsonPath("$.errors").value("You are not allowed to edit this recommendation."));
+			
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED);
+		}
+		
+		@Test
+		void testAcceptRecommendation_AlreadyAccepted() throws Exception {
+			String recommendationId = "already-accepted-id";
+			RecommendationResponseDTO alreadyAcceptedRecommendation = new RecommendationResponseDTO(
+					recommendationId, "user-id-1", 123L, "contractorName", "Already accepted message", StatusType.ACCEPTED
+			);
+			
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED))
+					.thenReturn(alreadyAcceptedRecommendation);
+
+			mockMvc.perform(patch("/recommendations/{recommendationId}/accept", recommendationId)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.data.id").value(recommendationId))
+					.andExpect(jsonPath("$.data.status").value("ACCEPTED"))
+					.andExpect(jsonPath("$.errors").isEmpty());
+			
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED);
+		}
+		
+		@Test
+		void testAcceptRecommendation_ServerError() throws Exception {
+			String recommendationId = "error-id";
+			
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED))
+					.thenThrow(new RuntimeException("Unexpected server error"));
+
+			mockMvc.perform(patch("/recommendations/{recommendationId}/accept", recommendationId)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isInternalServerError())
+					.andExpect(jsonPath("$.errors").value("Unexpected server error"));
+			
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.ACCEPTED);
+		}
+	}
+
+	@Nested
+	class RejectRecommendationTests {
+		private User testUser;
+
+		@BeforeEach
+		void setUp() {
+			testUser = new User();
+			testUser.setId("user-id-1");
+			testUser.setEmail("john.doe@email.com");
+
+			mockMvc = MockMvcBuilders
+					.standaloneSetup(recommendationController)
+					.setCustomArgumentResolvers(new PrincipalDetailsArgumentResolver(testUser))
+					.setControllerAdvice(new ErrorController())
+					.setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+					.build();
+		}
+
+		@Test
+		void testRejectRecommendation_Success() throws Exception {
+			String recommendationId = "rec-id-1";
+			RecommendationResponseDTO rejectedRecommendation = new RecommendationResponseDTO(
+					recommendationId, "user-id-1", 123L, "contractorName", "Some message", StatusType.DECLINED
+			);
+			
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.DECLINED))
+					.thenReturn(rejectedRecommendation);
+
+			mockMvc.perform(patch("/recommendations/{recommendationId}/reject", recommendationId)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.data.id").value(recommendationId))
+					.andExpect(jsonPath("$.data.status").value("DECLINED"))
+					.andExpect(jsonPath("$.errors").isEmpty());
+			
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.DECLINED);
+		}
+		
+		@Test
+		void testRejectRecommendation_NotFound() throws Exception {
+			String nonExistingId = "non-existing-id";
+			
+			when(recommendationService.editStatusById(testUser.getId(), nonExistingId, StatusType.DECLINED))
+					.thenThrow(new EntityNotFoundException("Recommendation with ID " + nonExistingId + " not found"));
+
+			mockMvc.perform(patch("/recommendations/{recommendationId}/reject", nonExistingId)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isNotFound())
+					.andExpect(jsonPath("$.errors").value("Recommendation with ID " + nonExistingId + " not found"));
+			
+			verify(recommendationService).editStatusById(testUser.getId(), nonExistingId, StatusType.DECLINED);
+		}
+		
+		@Test
+		void testRejectRecommendation_Unauthorized() throws Exception {
+			String recommendationId = "rec-id-1";
+			
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.DECLINED))
+					.thenThrow(new AccessDeniedException("You are not allowed to edit this recommendation."));
+
+			mockMvc.perform(patch("/recommendations/{recommendationId}/reject", recommendationId)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isForbidden())
+					.andExpect(jsonPath("$.errors").value("You are not allowed to edit this recommendation."));
+			
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.DECLINED);
+		}
+		
+		@Test
+		void testRejectRecommendation_AlreadyRejected() throws Exception {
+			String recommendationId = "already-rejected-id";
+			RecommendationResponseDTO alreadyRejectedRecommendation = new RecommendationResponseDTO(
+					recommendationId, "user-id-1", 123L, "contractorName", "Already rejected message", StatusType.DECLINED
+			);
+			
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.DECLINED))
+					.thenReturn(alreadyRejectedRecommendation);
+
+			mockMvc.perform(patch("/recommendations/{recommendationId}/reject", recommendationId)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.data.id").value(recommendationId))
+					.andExpect(jsonPath("$.data.status").value("DECLINED"))
+					.andExpect(jsonPath("$.errors").isEmpty());
+			
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.DECLINED);
+		}
+		
+		@Test
+		void testRejectRecommendation_ServerError() throws Exception {
+			String recommendationId = "error-id";
+			
+			when(recommendationService.editStatusById(testUser.getId(), recommendationId, StatusType.DECLINED))
+					.thenThrow(new RuntimeException("Unexpected server error"));
+
+			mockMvc.perform(patch("/recommendations/{recommendationId}/reject", recommendationId)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isInternalServerError())
+					.andExpect(jsonPath("$.errors").value("Unexpected server error"));
+			
+			verify(recommendationService).editStatusById(testUser.getId(), recommendationId, StatusType.DECLINED);
+		}
+	}
+
+	@Nested
+	class EditRecommendationTests {
+		private RecommendationRequestDTO validEditRequest;
+		private String recommendationId;
+		private Long contractorId;
+		@SuppressWarnings("unused")
+		private RecommendationResponseDTO originalRecommendation;
+		private RecommendationResponseDTO editedRecommendation;
+
+		@BeforeEach
+		void setUp() {
+			mockMvc = MockMvcBuilders
+							.standaloneSetup(recommendationController)
+							.setControllerAdvice(new ErrorController())
+							.setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+							.build();
+
+			recommendationId = "rec-123";
+			contractorId = 123L;
+			
+			originalRecommendation = new RecommendationResponseDTO(
+							recommendationId, "talent-id", contractorId, "Contractor Name", 
+							"Original message", StatusType.ACCEPTED
+			);
+			
+			validEditRequest = RecommendationRequestDTO.builder()
+							.contractorId(contractorId)
+							.contractorName("Contractor Name")
+							.message("Updated recommendation message")
+							.status(StatusType.PENDING)
+							.build();
+			
+			editedRecommendation = new RecommendationResponseDTO(
+							recommendationId, "talent-id", contractorId, "Contractor Name", 
+							"Updated recommendation message", StatusType.PENDING
+			);
+		}
+
+		@Test
+		void testEditRecommendation_Success() throws Exception {
+			when(recommendationService.editById(anyLong(), anyString(), any(RecommendationRequestDTO.class)))
+							.thenReturn(editedRecommendation);
+
+			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
+							.contentType(MediaType.APPLICATION_JSON)
+							.content(objectMapper.writeValueAsString(validEditRequest)))
+							.andDo(print())
+							.andExpect(status().isOk())
+							.andExpect(jsonPath("$.data.id").value(recommendationId))
+							.andExpect(jsonPath("$.data.message").value("Updated recommendation message"))
+							.andExpect(jsonPath("$.data.status").value("PENDING"))
+							.andExpect(jsonPath("$.errors").isEmpty());
+			
+			verify(recommendationService).editById(anyLong(), anyString(), any(RecommendationRequestDTO.class));
+		}
+		
+		@Test
+		void testEditRecommendation_RecommendationNotFound() throws Exception {
+			when(recommendationService.editById(anyLong(), anyString(), any(RecommendationRequestDTO.class)))
+							.thenThrow(new EntityNotFoundException("Recommendation with ID " + recommendationId + " not found"));
+
+			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
+							.contentType(MediaType.APPLICATION_JSON)
+							.content(objectMapper.writeValueAsString(validEditRequest)))
+							.andExpect(status().isNotFound())
+							.andExpect(jsonPath("$.errors").value("Recommendation with ID " + recommendationId + " not found"));
+			
+			verify(recommendationService).editById(anyLong(), anyString(), any(RecommendationRequestDTO.class));
+		}
+		
+		@Test
+		void testEditRecommendation_Unauthorized() throws Exception {
+			when(recommendationService.editById(anyLong(), anyString(), any(RecommendationRequestDTO.class)))
+							.thenThrow(new AccessDeniedException("Only the contractor who created this recommendation can edit it"));
+
+			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
+							.contentType(MediaType.APPLICATION_JSON)
+							.content(objectMapper.writeValueAsString(validEditRequest)))
+							.andExpect(status().isForbidden())
+							.andExpect(jsonPath("$.errors").value("Only the contractor who created this recommendation can edit it"));
+			
+			verify(recommendationService).editById(anyLong(), anyString(), any(RecommendationRequestDTO.class));
+		}
+		
+		@Test
+		void testEditRecommendation_InvalidRequest() throws Exception {
+			RecommendationRequestDTO invalidRequest = new RecommendationRequestDTO();
+			
+			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
+							.contentType(MediaType.APPLICATION_JSON)
+							.content(objectMapper.writeValueAsString(invalidRequest)))
+							.andExpect(status().isBadRequest());
+			
+			verify(recommendationService, never()).editById(any(), any(), any(RecommendationRequestDTO.class));
+		}
+		
+		@Test
+		void testEditRecommendation_KeepCurrentStatus() throws Exception {
+			RecommendationRequestDTO requestWithCurrentStatus = RecommendationRequestDTO.builder()
+							.contractorId(contractorId)
+							.contractorName("Contractor Name")
+							.message("Updated message only")
+							.status(StatusType.ACCEPTED) // Keeping the ACCEPTED status
+							.build();
+			
+			RecommendationResponseDTO responseWithStatusUnchanged = new RecommendationResponseDTO(
+							recommendationId, "talent-id", contractorId, "Contractor Name", 
+							"Updated message only", StatusType.ACCEPTED // Status remains ACCEPTED
+			);
+			
+			when(recommendationService.editById(anyLong(), anyString(), any(RecommendationRequestDTO.class)))
+							.thenReturn(responseWithStatusUnchanged);
+
+			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
+							.contentType(MediaType.APPLICATION_JSON)
+							.content(objectMapper.writeValueAsString(requestWithCurrentStatus)))
+							.andExpect(status().isOk())
+							.andExpect(jsonPath("$.data.id").value(recommendationId))
+							.andExpect(jsonPath("$.data.message").value("Updated message only"))
+							.andExpect(jsonPath("$.data.status").value("ACCEPTED")) // Status remains unchanged
+							.andExpect(jsonPath("$.errors").isEmpty());
+			
+			verify(recommendationService).editById(anyLong(), anyString(), any(RecommendationRequestDTO.class));
+		}
+		
+		@Test
+		void testEditRecommendation_ServerError() throws Exception {
+			when(recommendationService.editById(anyLong(), anyString(), any(RecommendationRequestDTO.class)))
+							.thenThrow(new RuntimeException("Unexpected server error"));
+
+			mockMvc.perform(put("/recommendations/{recommendationId}/contractor/{contractorId}", recommendationId, contractorId)
+							.contentType(MediaType.APPLICATION_JSON)
+							.content(objectMapper.writeValueAsString(validEditRequest)))
+							.andExpect(status().isInternalServerError())
+							.andExpect(jsonPath("$.errors").value("Unexpected server error"));
+			
+			verify(recommendationService).editById(anyLong(), anyString(), any(RecommendationRequestDTO.class));
+		}
+	}
 
     @Nested
         class ReadRecommendationTests {
@@ -620,9 +967,39 @@ class RecommendationControllerTest {
 
                 verify(recommendationService, never()).getByTalentIdAndGroupedByStatus(anyString());
             }
-        }
+            
+            @Test
+            void getRecommendationTalentFromContractorById_ExistingContractor_ReturnsRecommendations() throws Exception {
+                String contractorId = "contractor-id-1";
+                List<RecommendationResponseDTO> contractorRecommendations = Arrays.asList(recommendation1, recommendation2);
+                
+                when(recommendationService.getByTalentId(contractorId)).thenReturn(contractorRecommendations);
 
+                mockMvc.perform(get("/recommendations/user/contractor/{userId}", contractorId))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.data", hasSize(2)))
+                        .andExpect(jsonPath("$.data[0].id", is(recommendation1.getId())))
+                        .andExpect(jsonPath("$.data[1].id", is(recommendation2.getId())));
+
+                verify(recommendationService).getByTalentId(contractorId);
+            }
+            
+            @Test
+            void getRecommendationTalentFromContractorById_NoRecommendations_ReturnsNotFound() throws Exception {
+                String talentId = "contractor-with-no-recommendations";
+                
+                when(recommendationService.getByTalentId(talentId)).thenReturn(Collections.emptyList());
+
+                mockMvc.perform(get("/recommendations/user/contractor/{userId}", talentId))
+                        .andExpect(status().isNotFound())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.errors", containsString("No recommendations found for user with id: " + talentId)));
+
+                verify(recommendationService).getByTalentId(talentId);
+            }
+        }
 }
 
- 
+
 
