@@ -327,4 +327,61 @@ class UserControllerTest {
                     .andExpect(jsonPath("$.data[1].firstName").value("Bob"));
         }
     }
+
+    @Nested
+    @DisplayName("Get Talent from Contractor Tests")
+    class GetTalentFromContractorTests {
+
+        @Test
+        @DisplayName("Should return talent when talent exists")
+        void testGetTalentFromContractorById_Success() throws Exception {
+            String talentId = "talent123";
+            UserResponseDTO responseDTO = createUserResponseDTO();
+            when(userService.getById(talentId)).thenReturn(responseDTO);
+
+            mockMvc.perform(get("/users/contractor/{id}", talentId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.data.id").value("user123"))
+                    .andExpect(jsonPath("$.data.firstName").value("John"))
+                    .andExpect(jsonPath("$.data.lastName").value("Doe"))
+                    .andExpect(jsonPath("$.data.email").value("john.doe@example.com"))
+                    .andExpect(jsonPath("$.data.phoneNumber").value("08123456789"))
+                    .andExpect(jsonPath("$.data.experienceYears").value(5))
+                    .andExpect(jsonPath("$.data.skill").value("Java, Spring Boot"))
+                    .andExpect(jsonPath("$.data.price").value(5000000));
+
+            verify(userService, times(1)).getById(talentId);
+        }
+
+        @Test
+        @DisplayName("Should return 404 when talent not found")
+        void testGetTalentFromContractorById_NotFound() throws Exception {
+            String talentId = "nonexistent-talent";
+            when(userService.getById(talentId)).thenReturn(null);
+
+            mockMvc.perform(get("/users/contractor/{id}", talentId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("User not found."))
+                    .andExpect(jsonPath("$.data").doesNotExist());
+
+            verify(userService, times(1)).getById(talentId);
+        }
+
+        @Test
+        @DisplayName("Should handle special characters in ID")
+        void testGetTalentFromContractorById_SpecialCharacters() throws Exception {
+            String specialId = "user@#$%";
+            when(userService.getById(specialId)).thenReturn(null);
+
+            mockMvc.perform(get("/users/contractor/{id}", specialId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("User not found."));
+
+            verify(userService, times(1)).getById(specialId);
+        }
+    }
 }

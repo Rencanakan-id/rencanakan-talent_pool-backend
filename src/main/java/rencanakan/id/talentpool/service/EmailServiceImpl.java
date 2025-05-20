@@ -1,5 +1,6 @@
 package rencanakan.id.talentpool.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,6 +20,7 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
     private final PasswordResetTokenRepository tokenRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Override
     public void sendResetPasswordEmail(String to, String resetLink) {
@@ -33,6 +35,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void processResetPassword(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User with email" + email + " not found"));
+
         // Generate token
         String token = UUID.randomUUID().toString();
         LocalDateTime expiry = LocalDateTime.now().plusHours(1);
@@ -46,7 +51,7 @@ public class EmailServiceImpl implements EmailService {
                 .build();
         tokenRepository.save(resetToken);
 
-        String resetLink = "https://rencanakanid-stg.netlify.app/nando-tolong-ubah-ini?token=" + token;
+        String resetLink = "https://rencanakanid-stg.netlify.app/reset-password?token=" + token;
         sendResetPasswordEmail(email, resetLink);
     }
 }
