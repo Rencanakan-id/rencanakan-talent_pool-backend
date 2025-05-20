@@ -53,10 +53,22 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public RecommendationResponseDTO deleteById(String userId, String id) {
+    public RecommendationResponseDTO deleteByIdTalent(String userId, String id) {
         Recommendation recommendation = recommendationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Recommendation with id " + id + " not found."));
         if (!(recommendation.getTalent().getId().equals(userId))) {
+            throw new AccessDeniedException("You are not allowed to delete this recommendation.");
+        }
+        recommendationRepository.deleteById(id);
+        return  DTOMapper.map(recommendation, RecommendationResponseDTO.class);
+
+    }
+
+    @Override
+    public RecommendationResponseDTO deleteByIdContractor(Long contractorId, String id) {
+        Recommendation recommendation = recommendationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Recommendation with id " + id + " not found."));
+        if (!(recommendation.getContractorId().equals(contractorId))) {
             throw new AccessDeniedException("You are not allowed to delete this recommendation.");
         }
         recommendationRepository.deleteById(id);
@@ -106,11 +118,37 @@ public class RecommendationServiceImpl implements RecommendationService {
             throw new IllegalArgumentException("Recommendation request cannot be null");
         }
 
+        User talent = userRepository.findById(talentId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + talentId));
+
         Recommendation newRecommendation = DTOMapper.map(recommendation, Recommendation.class);
-        newRecommendation.setTalent(User.builder().id(talentId).build());
-
+        newRecommendation.setTalent(talent);
         Recommendation savedRecommendation = recommendationRepository.save(newRecommendation);
-
         return DTOMapper.map(savedRecommendation, RecommendationResponseDTO.class);
+    }
+
+    @Override
+    public RecommendationResponseDTO editById(Long contractorId, String id, RecommendationRequestDTO editRequest) {
+        Recommendation recommendation = recommendationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Recommendation with ID " + id + " not found"));
+
+        if (!recommendation.getContractorId().equals(contractorId)) {
+            throw new AccessDeniedException("Only the contractor who created this recommendation can edit it");
+        }
+
+        recommendation.setMessage(editRequest.getMessage());
+        
+        StatusType currentStatus = recommendation.getStatus();
+        StatusType requestedStatus = editRequest.getStatus();
+        
+        if (currentStatus == StatusType.ACCEPTED || currentStatus == StatusType.DECLINED) {
+            recommendation.setStatus(StatusType.PENDING);
+        } else if (requestedStatus != null) {
+            recommendation.setStatus(requestedStatus);
+        }
+
+        Recommendation updatedRecommendation = recommendationRepository.save(recommendation);
+
+        return DTOMapper.map(updatedRecommendation, RecommendationResponseDTO.class);
     }
 }
