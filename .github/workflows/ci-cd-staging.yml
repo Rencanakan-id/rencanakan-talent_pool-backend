@@ -114,6 +114,7 @@ jobs:
             --build-arg JDBC_DATABASE_URL=${{ secrets.JDBC_DATABASE_URL }} \
             --build-arg JDBC_DATABASE_USERNAME=${{ secrets.JDBC_DATABASE_USERNAME }} \
             --build-arg JWT_KEY=${{ secrets.JWT_KEY }} \
+            --build-arg RESET_PW_BASE_URL=${{ secrets.RESET_PW_BASE_URL }}
             -t rencanakan_talent_pool:${{ env.TAG_NAME }} .
 
       - name: Save Docker Image (version) as Tar File
