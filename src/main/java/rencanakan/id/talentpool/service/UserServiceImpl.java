@@ -2,6 +2,8 @@ package rencanakan.id.talentpool.service;
 
 import jakarta.persistence.EntityNotFoundException;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,13 +22,12 @@ import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -36,9 +37,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private static final String SKILL = "skill";
     private static final String PRICE = "price";
     private final UserRepository userRepository;
+    private final Validator validator;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, Validator validator) {
         this.userRepository = userRepository;
+        this.validator = validator;
     }
 
     @Override
@@ -56,6 +59,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         try {
             updateUserFields(user, edited);
+
+            // Validate the user before saving
+            Set<ConstraintViolation<User>> violations = validator.validate(user);
+            if (!violations.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (ConstraintViolation<User> violation : violations) {
+                    sb.append(violation.getPropertyPath())
+                      .append(": ")
+                      .append(violation.getMessage())
+                      .append("; ");
+                }
+                throw new IllegalArgumentException(sb.toString());
+            }
+
             userRepository.save(user);
             return DTOMapper.map(user, UserResponseDTO.class);
         } catch (IllegalArgumentException e) {
@@ -116,7 +133,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 );
 
                 Predicate fullNamePredicate = builder.like(
-                        builder.lower(builder.concat(builder.concat(root.get(FIRST_NAME), " "), root.get(LAST_NAME))), 
+                        builder.lower(builder.concat(builder.concat(root.get(FIRST_NAME), " "), root.get(LAST_NAME))),
                         keyword
                 );
 
@@ -173,13 +190,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return UserResponseWithPagingDTO.builder().users(userDTOs).page( userPage.getNumber()).size(userPage.getSize()).totalPages(userPage.getTotalPages()).build();
     }
 
-
-
     @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
-
-
 }

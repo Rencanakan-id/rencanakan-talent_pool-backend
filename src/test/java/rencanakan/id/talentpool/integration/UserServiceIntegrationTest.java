@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import rencanakan.id.talentpool.dto.FilterTalentDTO;
-import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.dto.UserResponseWithPagingDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
@@ -34,7 +33,7 @@ class UserServiceIntegrationTest {
 
     @BeforeEach
     void setup() {
-        userService = new UserServiceImpl(userRepository);
+        userService = new UserServiceImpl(userRepository, jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator());
         User user = User.builder()
                 .firstName("John")
                 .lastName("Doe")

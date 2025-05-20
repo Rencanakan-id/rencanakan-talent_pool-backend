@@ -14,12 +14,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 
 class UserTest {
 
    private User user;
+   private Validator validator;
 
    @BeforeEach
    void setUp() {
@@ -44,6 +51,9 @@ class UserTest {
                .build();
 
        user.setId(UUID.randomUUID().toString());
+       
+       ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+       validator = factory.getValidator();
    }
 
    @Test
@@ -89,48 +99,84 @@ class UserTest {
    }
 
    @Test
+   void testInvalidLastNameFormat() {
+       user.setLastName("abbilhaidarfarraszulfikardarifasilkomui2024");
+       Set<ConstraintViolation<User>> violations = validator.validate(user);
+       assertThat(violations).isNotEmpty();
+       assertThat(violations.stream()
+               .anyMatch(v -> v.getPropertyPath().toString().equals("lastName")))
+               .isTrue();
+   }
+
+   @Test
    void testInvalidEmailFormat() {
-       assertThrows(IllegalArgumentException.class, () -> {
-           user.setEmail("fernando-at-example.com");
-       });
+       user.setEmail("invalid-email-format");
+       Set<ConstraintViolation<User>> violations = validator.validate(user);
+       assertThat(violations).isNotEmpty();
+       assertThat(violations.stream()
+               .anyMatch(v -> v.getPropertyPath().toString().equals("email")))
+               .isTrue();
    }
 
    @Test
    void testValidEmailFormat() {
        String validEmail = "test.user+123@example-domain.co.uk";
        user.setEmail(validEmail);
+       Set<ConstraintViolation<User>> violations = validator.validate(user);
+       assertThat(violations.stream()
+               .anyMatch(v -> v.getPropertyPath().toString().equals("email")))
+               .isFalse();
        assertEquals(validEmail, user.getEmail());
    }
 
    @Test
    void testPasswordTooShort() {
-       assertThrows(IllegalArgumentException.class, () -> {
-           user.setPassword("short");
-       });
+       user.setPassword("short");
+       Set<ConstraintViolation<User>> violations = validator.validate(user);
+       assertThat(violations).isNotEmpty();
+       assertThat(violations.stream()
+               .anyMatch(v -> v.getPropertyPath().toString().equals("password")))
+               .isTrue();
    }
 
    @Test
    void testValidPasswordFormat() {
        String validPassword = "securepass123";
        user.setPassword(validPassword);
+       Set<ConstraintViolation<User>> violations = validator.validate(user);
+       assertThat(violations.stream()
+               .anyMatch(v -> v.getPropertyPath().toString().equals("password")))
+               .isFalse();
        assertEquals(validPassword, user.getPassword());
    }
 
    @Test
    void testInvalidNikLength() {
-       assertThrows(IllegalArgumentException.class, () -> {
-           user.setNik("12345");
-       });
+       // Test NIK too short
+       user.setNik("12345");
+       Set<ConstraintViolation<User>> violations = validator.validate(user);
+       assertThat(violations).isNotEmpty();
+       assertThat(violations.stream()
+               .anyMatch(v -> v.getPropertyPath().toString().equals("nik")))
+               .isTrue();
 
-       assertThrows(IllegalArgumentException.class, () -> {
-           user.setNik("12345678901234567");
-       });
+       // Test NIK too long
+       user.setNik("12345678901234567");
+       violations = validator.validate(user);
+       assertThat(violations).isNotEmpty();
+       assertThat(violations.stream()
+               .anyMatch(v -> v.getPropertyPath().toString().equals("nik")))
+               .isTrue();
    }
 
    @Test
    void testValidNikFormat() {
        String validNik = "1234567890123456";
        user.setNik(validNik);
+       Set<ConstraintViolation<User>> violations = validator.validate(user);
+       assertThat(violations.stream()
+               .anyMatch(v -> v.getPropertyPath().toString().equals("nik")))
+               .isFalse();
        assertEquals(validNik, user.getNik());
    }
 
