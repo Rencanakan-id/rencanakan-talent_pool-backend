@@ -378,4 +378,130 @@ public class ExperienceControllerTest {
                     .andExpect(status().isUnauthorized());
         }
     }
+    @Nested
+    class ContractorExperienceTest {
+
+        @Test
+        void testGetExperiencesTalentFromContractorById_Success() throws Exception {
+            // Given
+            String talentId = "1";
+            List<ExperienceResponseDTO> mockResponseList = List.of(
+                    createMockResponseDTO(),
+                    ExperienceResponseDTO.builder()
+                            .id(2L)
+                            .title("Software Developer")
+                            .company("Tech Solutions")
+                            .employmentType(EmploymentType.FULL_TIME)
+                            .startDate(LocalDate.now().minusYears(3))
+                            .endDate(LocalDate.now().minusYears(2))
+                            .location("Surabaya")
+                            .locationType(LocationType.HYBRID)
+                            .build()
+            );
+
+            when(experienceService.getByTalentId(talentId)).thenReturn(mockResponseList);
+
+            // When & Then
+            mockMvc.perform(get("/experiences/user/contractor/" + talentId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data.length()").value(2))
+                    .andExpect(jsonPath("$.data[0].id").value(1))
+                    .andExpect(jsonPath("$.data[0].title").value("Lead Construction Project Manager"))
+                    .andExpect(jsonPath("$.data[0].company").value("Aman"))
+                    .andExpect(jsonPath("$.data[1].id").value(2))
+                    .andExpect(jsonPath("$.data[1].title").value("Software Developer"))
+                    .andExpect(jsonPath("$.data[1].company").value("Tech Solutions"));
+
+            verify(experienceService, times(1)).getByTalentId(talentId);
+        }
+
+        @Test
+        void testGetExperiencesTalentFromContractorById_NotFound() throws Exception {
+            // Given
+            String talentId = "999";
+
+            when(experienceService.getByTalentId(talentId)).thenReturn(null);
+
+            // When & Then
+            mockMvc.perform(get("/experiences/user/contractor/" + talentId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("Experience not found."))
+                    .andExpect(jsonPath("$.data").doesNotExist());
+
+            verify(experienceService, times(1)).getByTalentId(talentId);
+        }
+
+        @Test
+        void testGetExperiencesTalentFromContractorById_EmptyList() throws Exception {
+            // Given
+            String talentId = "1";
+            List<ExperienceResponseDTO> emptyList = List.of();
+
+            when(experienceService.getByTalentId(talentId)).thenReturn(emptyList);
+
+            // When & Then
+            mockMvc.perform(get("/experiences/user/contractor/" + talentId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data.length()").value(0));
+
+            verify(experienceService, times(1)).getByTalentId(talentId);
+        }
+
+        @Test
+        void testGetExperiencesTalentFromContractorById_NoAuthenticationRequired() throws Exception {
+            // Given
+            String talentId = "1";
+            List<ExperienceResponseDTO> mockResponseList = List.of(createMockResponseDTO());
+
+            when(experienceService.getByTalentId(talentId)).thenReturn(mockResponseList);
+
+            // When & Then - Note: No authentication needed for contractor endpoint
+            mockMvc.perform(get("/experiences/user/contractor/" + talentId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data.length()").value(1));
+
+            verify(experienceService, times(1)).getByTalentId(talentId);
+        }
+
+        @Test
+        void testGetExperiencesTalentFromContractorById_DifferentTalentId() throws Exception {
+            // Given
+            String differentTalentId = "contractor-123";
+            ExperienceResponseDTO differentExperience = ExperienceResponseDTO.builder()
+                    .id(3L)
+                    .title("Senior Backend Engineer")
+                    .company("Startup Inc")
+                    .employmentType(EmploymentType.CONTRACT)
+                    .startDate(LocalDate.now().minusMonths(6))
+                    .endDate(LocalDate.now().plusMonths(6))
+                    .location("Bandung")
+                    .locationType(LocationType.HYBRID)
+                    .build();
+
+            List<ExperienceResponseDTO> differentResponseList = List.of(differentExperience);
+            when(experienceService.getByTalentId(differentTalentId)).thenReturn(differentResponseList);
+
+            // When & Then
+            mockMvc.perform(get("/experiences/user/contractor/" + differentTalentId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data.length()").value(1))
+                    .andExpect(jsonPath("$.data[0].id").value(3))
+                    .andExpect(jsonPath("$.data[0].title").value("Senior Backend Engineer"))
+                    .andExpect(jsonPath("$.data[0].company").value("Startup Inc"))
+                    .andExpect(jsonPath("$.data[0].employmentType").value("CONTRACT"))
+                    .andExpect(jsonPath("$.data[0].location").value("Bandung"))
+                    .andExpect(jsonPath("$.data[0].locationType").value("HYBRID"));
+
+            verify(experienceService, times(1)).getByTalentId(differentTalentId);
+        }
+    }
 }
