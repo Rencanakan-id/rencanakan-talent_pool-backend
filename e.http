@@ -1,5 +1,5 @@
 ### Set environment variable
-@baseUrl = http://localhost:8081
+@baseUrl = https://api-talentpool.rencanakan.my.id
 @authToken = Bearer eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdE5hbWUiOiJKb2huIERvZSIsImlkIjoiYTE3MmQ5ZTktODM5ZC00YThlLWEwNzgtODYzYWY4YTE5YmUxIiwiZW1haWwiOiJqb2huLmRvZUBleGFtcGxlLmNvbSIsInN1YiI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwiaWF0IjoxNzQ3MDE5NjM5LCJleHAiOjE3NDcxMDYwMzl9.c6yzYlKVtJQ1mL5HuNl4lFGt1-elStIhsuBcV15i5lo
 @userId =  a172d9e9-839d-4a8e-a078-863af8a19be1
 @certificateId = 1
