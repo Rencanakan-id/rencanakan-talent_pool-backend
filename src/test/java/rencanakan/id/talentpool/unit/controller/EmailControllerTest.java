@@ -3,6 +3,7 @@ package rencanakan.id.talentpool.unit.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import rencanakan.id.talentpool.controller.EmailController;
 import rencanakan.id.talentpool.service.EmailService;
 
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -57,6 +59,25 @@ class EmailControllerTest {
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Reset password email sent."));
+
+        Mockito.verify(emailService).processResetPassword(email);
+    }
+
+    @Test
+    void postEmail_whenUserNotFound_shouldReturn400() throws Exception {
+        // Arrange
+        String email = "notfound@example.com";
+        var requestBody = new EmailController.ResetPasswordRequest(email);
+
+        doThrow(new EntityNotFoundException("User not found with email: " + email))
+                .when(emailService).processResetPassword(email);
+
+        // Act & Assert
+        mockMvc.perform(post("/email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Email tidak ditemukan: " + email));
 
         Mockito.verify(emailService).processResetPassword(email);
     }

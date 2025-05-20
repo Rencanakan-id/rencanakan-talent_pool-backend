@@ -19,10 +19,12 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
     private final PasswordResetTokenRepository tokenRepository;
+    private final UserService userService;
     private final UserRepository userRepository;
 
     @Override
     public void sendResetPasswordEmail(String to, String resetLink) {
+        userService.findByEmail(to);
         System.out.println("Sending reset password email to " + to);
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);

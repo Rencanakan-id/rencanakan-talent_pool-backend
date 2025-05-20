@@ -13,6 +13,7 @@ import java.util.Optional;
 import rencanakan.id.talentpool.repository.PasswordResetTokenRepository;
 import rencanakan.id.talentpool.repository.UserRepository;
 import rencanakan.id.talentpool.service.EmailServiceImpl;
+import rencanakan.id.talentpool.service.UserService;
 
 import java.time.LocalDateTime;
 
@@ -30,6 +31,8 @@ class EmailServiceTest {
     private PasswordResetTokenRepository tokenRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private EmailServiceImpl emailService;
