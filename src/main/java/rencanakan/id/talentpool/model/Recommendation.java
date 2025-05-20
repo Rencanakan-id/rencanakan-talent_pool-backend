@@ -29,6 +29,7 @@ public class Recommendation {
     @NotNull(message = "Contractor ID is required")
     private Long contractorId;
 
+
     @Column(name = "contractor_name", nullable = false)
     @NotBlank(message = "Contractor name is required")
     private String contractorName;

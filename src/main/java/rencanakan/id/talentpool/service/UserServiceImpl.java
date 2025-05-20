@@ -4,8 +4,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,6 +31,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
+    private static final String FIRST_NAME = "firstName";
+    private static final String LAST_NAME = "lastName";
+    private static final String CURRENT_LOCATION = "currentLocation";
+    private static final String SKILL = "skill";
+    private static final String PRICE = "price";
     private final UserRepository userRepository;
     private final Validator validator;
 
@@ -51,7 +59,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         try {
             updateUserFields(user, edited);
-            
+
             // Validate the user before saving
             Set<ConstraintViolation<User>> violations = validator.validate(user);
             if (!violations.isEmpty()) {
@@ -64,7 +72,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 }
                 throw new IllegalArgumentException(sb.toString());
             }
-            
+
             userRepository.save(user);
             return DTOMapper.map(user, UserResponseDTO.class);
         } catch (IllegalArgumentException e) {
@@ -116,15 +124,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 String keyword = "%" + filter.getName().toLowerCase() + "%";
 
                 Predicate firstNamePredicate = builder.like(
-                        builder.lower(root.get("firstName")), keyword
+                        builder.lower(root.get(FIRST_NAME)), keyword
                 );
 
                 Predicate lastNamePredicate = builder.like(
-                        builder.lower(root.get("lastName")), keyword
+                        builder.lower(root.get(LAST_NAME)), keyword
                 );
 
                 Predicate fullNamePredicate = builder.like(
-                        builder.lower(builder.concat(builder.concat(root.get("firstName"), " "), root.get("lastName"))), 
+                        builder.lower(builder.concat(builder.concat(root.get(FIRST_NAME), " "), root.get(LAST_NAME))),
                         keyword
                 );
 
@@ -134,10 +142,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             if (Objects.nonNull(filter.getPreferredLocations()) && !filter.getPreferredLocations().isEmpty()) {
                 List<Predicate> locationPredicates = filter.getPreferredLocations().stream()
                         .map(location -> builder.equal(
-                                builder.lower(root.get("currentLocation")),
+                                builder.lower(root.get(CURRENT_LOCATION)),
                                 location.toLowerCase()
                         ))
-                        .collect(Collectors.toList());
+                        .toList();
 
                 predicates.add(builder.or(locationPredicates.toArray(new Predicate[0])));
             }
@@ -145,36 +153,38 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             if (Objects.nonNull(filter.getSkills()) && !filter.getSkills().isEmpty()) {
                 List<Predicate> skillsPredicates = filter.getSkills().stream()
                         .map(skill -> builder.equal(
-                                builder.lower(root.get("skill")),
+                                builder.lower(root.get(SKILL)),
                                 skill.toLowerCase()
                         ))
-                        .collect(Collectors.toList());
+                        .toList();
 
                 predicates.add(builder.or(skillsPredicates.toArray(new Predicate[0])));
             }
-
 
             if (Objects.nonNull(filter.getPriceRange()) && filter.getPriceRange().size() == 2) {
                 Double minPrice = filter.getPriceRange().get(0);
                 Double maxPrice = filter.getPriceRange().get(1);
 
-                Predicate pricePredicate = builder.between(root.get("price"), minPrice, maxPrice);
+                Predicate pricePredicate = builder.between(root.get(PRICE), minPrice, maxPrice);
 
                 predicates.add(pricePredicate);
             }
 
-
             return builder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Page<User> userPage = userRepository.findAll(specification, page);
+        // Create a Sort object that orders by firstName and then by lastName
+        Sort sort = Sort.by(FIRST_NAME).and(Sort.by(LAST_NAME));
+        Pageable pageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
+        Page<User> userPage = userRepository.findAll(specification, pageable);
+
         if(userPage.isEmpty()){
             throw  new EntityNotFoundException("No users found");
         }
 
         List<UserResponseDTO> userDTOs = userPage.getContent().stream()
                 .map(user -> DTOMapper.map(user, UserResponseDTO.class))
-                .collect(Collectors.toList());
+                .toList();
 
         return UserResponseWithPagingDTO.builder().users(userDTOs).page( userPage.getNumber()).size(userPage.getSize()).totalPages(userPage.getTotalPages()).build();
     }

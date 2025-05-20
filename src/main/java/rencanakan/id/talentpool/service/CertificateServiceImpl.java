@@ -59,7 +59,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public CertificateResponseDTO editById(Long id, CertificateRequestDTO dto) {
+    public CertificateResponseDTO editById(Long id, CertificateRequestDTO dto){
         Certificate certificate = certificateRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Certificate with ID " + id + " not found"));
 
