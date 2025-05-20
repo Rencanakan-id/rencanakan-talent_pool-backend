@@ -43,23 +43,23 @@ public class RecommendationController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{recommendationId}/contractor/{contractorId}")
-    public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
-            @PathVariable("recommendationId") String recommendationId,
-            @PathVariable("contractorId") Long contractorId){
-        RecommendationResponseDTO res = this.recommendationService
-                .deleteByIdContractor(contractorId, recommendationId);
-        WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
-                .data(res)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-      
     @DeleteMapping("/{recommendationId}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
             @PathVariable("recommendationId") String recommendationId,
             @AuthenticationPrincipal User user ){
         RecommendationResponseDTO res = this.recommendationService.deleteByIdTalent(user.getId(),  recommendationId);
+        WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
+                .data(res)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/user/contractor/{recommendationId}/{contractorId}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
+            @PathVariable("recommendationId") String recommendationId,
+            @PathVariable("contractorId") Long contractorId){
+        RecommendationResponseDTO res = this.recommendationService
+                .deleteByIdContractor(contractorId, recommendationId);
         WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
                 .data(res)
                 .build();
@@ -75,23 +75,23 @@ public class RecommendationController {
             RecommendationResponseDTO resp = recommendationService.editStatusById(user.getId(), recommendationId, StatusType.ACCEPTED);
 
             return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
-                        .data(resp)
-                        .build());
+                    .data(resp)
+                    .build());
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     WebResponse.<RecommendationResponseDTO>builder()
-                        .errors(e.getMessage())
-                        .build());
+                            .errors(e.getMessage())
+                            .build());
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     WebResponse.<RecommendationResponseDTO>builder()
-                        .errors(e.getMessage())
-                        .build());
+                            .errors(e.getMessage())
+                            .build());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     WebResponse.<RecommendationResponseDTO>builder()
-                        .errors(e.getMessage())
-                        .build());
+                            .errors(e.getMessage())
+                            .build());
         }
     }
 
@@ -104,23 +104,23 @@ public class RecommendationController {
             RecommendationResponseDTO resp = recommendationService.editStatusById(user.getId(), recommendationId, StatusType.DECLINED);
 
             return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
-                        .data(resp)
-                        .build());
+                    .data(resp)
+                    .build());
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     WebResponse.<RecommendationResponseDTO>builder()
-                        .errors(e.getMessage())
-                        .build());
+                            .errors(e.getMessage())
+                            .build());
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     WebResponse.<RecommendationResponseDTO>builder()
-                        .errors(e.getMessage())
-                        .build());
+                            .errors(e.getMessage())
+                            .build());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     WebResponse.<RecommendationResponseDTO>builder()
-                        .errors(e.getMessage())
-                        .build());
+                            .errors(e.getMessage())
+                            .build());
         }
     }
 
@@ -132,21 +132,21 @@ public class RecommendationController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     WebResponse.<RecommendationResponseDTO>builder()
-                        .errors(UNAUTHORIZED_ACCESS_MESSAGE)
-                        .build());
+                            .errors(UNAUTHORIZED_ACCESS_MESSAGE)
+                            .build());
         }
 
         try {
             RecommendationResponseDTO resp = recommendationService.getById(recommendationId);
 
             return ResponseEntity.ok(WebResponse.<RecommendationResponseDTO>builder()
-                        .data(resp)
-                        .build());
+                    .data(resp)
+                    .build());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     WebResponse.<RecommendationResponseDTO>builder()
-                        .errors(e.getMessage())
-                        .build());
+                            .errors(e.getMessage())
+                            .build());
         }
     }
 
@@ -158,8 +158,8 @@ public class RecommendationController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     WebResponse.<List<RecommendationResponseDTO>>builder()
-                        .errors(UNAUTHORIZED_ACCESS_MESSAGE)
-                        .build());
+                            .errors(UNAUTHORIZED_ACCESS_MESSAGE)
+                            .build());
         }
 
         try {
@@ -168,18 +168,18 @@ public class RecommendationController {
             if (recommendations.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         WebResponse.<List<RecommendationResponseDTO>>builder()
-                            .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
-                            .build());
+                                .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
+                                .build());
             }
 
             return ResponseEntity.ok(WebResponse.<List<RecommendationResponseDTO>>builder()
-                        .data(recommendations)
-                        .build());
+                    .data(recommendations)
+                    .build());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     WebResponse.<List<RecommendationResponseDTO>>builder()
-                        .errors(e.getMessage())
-                        .build());
+                            .errors(e.getMessage())
+                            .build());
         }
     }
 
@@ -192,8 +192,8 @@ public class RecommendationController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     WebResponse.<List<RecommendationResponseDTO>>builder()
-                        .errors(UNAUTHORIZED_ACCESS_MESSAGE)
-                        .build());
+                            .errors(UNAUTHORIZED_ACCESS_MESSAGE)
+                            .build());
         }
 
         try {
@@ -202,18 +202,18 @@ public class RecommendationController {
             if (recommendations.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         WebResponse.<List<RecommendationResponseDTO>>builder()
-                            .errors(NO_RECOMMENDATIONS_FOR_USER + userId + " and status: " + status)
-                            .build());
+                                .errors(NO_RECOMMENDATIONS_FOR_USER + userId + " and status: " + status)
+                                .build());
             }
 
             return ResponseEntity.ok(WebResponse.<List<RecommendationResponseDTO>>builder()
-                        .data(recommendations)
-                        .build());
+                    .data(recommendations)
+                    .build());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     WebResponse.<List<RecommendationResponseDTO>>builder()
-                        .errors(e.getMessage())
-                        .build());
+                            .errors(e.getMessage())
+                            .build());
         }
     }
 
@@ -225,8 +225,8 @@ public class RecommendationController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     WebResponse.<Map<StatusType, List<RecommendationResponseDTO>>>builder()
-                        .errors(UNAUTHORIZED_ACCESS_MESSAGE)
-                        .build());
+                            .errors(UNAUTHORIZED_ACCESS_MESSAGE)
+                            .build());
         }
 
         try {
@@ -235,18 +235,18 @@ public class RecommendationController {
             if (groupedRecommendations.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         WebResponse.<Map<StatusType, List<RecommendationResponseDTO>>>builder()
-                            .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
-                            .build());
+                                .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
+                                .build());
             }
 
             return ResponseEntity.ok(WebResponse.<Map<StatusType, List<RecommendationResponseDTO>>>builder()
-                        .data(groupedRecommendations)
-                        .build());
+                    .data(groupedRecommendations)
+                    .build());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     WebResponse.<Map<StatusType, List<RecommendationResponseDTO>>>builder()
-                        .errors(e.getMessage())
-                        .build());
+                            .errors(e.getMessage())
+                            .build());
         }
     }
 
@@ -276,13 +276,13 @@ public class RecommendationController {
         if (recommendations.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     WebResponse.<List<RecommendationResponseDTO>>builder()
-                        .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
-                        .build());
+                            .errors(NO_RECOMMENDATIONS_FOR_USER + userId)
+                            .build());
         }
 
         return ResponseEntity.ok(WebResponse.<List<RecommendationResponseDTO>>builder()
-                    .data(recommendations)
-                    .build());
+                .data(recommendations)
+                .build());
     }
 
     @PutMapping("/{recommendationId}/contractor/{contractorId}")
