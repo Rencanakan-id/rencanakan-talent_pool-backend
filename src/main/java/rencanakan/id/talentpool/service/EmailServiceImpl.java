@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
@@ -24,10 +23,16 @@ public class EmailServiceImpl implements EmailService {
     private final UserService userService;
     private final UserRepository userRepository;
 
+    public EmailServiceImpl(JavaMailSender mailSender, PasswordResetTokenRepository tokenRepository, UserService userService, UserRepository userRepository) {
+        this.mailSender = mailSender;
+        this.tokenRepository = tokenRepository;
+        this.userService = userService;
+        this.userRepository = userRepository;
+    }
+
     @Setter
     @Value("${app.reset-password.base-url}")
     private String resetBaseUrl;
-
 
     @Override
     public void sendResetPasswordEmail(String to, String resetLink) {
