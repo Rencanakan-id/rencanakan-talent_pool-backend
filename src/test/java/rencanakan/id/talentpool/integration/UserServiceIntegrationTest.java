@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import rencanakan.id.talentpool.dto.FilterTalentDTO;
-import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.dto.UserResponseWithPagingDTO;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.UserRepository;
@@ -34,7 +33,7 @@ class UserServiceIntegrationTest {
 
     @BeforeEach
     void setup() {
-        userService = new UserServiceImpl(userRepository);
+        userService = new UserServiceImpl(userRepository, jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator());
         User user = User.builder()
                 .firstName("John")
                 .lastName("Doe")
@@ -115,5 +114,70 @@ class UserServiceIntegrationTest {
         userRepository.deleteAll(); // Clear seeded data
         FilterTalentDTO filter = new FilterTalentDTO();
         assertThrows(EntityNotFoundException.class, () -> userService.filter(filter,page));
+    }
+
+    @Test
+    void testFilter_OrdersResultsAlphabetically() {
+        // Save additional users with different names to test ordering
+        User userA = User.builder()
+                .firstName("Alice")
+                .lastName("Smith")
+                .email("alice.smith@example.com")
+                .password("SecurePass123!")
+                .phoneNumber("081234567891")
+                .nik("1234567890123457")
+                .currentLocation("Jakarta")
+                .preferredLocations(List.of("Jakarta", "Bandung"))
+                .skill("Java")
+                .price(80)
+                .build();
+        
+        User userZ = User.builder()
+                .firstName("Zack")
+                .lastName("Brown")
+                .email("zack.brown@example.com")
+                .password("SecurePass123!")
+                .phoneNumber("081234567892")
+                .nik("1234567890123458")
+                .currentLocation("Bandung")
+                .preferredLocations(List.of("Jakarta", "Bandung"))
+                .skill("Java")
+                .price(90)
+                .build();
+                
+        userRepository.save(userA);
+        userRepository.save(userZ);
+        
+        // Use a larger page size to get all users
+        Pageable largerPage = PageRequest.of(0, 10);
+        FilterTalentDTO emptyFilter = new FilterTalentDTO();
+        
+        // Act
+        UserResponseWithPagingDTO result = userService.filter(emptyFilter, largerPage);
+        
+        // Assert
+        assertFalse(result.getUsers().isEmpty());
+        assertEquals(3, result.getUsers().size());
+        
+        // Check alphabetical ordering
+        assertEquals("Alice", result.getUsers().get(0).getFirstName());
+        assertEquals("John", result.getUsers().get(1).getFirstName());
+        assertEquals("Zack", result.getUsers().get(2).getFirstName());
+    }
+
+    @Test
+    void testFilter_WithNullName_ShouldNoApplyNameFilter() {
+        // Test specifically for Objects.nonNull(filter.getName()) condition
+        FilterTalentDTO filter = new FilterTalentDTO();
+        filter.setName(null);
+
+        // Use a larger page size to get all results
+        Pageable testPage = PageRequest.of(0, 10);
+        
+        UserResponseWithPagingDTO result = userService.filter(filter, testPage);
+        
+        // Verify results are returned (no name filter applied)
+        assertFalse(result.getUsers().isEmpty());
+        assertTrue(result.getUsers().size() >= 1);
     }
 }

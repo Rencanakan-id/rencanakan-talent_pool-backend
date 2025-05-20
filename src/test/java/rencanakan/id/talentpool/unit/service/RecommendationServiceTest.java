@@ -10,24 +10,29 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.security.access.AccessDeniedException;
 
+import rencanakan.id.talentpool.dto.RecommendationRequestDTO;
 import rencanakan.id.talentpool.dto.RecommendationResponseDTO;
+import rencanakan.id.talentpool.dto.UserResponseDTO;
 import rencanakan.id.talentpool.enums.StatusType;
+import rencanakan.id.talentpool.mapper.DTOMapper;
 import rencanakan.id.talentpool.model.Recommendation;
 import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.RecommendationRepository;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import rencanakan.id.talentpool.repository.UserRepository;
 import rencanakan.id.talentpool.service.RecommendationServiceImpl;
 
-import java.util.*;
-
-
 import static org.mockito.ArgumentMatchers.any;
-
 
 @ExtendWith(MockitoExtension.class)
 class RecommendationServiceTest {
@@ -45,6 +50,11 @@ class RecommendationServiceTest {
 
     private User talent1;
     private User talent2;
+    private User mockTalent;
+    private RecommendationRequestDTO requestDTO;
+    private RecommendationResponseDTO responseDTO;
+    private UserResponseDTO userResponseDTO;
+    private Recommendation recommendation;
     private Recommendation recommendation1;
     private Recommendation recommendation2;
     private Recommendation recommendation3;
@@ -56,9 +66,39 @@ class RecommendationServiceTest {
         setUpUsers();
         setUpRecommendations();
         setUpRecommendationLists();
+
+        requestDTO = new RecommendationRequestDTO();
+        requestDTO.setContractorId(1L);
+        requestDTO.setContractorName("Test Contractor");
+        requestDTO.setMessage("Test recommendation message");
+        requestDTO.setStatus(StatusType.PENDING);
+
+        responseDTO = new RecommendationResponseDTO();
+        responseDTO.setId("recommendation123");
+        responseDTO.setContractorId(1L);
+        responseDTO.setContractorName("Test Contractor");
+        responseDTO.setMessage("Test recommendation message");
+        responseDTO.setStatus(StatusType.PENDING);
+
+        userResponseDTO = new UserResponseDTO();
+        userResponseDTO.setFirstName("Test");
+        userResponseDTO.setLastName("Talent");
+        userResponseDTO.setEmail("test@example.setcom");
+        userResponseDTO.setPhoneNumber("081234567890");
+        userResponseDTO.setNik("1234567890123456");
     }
 
     private void setUpUsers() {
+        mockTalent = User.builder()
+                .id("user123")
+                .firstName("Test")
+                .lastName("Talent")
+                .email("test@example.com")
+                .password("Password123")
+                .phoneNumber("081234567890")
+                .nik("1234567890123456")
+                .build();
+
         talent1 = User.builder()
                 .firstName("Talent")
                 .lastName("One")
@@ -101,6 +141,15 @@ class RecommendationServiceTest {
     }
 
     private void setUpRecommendations() {
+        recommendation = Recommendation.builder()
+                .id("recommendation123")
+                .talent(mockTalent)
+                .contractorId(1L)
+                .contractorName("Test Contractor")
+                .message("Test recommendation message")
+                .status(StatusType.PENDING)
+                .build();
+
         recommendation1 = new Recommendation();
         recommendation1.setId("rec-id-1");
         recommendation1.setTalent(talent1);
@@ -132,51 +181,208 @@ class RecommendationServiceTest {
     }
 
     @Nested
-    class DeleteRecommendation{
-        @Test
-        void deleteById_Success() {
-            when(recommendationRepository.findById(recommendation1.getId())).thenReturn(Optional.of(recommendation1));
-            User mockedTalent = mock(User.class);
-            recommendation1.setTalent(mockedTalent);
-            when(mockedTalent.getId()).thenReturn("idUser");
-            RecommendationResponseDTO response = recommendationService.deleteById( "idUser", recommendation1.getId());
+    class CreateRecommendation {
 
-            verify(recommendationRepository, times(1)).deleteById(recommendation1.getId());
+        private RecommendationResponseDTO testCreateRecommendationWithMessage(String message) {
+            try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
+                requestDTO.setMessage(message);
 
-            assertNotNull(response);
-            assertEquals(recommendation1.getId(), response.getId());
-            assertEquals(StatusType.PENDING, response.getStatus());
+                Recommendation modifiedRecommendation = new Recommendation();
+                modifiedRecommendation.setId("recommendation123");
+                modifiedRecommendation.setContractorId(1L);
+                modifiedRecommendation.setContractorName("Test Contractor");
+                modifiedRecommendation.setMessage(message);
+                modifiedRecommendation.setStatus(StatusType.PENDING);
+                modifiedRecommendation.setTalent(mockTalent);
+
+                RecommendationResponseDTO modifiedResponseDTO = new RecommendationResponseDTO();
+                modifiedResponseDTO.setId("recommendation123");
+                modifiedResponseDTO.setTalentId("user123");
+                modifiedResponseDTO.setContractorId(1L);
+                modifiedResponseDTO.setContractorName("Test Contractor");
+                modifiedResponseDTO.setMessage(message);
+                modifiedResponseDTO.setStatus(StatusType.PENDING);
+
+                when(userRepository.findById("user123")).thenReturn(Optional.of(mockTalent));
+                mockedMapper.when(() -> DTOMapper.map(requestDTO, Recommendation.class)).thenReturn(modifiedRecommendation);
+                mockedMapper.when(() -> DTOMapper.map(modifiedRecommendation, RecommendationResponseDTO.class)).thenReturn(modifiedResponseDTO);
+                when(recommendationRepository.save(any(Recommendation.class))).thenReturn(modifiedRecommendation);
+
+                RecommendationResponseDTO result = recommendationService.createRecommendation("user123", requestDTO);
+                verify(recommendationRepository, times(1)).save(any(Recommendation.class));
+                return result;
+            }
         }
+
+        // POSITIVE TEST CASES
+
         @Test
-        void deleteById_NotFound_ThrowsException() {
+        void testCreateRecommendationSuccess() {
+            try (MockedStatic<DTOMapper> mockedMapper = mockStatic(DTOMapper.class)) {
+                when(userRepository.findById(mockTalent.getId())).thenReturn(Optional.of(mockTalent));
+                mockedMapper.when(() -> DTOMapper.map(requestDTO, Recommendation.class)).thenReturn(recommendation);
+                mockedMapper.when(() -> DTOMapper.map(recommendation, RecommendationResponseDTO.class)).thenReturn(responseDTO);
+                when(recommendationRepository.save(any(Recommendation.class))).thenReturn(recommendation);
 
-            when(recommendationRepository.findById("999")).thenReturn(Optional.empty());
-            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-                recommendationService.deleteById("userId","999");
-            });
+                RecommendationResponseDTO result = recommendationService.createRecommendation(mockTalent.getId(), requestDTO);
 
-            assertEquals("Recommendation with id 999 not found.", exception.getMessage());
-
-            verify(recommendationRepository, never()).deleteById("999");
+                assertNotNull(result);
+                assertEquals("recommendation123", result.getId());
+                assertEquals("Test Contractor", result.getContractorName());
+                assertEquals("Test recommendation message", result.getMessage());
+                assertEquals(StatusType.PENDING, result.getStatus());
+                verify(recommendationRepository, times(1)).save(any(Recommendation.class));
+            }
         }
 
         @Test
-        void testDeleteById_UnAuthorized() {
-            // Arrange
-            User mockedTalent = mock(User.class);
-            recommendation1.setTalent(mockedTalent);
-            when(mockedTalent.getId()).thenReturn("idUser");
-            when(recommendationRepository.findById(eq(recommendation1.getId()))).thenReturn(Optional.of(recommendation1));
+        void testCreateRecommendationWithMinimumMessageLength() {
+            RecommendationResponseDTO result = testCreateRecommendationWithMessage("A");
+            assertEquals("A", result.getMessage());
+        }
 
-            // Act & Assert
-            AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
-                recommendationService.deleteById("idUser123", recommendation1.getId());
-            });
+        @Test
+        void testCreateRecommendationWithMaxMessageLength() {
+            String maxLengthMessage = "A".repeat(4000);
+            RecommendationResponseDTO result = testCreateRecommendationWithMessage(maxLengthMessage);
+            assertEquals(4000, result.getMessage().length());
+        }
 
-            assertEquals("You are not allowed to delete this recommendation.", exception.getMessage());
-            verify(recommendationRepository, never()).save(any());
+        // NEGATIVE TEST CASES
+
+        @Test
+        void testCreateRecommendationWithNullRequest() {
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> recommendationService.createRecommendation(null, null));
+            assertEquals("Recommendation request cannot be null", exception.getMessage());
+            verify(recommendationRepository, never()).save(any(Recommendation.class));
+        }
+
+        @Test
+        void testCreateRecommendationWithNullTalentId() {
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> recommendationService.createRecommendation(null, requestDTO));
+            assertEquals("Recommendation request cannot be null", exception.getMessage());
+            verify(recommendationRepository, never()).save(any(Recommendation.class));
+        }
+
+        @Test
+        void testCreateRecommendationWithNullRequestDTO() {
+            String talentId = mockTalent.getId();
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> recommendationService.createRecommendation(talentId, null));
+            assertEquals("Recommendation request cannot be null", exception.getMessage());
+            verify(recommendationRepository, never()).save(any(Recommendation.class));
+        }
+
+        @Test
+        void testCreateRecommendation_UserNotFound() {
+            when(userRepository.findById("nonexistentUser")).thenReturn(Optional.empty());
+
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                    () -> recommendationService.createRecommendation("nonexistentUser", requestDTO));
+
+            assertEquals("User not found with id: nonexistentUser", exception.getMessage());
+            verify(userRepository, times(1)).findById("nonexistentUser");
+            verify(recommendationRepository, never()).save(any(Recommendation.class));
         }
     }
+
+
+    @Nested
+    class DeleteRecommendation {
+
+        @Nested
+        class DeleteByIdTalent {
+
+            @Test
+            void deleteByIdTalent_Success() {
+                when(recommendationRepository.findById(recommendation1.getId())).thenReturn(Optional.of(recommendation1));
+                User mockedTalent = mock(User.class);
+                recommendation1.setTalent(mockedTalent);
+                when(mockedTalent.getId()).thenReturn("idUser");
+
+                RecommendationResponseDTO response = recommendationService.deleteByIdTalent("idUser", recommendation1.getId());
+
+                verify(recommendationRepository, times(1)).deleteById(recommendation1.getId());
+
+                assertNotNull(response);
+                assertEquals(recommendation1.getId(), response.getId());
+                assertEquals(StatusType.PENDING, response.getStatus());
+            }
+
+            @Test
+            void deleteByIdTalent_NotFound_ThrowsException() {
+                when(recommendationRepository.findById("999")).thenReturn(Optional.empty());
+
+                EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                    recommendationService.deleteByIdTalent("userId", "999");
+                });
+
+                assertEquals("Recommendation with id 999 not found.", exception.getMessage());
+                verify(recommendationRepository, never()).deleteById("999");
+            }
+
+            @Test
+            void deleteByIdTalent_UnAuthorized_ThrowsException() {
+                User mockedTalent = mock(User.class);
+                recommendation1.setTalent(mockedTalent);
+                when(mockedTalent.getId()).thenReturn("idUser");
+                when(recommendationRepository.findById(eq(recommendation1.getId()))).thenReturn(Optional.of(recommendation1));
+
+                AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+                    recommendationService.deleteByIdTalent("unauthorizedUserId", recommendation1.getId());
+                });
+
+                assertEquals("You are not allowed to delete this recommendation.", exception.getMessage());
+                verify(recommendationRepository, never()).deleteById(any());
+            }
+        }
+
+        @Nested
+        class DeleteByIdContractor {
+
+            @Test
+            void deleteByIdContractor_Success() {
+                recommendation1.setContractorId(123L);
+                when(recommendationRepository.findById(recommendation1.getId())).thenReturn(Optional.of(recommendation1));
+
+                RecommendationResponseDTO response = recommendationService.deleteByIdContractor(123L, recommendation1.getId());
+
+                verify(recommendationRepository, times(1)).deleteById(recommendation1.getId());
+
+                assertNotNull(response);
+                assertEquals(recommendation1.getId(), response.getId());
+                assertEquals(StatusType.PENDING, response.getStatus());
+            }
+
+            @Test
+            void deleteByIdContractor_NotFound_ThrowsException() {
+                when(recommendationRepository.findById("999")).thenReturn(Optional.empty());
+
+                EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                    recommendationService.deleteByIdContractor(123L, "999");
+                });
+
+                assertEquals("Recommendation with id 999 not found.", exception.getMessage());
+                verify(recommendationRepository, never()).deleteById(any());
+            }
+
+            @Test
+            void deleteByIdContractor_Unauthorized_ThrowsException() {
+                recommendation1.setContractorId(999L);
+                when(recommendationRepository.findById(recommendation1.getId())).thenReturn(Optional.of(recommendation1));
+
+                AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+                    recommendationService.deleteByIdContractor(123L, recommendation1.getId());
+                });
+
+                assertEquals("You are not allowed to delete this recommendation.", exception.getMessage());
+                verify(recommendationRepository, never()).deleteById(any());
+            }
+        }
+    }
+
     @Nested
     class patchStatus{
 
@@ -232,6 +438,311 @@ class RecommendationServiceTest {
 
             assertEquals("You are not allowed to edit this recommendation.", exception.getMessage());
             verify(recommendationRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    class EditRecommendationTests {
+        
+        @Test
+        void editById_Success() {
+            Long contractorId = 101L;
+            String recommendationId = "rec-id-1";
+            
+            RecommendationRequestDTO editRequest = new RecommendationRequestDTO();
+            editRequest.setContractorId(101L);
+            editRequest.setContractorName("Contractor A");
+            editRequest.setMessage("Updated message");
+            editRequest.setStatus(StatusType.PENDING);
+            
+            recommendation1.setStatus(StatusType.ACCEPTED);
+            
+            when(recommendationRepository.findById(recommendationId)).thenReturn(Optional.of(recommendation1));
+            
+            Recommendation updatedRecommendation = new Recommendation();
+            updatedRecommendation.setId(recommendationId);
+            updatedRecommendation.setTalent(talent1);
+            updatedRecommendation.setContractorId(101L);
+            updatedRecommendation.setContractorName("Contractor A");
+            updatedRecommendation.setMessage("Updated message");
+            updatedRecommendation.setStatus(StatusType.PENDING); // Reset to PENDING
+            
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(updatedRecommendation);
+            
+            RecommendationResponseDTO result = recommendationService.editById(contractorId, recommendationId, editRequest);
+            
+            assertNotNull(result);
+            assertEquals(recommendationId, result.getId());
+            assertEquals("Updated message", result.getMessage());
+            assertEquals(StatusType.PENDING, result.getStatus());
+            
+            verify(recommendationRepository).findById(recommendationId);
+            verify(recommendationRepository).save(recommendation1);
+        }
+        
+        @Test
+        void editById_RecommendationNotFound() {
+            Long contractorId = 101L;
+            String nonExistingId = "non-existing-id";
+            
+            RecommendationRequestDTO editRequest = new RecommendationRequestDTO();
+            editRequest.setContractorId(101L);
+            editRequest.setContractorName("Contractor A");
+            editRequest.setMessage("Updated message");
+            editRequest.setStatus(StatusType.PENDING);
+            
+            when(recommendationRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+            
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                recommendationService.editById(contractorId, nonExistingId, editRequest);
+            });
+            
+            assertEquals("Recommendation with ID " + nonExistingId + " not found", exception.getMessage());
+            
+            verify(recommendationRepository).findById(nonExistingId);
+            verify(recommendationRepository, never()).save(any());
+        }
+        
+        @Test
+        void editById_ContractorMismatch() {
+            Long contractorId = 999L;
+            String recommendationId = "rec-id-1";
+            
+            RecommendationRequestDTO editRequest = new RecommendationRequestDTO();
+            editRequest.setContractorId(999L); // Different contractor ID
+            editRequest.setContractorName("Different Contractor");
+            editRequest.setMessage("Updated message");
+            editRequest.setStatus(StatusType.PENDING);
+            
+            when(recommendationRepository.findById(recommendationId)).thenReturn(Optional.of(recommendation1));
+            
+            AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+                recommendationService.editById(contractorId, recommendationId, editRequest);
+            });
+            
+            assertEquals("Only the contractor who created this recommendation can edit it", exception.getMessage());
+            
+            verify(recommendationRepository).findById(recommendationId);
+            verify(recommendationRepository, never()).save(any());
+        }
+        
+        @Test
+        void editById_KeepCurrentStatus() {
+            Long contractorId = 101L;
+            String recommendationId = "rec-id-1";
+            
+            recommendation1.setStatus(StatusType.PENDING);
+            
+            RecommendationRequestDTO editRequest = new RecommendationRequestDTO();
+            editRequest.setContractorId(101L);
+            editRequest.setContractorName("Contractor A");
+            editRequest.setMessage("Updated message only");
+            editRequest.setStatus(StatusType.PENDING); // Same status
+            
+            when(recommendationRepository.findById(recommendationId)).thenReturn(Optional.of(recommendation1));
+            
+            Recommendation updatedRecommendation = new Recommendation();
+            updatedRecommendation.setId(recommendationId);
+            updatedRecommendation.setTalent(talent1);
+            updatedRecommendation.setContractorId(101L);
+            updatedRecommendation.setContractorName("Contractor A");
+            updatedRecommendation.setMessage("Updated message only");
+            updatedRecommendation.setStatus(StatusType.PENDING); // Status unchanged
+            
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(updatedRecommendation);
+            
+            RecommendationResponseDTO result = recommendationService.editById(contractorId, recommendationId, editRequest);
+            
+            assertNotNull(result);
+            assertEquals(recommendationId, result.getId());
+            assertEquals("Updated message only", result.getMessage());
+            assertEquals(StatusType.PENDING, result.getStatus());
+            
+            verify(recommendationRepository).findById(recommendationId);
+            verify(recommendationRepository).save(recommendation1);
+        }
+        
+        @Test
+        void editById_ResetFromAcceptedToPending() {
+            Long contractorId = 101L;
+            String recommendationId = "rec-id-1";
+            
+            recommendation1.setStatus(StatusType.ACCEPTED);
+            
+            RecommendationRequestDTO editRequest = new RecommendationRequestDTO();
+            editRequest.setContractorId(101L);
+            editRequest.setContractorName("Contractor A");
+            editRequest.setMessage("Updated message");
+            editRequest.setStatus(StatusType.DECLINED); // Different status
+            
+            when(recommendationRepository.findById(recommendationId)).thenReturn(Optional.of(recommendation1));
+            
+            Recommendation updatedRecommendation = new Recommendation();
+            updatedRecommendation.setId(recommendationId);
+            updatedRecommendation.setTalent(talent1);
+            updatedRecommendation.setContractorId(101L);
+            updatedRecommendation.setContractorName("Contractor A");
+            updatedRecommendation.setMessage("Updated message");
+            updatedRecommendation.setStatus(StatusType.PENDING); // Reset to PENDING
+            
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(updatedRecommendation);
+            
+            RecommendationResponseDTO result = recommendationService.editById(contractorId, recommendationId, editRequest);
+            
+            assertNotNull(result);
+            assertEquals(recommendationId, result.getId());
+            assertEquals("Updated message", result.getMessage());
+            assertEquals(StatusType.PENDING, result.getStatus()); // Reset to PENDING
+            
+            verify(recommendationRepository).findById(recommendationId);
+            verify(recommendationRepository).save(recommendation1);
+        }
+        
+        @Test
+        void editById_ResetFromDeclinedToPending() {
+            Long contractorId = 103L;
+            String recommendationId = "rec-id-3";
+            
+            recommendation3.setStatus(StatusType.DECLINED);
+            
+            RecommendationRequestDTO editRequest = new RecommendationRequestDTO();
+            editRequest.setContractorId(103L);
+            editRequest.setContractorName("Contractor C");
+            editRequest.setMessage("Updated declined recommendation");
+            editRequest.setStatus(StatusType.ACCEPTED); // Different status
+            
+            when(recommendationRepository.findById(recommendationId)).thenReturn(Optional.of(recommendation3));
+            
+            Recommendation updatedRecommendation = new Recommendation();
+            updatedRecommendation.setId(recommendationId);
+            updatedRecommendation.setTalent(talent2);
+            updatedRecommendation.setContractorId(103L);
+            updatedRecommendation.setContractorName("Contractor C");
+            updatedRecommendation.setMessage("Updated declined recommendation");
+            updatedRecommendation.setStatus(StatusType.PENDING); // Reset to PENDING
+            
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(updatedRecommendation);
+            
+            RecommendationResponseDTO result = recommendationService.editById(contractorId, recommendationId, editRequest);
+            
+            assertNotNull(result);
+            assertEquals(recommendationId, result.getId());
+            assertEquals("Updated declined recommendation", result.getMessage());
+            assertEquals(StatusType.PENDING, result.getStatus()); // Reset to PENDING
+            
+            verify(recommendationRepository).findById(recommendationId);
+            verify(recommendationRepository).save(recommendation3);
+        }
+        
+        @Test
+        void editById_KeepAcceptedStatus_WhenRequestingSameStatus() {
+            Long contractorId = 102L;
+            String recommendationId = "rec-id-2";
+            
+            recommendation2.setStatus(StatusType.ACCEPTED);
+            
+            RecommendationRequestDTO editRequest = new RecommendationRequestDTO();
+            editRequest.setContractorId(102L);
+            editRequest.setContractorName("Contractor B");
+            editRequest.setMessage("Updated message but keep status");
+            editRequest.setStatus(StatusType.ACCEPTED); // Same status as original
+            
+            when(recommendationRepository.findById(recommendationId)).thenReturn(Optional.of(recommendation2));
+            
+            Recommendation updatedRecommendation = new Recommendation();
+            updatedRecommendation.setId(recommendationId);
+            updatedRecommendation.setTalent(talent1);
+            updatedRecommendation.setContractorId(102L);
+            updatedRecommendation.setContractorName("Contractor B");
+            updatedRecommendation.setMessage("Updated message but keep status");
+            updatedRecommendation.setStatus(StatusType.ACCEPTED); // Should stay ACCEPTED
+            
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(updatedRecommendation);
+            
+            RecommendationResponseDTO result = recommendationService.editById(contractorId, recommendationId, editRequest);
+            
+            assertNotNull(result);
+            assertEquals(recommendationId, result.getId());
+            assertEquals("Updated message but keep status", result.getMessage());
+            assertEquals(StatusType.ACCEPTED, result.getStatus()); // Status remains ACCEPTED
+            
+            verify(recommendationRepository).findById(recommendationId);
+            verify(recommendationRepository).save(recommendation2);
+        }
+        
+        @Test
+        void editById_UpdateStatusWhenPending() {
+            Long contractorId = 101L;
+            String recommendationId = "rec-id-1";
+            
+            recommendation1.setStatus(StatusType.PENDING);
+            
+            RecommendationRequestDTO editRequest = new RecommendationRequestDTO();
+            editRequest.setContractorId(101L);
+            editRequest.setContractorName("Contractor A");
+            editRequest.setMessage("Updating status to DECLINED");
+            editRequest.setStatus(StatusType.DECLINED);
+            
+            when(recommendationRepository.findById(recommendationId)).thenReturn(Optional.of(recommendation1));
+            
+            Recommendation updatedRecommendation = new Recommendation();
+            updatedRecommendation.setId(recommendationId);
+            updatedRecommendation.setTalent(talent1);
+            updatedRecommendation.setContractorId(101L);
+            updatedRecommendation.setContractorName("Contractor A");
+            updatedRecommendation.setMessage("Updating status to DECLINED");
+            updatedRecommendation.setStatus(StatusType.DECLINED);
+            
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(updatedRecommendation);
+            
+            RecommendationResponseDTO result = recommendationService.editById(contractorId, recommendationId, editRequest);
+            
+            assertNotNull(result);
+            assertEquals(recommendationId, result.getId());
+            assertEquals("Updating status to DECLINED", result.getMessage());
+            assertEquals(StatusType.DECLINED, result.getStatus());
+            
+            verify(recommendationRepository).findById(recommendationId);
+            verify(recommendationRepository).save(recommendation1);
+        }
+        
+        @Test
+        void editById_NullRequestedStatus() {
+            // This test covers the case when requestedStatus is null
+            Long contractorId = 101L;
+            String recommendationId = "rec-id-1";
+            
+            // Set the current recommendation status to PENDING
+            recommendation1.setStatus(StatusType.PENDING);
+            
+            // Request with null status
+            RecommendationRequestDTO editRequest = new RecommendationRequestDTO();
+            editRequest.setContractorId(101L);
+            editRequest.setContractorName("Contractor A");
+            editRequest.setMessage("Only updating message");
+            editRequest.setStatus(null); // Null status
+            
+            when(recommendationRepository.findById(recommendationId)).thenReturn(Optional.of(recommendation1));
+            
+            Recommendation updatedRecommendation = new Recommendation();
+            updatedRecommendation.setId(recommendationId);
+            updatedRecommendation.setTalent(talent1);
+            updatedRecommendation.setContractorId(101L);
+            updatedRecommendation.setContractorName("Contractor A");
+            updatedRecommendation.setMessage("Only updating message");
+            updatedRecommendation.setStatus(StatusType.PENDING); // Status should remain unchanged
+            
+            when(recommendationRepository.save(any(Recommendation.class))).thenReturn(updatedRecommendation);
+            
+            RecommendationResponseDTO result = recommendationService.editById(contractorId, recommendationId, editRequest);
+            
+            assertNotNull(result);
+            assertEquals(recommendationId, result.getId());
+            assertEquals("Only updating message", result.getMessage());
+            assertEquals(StatusType.PENDING, result.getStatus()); // Status should remain unchanged
+            
+            verify(recommendationRepository).findById(recommendationId);
+            verify(recommendationRepository).save(recommendation1);
         }
     }
 

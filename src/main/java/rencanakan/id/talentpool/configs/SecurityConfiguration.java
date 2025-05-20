@@ -40,7 +40,12 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/users/contractor/**").permitAll()
+                        .requestMatchers("/api/certificates/user/contractor/**").permitAll()
+                        .requestMatchers("/api/experiences/user/contractor/**").permitAll()
+                        .requestMatchers("/api/recommendations/user/contractor/**").permitAll()
                         .requestMatchers("/api/users/contractor").permitAll()
+                        .requestMatchers("/api/email").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().denyAll()

@@ -412,4 +412,92 @@ class CertificateControllerTest {
                     .andExpect(jsonPath("$.errors").value("Anda tidak memiliki akses"));
         }
     }
+    @Nested
+    class ContractorCertificateTests {
+
+        @Test
+        void getCertificatesByUserIdFromContractor_Success() throws Exception {
+            // Arrange
+            when(certificateService.getByUserId(talentId)).thenReturn(certificateList);
+
+            // Act & Assert
+            mockMvc.perform(get("/certificates/user/contractor/{userId}", talentId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data", hasSize(1)))
+                    .andExpect(jsonPath("$.data[0].id").value(certificateId))
+                    .andExpect(jsonPath("$.data[0].title").value("Java Certificate"))
+                    .andExpect(jsonPath("$.data[0].file").value("certificate.pdf"))
+                    .andExpect(jsonPath("$.data[0].talentId").value(talentId));
+
+            verify(certificateService, times(1)).getByUserId(talentId);
+        }
+
+        @Test
+        void getCertificatesByUserIdFromContractor_WhenCertificatesNotFound_ShouldReturnNotFound() throws Exception {
+            // Arrange
+            when(certificateService.getByUserId(talentId)).thenReturn(null);
+
+            // Act & Assert
+            mockMvc.perform(get("/certificates/user/contractor/{userId}", talentId))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errors").value("Certificates not found."))
+                    .andExpect(jsonPath("$.data").doesNotExist());
+
+            verify(certificateService, times(1)).getByUserId(talentId);
+        }
+
+        @Test
+        void getCertificatesByUserIdFromContractor_WithEmptyList_ShouldReturnEmptyList() throws Exception {
+            // Arrange
+            List<CertificateResponseDTO> emptyCertificateList = new ArrayList<>();
+            when(certificateService.getByUserId(talentId)).thenReturn(emptyCertificateList);
+
+            // Act & Assert
+            mockMvc.perform(get("/certificates/user/contractor/{userId}", talentId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data", hasSize(0)));
+
+            verify(certificateService, times(1)).getByUserId(talentId);
+        }
+
+        @Test
+        void getCertificatesByUserIdFromContractor_DoesNotRequireAuthentication() throws Exception {
+            // Arrange
+            when(certificateService.getByUserId(talentId)).thenReturn(certificateList);
+
+            // Act & Assert - Note: No authentication required, unlike the regular user endpoint
+            mockMvc.perform(get("/certificates/user/contractor/{userId}", talentId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data", hasSize(1)));
+
+            verify(certificateService, times(1)).getByUserId(talentId);
+        }
+
+        @Test
+        void getCertificatesByUserIdFromContractor_WithDifferentUserId_ShouldReturnCorrectCertificates() throws Exception {
+            // Arrange
+            String differentUserId = "user456";
+            CertificateResponseDTO differentCertificate = new CertificateResponseDTO();
+            differentCertificate.setId(2L);
+            differentCertificate.setTitle("Python Certificate");
+            differentCertificate.setFile("python-cert.pdf");
+            differentCertificate.setTalentId(differentUserId);
+
+            List<CertificateResponseDTO> differentCertificateList = new ArrayList<>();
+            differentCertificateList.add(differentCertificate);
+
+            when(certificateService.getByUserId(differentUserId)).thenReturn(differentCertificateList);
+
+            // Act & Assert
+            mockMvc.perform(get("/certificates/user/contractor/{userId}", differentUserId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data", hasSize(1)))
+                    .andExpect(jsonPath("$.data[0].id").value(2L))
+                    .andExpect(jsonPath("$.data[0].title").value("Python Certificate"))
+                    .andExpect(jsonPath("$.data[0].file").value("python-cert.pdf"))
+                    .andExpect(jsonPath("$.data[0].talentId").value(differentUserId));
+
+            verify(certificateService, times(1)).getByUserId(differentUserId);
+        }
+    }
 }

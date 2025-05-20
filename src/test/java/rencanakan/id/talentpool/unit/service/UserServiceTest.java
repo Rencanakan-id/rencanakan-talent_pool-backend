@@ -3,7 +3,6 @@ package rencanakan.id.talentpool.unit.service;
 import jakarta.persistence.EntityNotFoundException;
 
 import jakarta.validation.Validator;
-import org.hibernate.query.Page;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -18,11 +17,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 import java.lang.reflect.Field;
+import java.util.Comparator;
 
 import rencanakan.id.talentpool.dto.FilterTalentDTO;
 import rencanakan.id.talentpool.dto.UserRequestDTO;
@@ -36,7 +37,6 @@ import rencanakan.id.talentpool.service.UserServiceImpl;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-
     @Mock
     private UserRepository userRepository;
 
@@ -48,7 +48,7 @@ class UserServiceTest {
 
     private String testUserId = "user123";
     private User testUser;
-    Pageable page ; // page = 0, size = 1
+    Pageable page;
 
 
     @BeforeEach
@@ -205,14 +205,23 @@ class UserServiceTest {
         }
 
         @Test
-        void editById_WithInvalidEmail_ThrowsException() throws Exception {
+        void editById_WithInvalidEmail_FailsValidation() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            User invalidUser = new User();
-            Field emailField = User.class.getDeclaredField("email");
-            emailField.setAccessible(true);
-            emailField.set(invalidUser, "invalid-email");
 
-            UserRequestDTO invalidUserRequest = DTOMapper.map(invalidUser, UserRequestDTO.class);
+            UserRequestDTO invalidUserRequest = new UserRequestDTO();
+            invalidUserRequest.setEmail("invalid-email");
+
+            when(mockValidator.validate(any(User.class)))
+                .thenAnswer(invocation -> {
+                    Set<jakarta.validation.ConstraintViolation<User>> violations = new HashSet<>();
+                    @SuppressWarnings("unchecked")
+                    jakarta.validation.ConstraintViolation<User> violation = mock(jakarta.validation.ConstraintViolation.class);
+                    when(violation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
+                    when(violation.getPropertyPath().toString()).thenReturn("email");
+                    when(violation.getMessage()).thenReturn("Invalid email format");
+                    violations.add(violation);
+                    return violations;
+                });
 
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editById(testUserId, invalidUserRequest);
@@ -221,15 +230,23 @@ class UserServiceTest {
         }
 
         @Test
-        void editById_WithInvalidNIK_ThrowsException() throws Exception {
+        void editById_WithInvalidNIK_FailsValidation() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            User invalidUser = new User();
-            Field nikField = User.class.getDeclaredField("nik");
-            nikField.setAccessible(true);
-            nikField.set(invalidUser, "invalid-nik");
-            invalidUser.setId(testUserId);
 
-            UserRequestDTO invalidUserRequest = DTOMapper.map(invalidUser, UserRequestDTO.class);
+            UserRequestDTO invalidUserRequest = new UserRequestDTO();
+            invalidUserRequest.setNik("12345");
+
+            when(mockValidator.validate(any(User.class)))
+                .thenAnswer(invocation -> {
+                    Set<jakarta.validation.ConstraintViolation<User>> violations = new HashSet<>();
+                    @SuppressWarnings("unchecked")
+                    jakarta.validation.ConstraintViolation<User> violation = mock(jakarta.validation.ConstraintViolation.class);
+                    when(violation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
+                    when(violation.getPropertyPath().toString()).thenReturn("nik");
+                    when(violation.getMessage()).thenReturn("NIK must be exactly 16 digits");
+                    violations.add(violation);
+                    return violations;
+                });
 
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editById(testUserId, invalidUserRequest);
@@ -251,17 +268,23 @@ class UserServiceTest {
         }
 
         @Test
-        void editById_WithNameTooLong_ThrowsException() throws Exception {
+        void editById_WithNameTooLong_FailsValidation() {
             when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-            User invalidUser = new User();
-            invalidUser.setId(testUserId);
 
-            String longName = "A".repeat(300);
-            Field nameField = User.class.getDeclaredField("firstName");
-            nameField.setAccessible(true);
-            nameField.set(invalidUser, longName);
+            UserRequestDTO invalidUserRequest = new UserRequestDTO();
+            invalidUserRequest.setFirstName("A".repeat(100));
 
-            UserRequestDTO invalidUserRequest = DTOMapper.map(invalidUser, UserRequestDTO.class);
+            when(mockValidator.validate(any(User.class)))
+                .thenAnswer(invocation -> {
+                    Set<jakarta.validation.ConstraintViolation<User>> violations = new HashSet<>();
+                    @SuppressWarnings("unchecked")
+                    jakarta.validation.ConstraintViolation<User> violation = mock(jakarta.validation.ConstraintViolation.class);
+                    when(violation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
+                    when(violation.getPropertyPath().toString()).thenReturn("firstName");
+                    when(violation.getMessage()).thenReturn("First name exceeds maximum length");
+                    violations.add(violation);
+                    return violations;
+                });
 
             Exception exception = assertThrows(IllegalArgumentException.class, () -> {
                 userService.editById(testUserId, invalidUserRequest);
@@ -303,6 +326,71 @@ class UserServiceTest {
     }
     @Nested
     class FilterTalentTest{
+        @Test
+        void filter_ShouldReturnUsersOrderedAlphabeticallyByName() {
+            FilterTalentDTO filter = new FilterTalentDTO();
+            Pageable pageable = PageRequest.of(0, 10);
+
+            // Create users with different combinations of first and last names
+            User user1 = new User();
+            user1.setFirstName("Alice");
+            user1.setLastName("Smith");
+
+            User user2 = new User();
+            user2.setFirstName("Bob");
+            user2.setLastName("Jones");
+
+            User user3 = new User();
+            user3.setFirstName("Alice");
+            user3.setLastName("Johnson");
+
+            List<User> users = Arrays.asList(user2, user3, user1); // Unordered list
+
+            // Mock that the repository will return the users in alphabetical order
+            // This simulates what Spring Data JPA would do with Sort.by("firstName").and(Sort.by("lastName"))
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenAnswer(invocation -> {
+                        Pageable pageableArg = invocation.getArgument(1);
+                        if (pageableArg.getSort().isSorted()) {
+                            // Sort the list by firstName and then by lastName
+                            List<User> sortedUsers = new ArrayList<>(users);
+                            sortedUsers.sort(Comparator.comparing(User::getFirstName)
+                                             .thenComparing(User::getLastName));
+                            return new PageImpl<>(sortedUsers, pageableArg, sortedUsers.size());
+                        }
+                        return new PageImpl<>(users, pageableArg, users.size());
+                    });
+
+            // Mock the DTOMapper to return DTOs with the same names
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(eq(user1), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder()
+                                   .firstName("Alice")
+                                   .lastName("Smith")
+                                   .build());
+                mockedMapper.when(() -> DTOMapper.map(eq(user2), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder()
+                                   .firstName("Bob")
+                                   .lastName("Jones")
+                                   .build());
+                mockedMapper.when(() -> DTOMapper.map(eq(user3), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder()
+                                   .firstName("Alice")
+                                   .lastName("Johnson")
+                                   .build());
+
+                UserResponseWithPagingDTO result = userService.filter(filter, pageable);
+
+                // Check that users are sorted first by firstName, then by lastName
+                List<UserResponseDTO> sortedUsers = result.getUsers();
+                assertEquals(3, sortedUsers.size());
+                assertEquals("Alice", sortedUsers.get(0).getFirstName());
+                assertEquals("Johnson", sortedUsers.get(0).getLastName());
+                assertEquals("Alice", sortedUsers.get(1).getFirstName());
+                assertEquals("Smith", sortedUsers.get(1).getLastName());
+                assertEquals("Bob", sortedUsers.get(2).getFirstName());
+            }
+        }
         @Test
         void filter_withValidData_returnsMatchingUsers() {
             FilterTalentDTO filter = FilterTalentDTO.builder().name("john").preferredLocations( Arrays.asList("Jakarta")).priceRange(Arrays.asList(0.00,200000.00)).skills(Arrays.asList("Java")).build();
@@ -483,11 +571,111 @@ class UserServiceTest {
             }
         }
 
+        @Test
+        void filter_withEmptyName_shouldTreatAsNoNameFilter() {
+
+            FilterTalentDTO filter = FilterTalentDTO.builder().name("  ").build();
+
+            User user1 = new User();
+            user1.setFirstName("Alice");
+
+            List<User> allUsers = List.of(user1);
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(allUsers));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(eq(user1), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder().firstName("Alice").build());
+
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+                Assertions.assertEquals(1, result.getUsers().size());
+                Assertions.assertEquals("Alice", result.getUsers().get(0).getFirstName());
+            }
+        }
+
+        @Test
+        void filter_withNameConditionBranches() {
+
+            FilterTalentDTO filterWithNullName = FilterTalentDTO.builder().name(null).build();
+
+
+            FilterTalentDTO filterWithWhitespaceName = FilterTalentDTO.builder().name("  ").build();
+
+
+            FilterTalentDTO filterWithEmptyName = FilterTalentDTO.builder().name("").build();
+
+
+            FilterTalentDTO filterWithValidName = FilterTalentDTO.builder().name("John").build();
+
+            User testUserLocal = new User();
+            testUserLocal.setFirstName("Test");
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of(testUserLocal)));
+
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(eq(testUserLocal), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder().firstName("Test").build());
+
+
+                UserResponseWithPagingDTO resultNull = userService.filter(filterWithNullName, page);
+                UserResponseWithPagingDTO resultWhitespace = userService.filter(filterWithWhitespaceName, page);
+                UserResponseWithPagingDTO resultEmpty = userService.filter(filterWithEmptyName, page);
+                UserResponseWithPagingDTO resultValid = userService.filter(filterWithValidName, page);
+
+                assertEquals(1, resultNull.getUsers().size());
+                assertEquals(1, resultWhitespace.getUsers().size());
+                assertEquals(1, resultEmpty.getUsers().size());
+                assertEquals(1, resultValid.getUsers().size());
+
+                verify(userRepository, times(4)).findAll(any(Specification.class), any(Pageable.class));
+            }
+        }
+
+        @Test
+        void filter_withEmptyStringName_shouldTreatAsNoNameFilter() {
+
+            FilterTalentDTO filter = FilterTalentDTO.builder().name("").build();
+
+            User user1 = new User();
+            user1.setFirstName("Alice");
+
+            List<User> allUsers = List.of(user1);
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(allUsers));
+
+            try (MockedStatic<DTOMapper> mockedMapper = Mockito.mockStatic(DTOMapper.class)) {
+                mockedMapper.when(() -> DTOMapper.map(eq(user1), eq(UserResponseDTO.class)))
+                        .thenReturn(UserResponseDTO.builder().firstName("Alice").build());
+
+                UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+
+                Assertions.assertEquals(1, result.getUsers().size());
+                Assertions.assertEquals("Alice", result.getUsers().get(0).getFirstName());
+            }
+        }
+
+        @Test
+        void filter_withEmptyStringName_shouldHandleAsNoNameFilter() {
+
+            FilterTalentDTO filter = new FilterTalentDTO();
+            filter.setName(""); // Empty string
+
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(mockUser("John"))));
+
+            UserResponseWithPagingDTO result = userService.filter(filter, page);
+
+
+            assertNotNull(result);
+            assertFalse(result.getUsers().isEmpty());
+            assertEquals("John", result.getUsers().get(0).getFirstName());
+        }
+
     }
-
-
-
-
-
-
 }
