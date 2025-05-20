@@ -112,7 +112,7 @@ class AuthenticationServiceTest {
             authenticationService.signup(userRequestDTO);
         });
 
-        assertEquals("Email " + userRequestDTO.getEmail() + " sudah terdaftar.", exception.getMessage());
+        assertEquals("Email " + userRequestDTO.getEmail() + " is already in use.", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -125,7 +125,7 @@ class AuthenticationServiceTest {
             authenticationService.signup(userRequestDTO);
         });
 
-        assertEquals("NIK " + userRequestDTO.getNik() + " sudah terdaftar.", exception.getMessage());
+        assertEquals("NIK " + userRequestDTO.getNik() + " is already in use.", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -138,7 +138,7 @@ class AuthenticationServiceTest {
             authenticationService.signup(userRequestDTO);
         });
 
-        assertEquals("NPWP " + userRequestDTO.getNpwp() + " sudah terdaftar.", exception.getMessage());
+        assertEquals("NPWP " + userRequestDTO.getNpwp() + " is already in use.", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -151,7 +151,7 @@ class AuthenticationServiceTest {
             authenticationService.signup(userRequestDTO);
         });
 
-        assertEquals("Nomor telepon " + userRequestDTO.getPhoneNumber() + " sudah terdaftar.", exception.getMessage());
+        assertEquals("Phone number " + userRequestDTO.getPhoneNumber() + " is already in use.", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
 
