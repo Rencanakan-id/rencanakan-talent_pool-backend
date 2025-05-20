@@ -256,45 +256,82 @@ class RecommendationControllerTest {
     }
 
     @Nested
-    class DeleteRecommendationTests{
-        @Test
-        void deleteByStatusId_NotFound_ShouldReturn404() throws Exception {
-            String notFoundId = "999";
-            doThrow(new EntityNotFoundException("Recommendation with id " + notFoundId + " not found."))
-                    .when(recommendationService).deleteById(any(), any());
+    class DeleteRecommendationTests {
+        @Nested
+        class DeleteByTalentTests {
 
-            mockMvc.perform(delete("/recommendations/{id}", notFoundId)
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.errors").value("Recommendation with id " + notFoundId + " not found."));
+            @Test
+            void deleteByTalent_NotFound_ShouldReturn404() throws Exception {
+                String notFoundId = "999";
+                doThrow(new EntityNotFoundException("Recommendation with id " + notFoundId + " not found."))
+                        .when(recommendationService).deleteByIdTalent(any(), any());
 
+                mockMvc.perform(delete("/recommendations/{id}", notFoundId)
+                                .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isNotFound())
+                        .andExpect(jsonPath("$.errors").value("Recommendation with id " + notFoundId + " not found."));
+            }
+
+            @Test
+            void deleteByTalent_UserNotAuthorized_ShouldReturn403() throws Exception {
+                when(recommendationService.deleteByIdTalent(any(), eq(id)))
+                        .thenThrow(new AccessDeniedException("You are not allowed to delete this recommendation."));
+
+                mockMvc.perform(delete("/recommendations/{id}", id)
+                                .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isForbidden())
+                        .andExpect(jsonPath("$.errors").value("You are not allowed to delete this recommendation."));
+            }
+
+            @Test
+            void deleteByTalent_Success_ShouldReturn200() throws Exception {
+                when(recommendationService.deleteByIdTalent(any(), eq(id))).thenReturn(responseDTO);
+
+                mockMvc.perform(delete("/recommendations/{id}", id)
+                                .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.data.id").value(id))
+                        .andExpect(jsonPath("$.data.talentId").value("talentId"))
+                        .andExpect(jsonPath("$.data.contractorId").value(123L))
+                        .andExpect(jsonPath("$.data.contractorName").value("contractorName"))
+                        .andExpect(jsonPath("$.data.message").value("Some message"))
+                        .andExpect(jsonPath("$.data.status").value("ACCEPTED"));
+            }
         }
 
-        @Test
-        public void testDelete_UserNotAuthorized_ReturnsForbidden() throws Exception {
+        @Nested
+        class DeleteByContractorTests {
 
-            when(recommendationService.deleteById(any(), eq(id)))
-                    .thenThrow(new AccessDeniedException("You are not allowed to delete this recommendation."));
+            @Test
+            void deleteByContractor_NotFound_ShouldReturn404() throws Exception {
+                String notFoundId = "999";
+                Long contractorId = 999L;
 
-            mockMvc.perform(delete("/recommendations/{id}", id)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(StatusType.ACCEPTED)))
-                    .andExpect(status().isForbidden()) // Expect 403 Forbidden status
-                    .andExpect(jsonPath("$.errors").value("You are not allowed to delete this recommendation.")); // Check error message
-        }
-        @Test
-        void deleteByStatusId_Success_ShouldReturn200() throws Exception {
-            when(recommendationService.deleteById(any(), eq(id))).thenReturn(responseDTO);
-            mockMvc.perform(delete("/recommendations/{id}", id)
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk()) // Harus 200 OK
-                    .andExpect(jsonPath("$.data.id").value(id))
-                    .andExpect(jsonPath("$.data.talentId").value("talentId"))
-                    .andExpect(jsonPath("$.data.contractorId").value(123L))
-                    .andExpect(jsonPath("$.data.contractorName").value("contractorName"))
-                    .andExpect(jsonPath("$.data.message").value("Some message"))
-                    .andExpect(jsonPath("$.data.status").value("ACCEPTED"));
+                doThrow(new EntityNotFoundException("Recommendation with id " + notFoundId + " not found."))
+                        .when(recommendationService).deleteByIdContractor(contractorId, notFoundId);
 
+                mockMvc.perform(delete("/recommendations/{recommendationId}/contractor/{contractorId}", notFoundId, contractorId)
+                                .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isNotFound())
+                        .andExpect(jsonPath("$.errors").value("Recommendation with id " + notFoundId + " not found."));
+            }
+
+            @Test
+            void deleteByContractor_Success_ShouldReturn200() throws Exception {
+                Long contractorId = 123L;
+
+                when(recommendationService.deleteByIdContractor(contractorId, id)).thenReturn(responseDTO);
+
+                mockMvc.perform(delete("/recommendations/{recommendationId}/contractor/{contractorId}", id, contractorId)
+                                .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.data.id").value(id))
+                        .andExpect(jsonPath("$.data.talentId").value("talentId"))
+                        .andExpect(jsonPath("$.data.contractorId").value(123L))
+                        .andExpect(jsonPath("$.data.contractorName").value("contractorName"))
+                        .andExpect(jsonPath("$.data.message").value("Some message"))
+                        .andExpect(jsonPath("$.data.status").value("ACCEPTED"));
+            }
         }
     }
 
@@ -646,7 +683,7 @@ class RecommendationControllerTest {
 		}
 	}
 
-        @Nested
+    @Nested
         class ReadRecommendationTests {
             private User testUser;
             private RecommendationResponseDTO recommendation1;

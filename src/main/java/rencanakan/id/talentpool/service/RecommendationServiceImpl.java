@@ -53,10 +53,22 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public RecommendationResponseDTO deleteById(String userId, String id) {
+    public RecommendationResponseDTO deleteByIdTalent(String userId, String id) {
         Recommendation recommendation = recommendationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Recommendation with id " + id + " not found."));
         if (!(recommendation.getTalent().getId().equals(userId))) {
+            throw new AccessDeniedException("You are not allowed to delete this recommendation.");
+        }
+        recommendationRepository.deleteById(id);
+        return  DTOMapper.map(recommendation, RecommendationResponseDTO.class);
+
+    }
+
+    @Override
+    public RecommendationResponseDTO deleteByIdContractor(Long contractorId, String id) {
+        Recommendation recommendation = recommendationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Recommendation with id " + id + " not found."));
+        if (!(recommendation.getContractorId().equals(contractorId))) {
             throw new AccessDeniedException("You are not allowed to delete this recommendation.");
         }
         recommendationRepository.deleteById(id);

@@ -290,51 +290,99 @@ class RecommendationServiceTest {
 
 
     @Nested
-    class DeleteRecommendation{
-        @Test
-        void deleteById_Success() {
-            when(recommendationRepository.findById(recommendation1.getId())).thenReturn(Optional.of(recommendation1));
-            User mockedTalent = mock(User.class);
-            recommendation1.setTalent(mockedTalent);
-            when(mockedTalent.getId()).thenReturn("idUser");
-            RecommendationResponseDTO response = recommendationService.deleteById( "idUser", recommendation1.getId());
+    class DeleteRecommendation {
 
-            verify(recommendationRepository, times(1)).deleteById(recommendation1.getId());
+        @Nested
+        class DeleteByIdTalent {
 
-            assertNotNull(response);
-            assertEquals(recommendation1.getId(), response.getId());
-            assertEquals(StatusType.PENDING, response.getStatus());
+            @Test
+            void deleteByIdTalent_Success() {
+                when(recommendationRepository.findById(recommendation1.getId())).thenReturn(Optional.of(recommendation1));
+                User mockedTalent = mock(User.class);
+                recommendation1.setTalent(mockedTalent);
+                when(mockedTalent.getId()).thenReturn("idUser");
+
+                RecommendationResponseDTO response = recommendationService.deleteByIdTalent("idUser", recommendation1.getId());
+
+                verify(recommendationRepository, times(1)).deleteById(recommendation1.getId());
+
+                assertNotNull(response);
+                assertEquals(recommendation1.getId(), response.getId());
+                assertEquals(StatusType.PENDING, response.getStatus());
+            }
+
+            @Test
+            void deleteByIdTalent_NotFound_ThrowsException() {
+                when(recommendationRepository.findById("999")).thenReturn(Optional.empty());
+
+                EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                    recommendationService.deleteByIdTalent("userId", "999");
+                });
+
+                assertEquals("Recommendation with id 999 not found.", exception.getMessage());
+                verify(recommendationRepository, never()).deleteById("999");
+            }
+
+            @Test
+            void deleteByIdTalent_UnAuthorized_ThrowsException() {
+                User mockedTalent = mock(User.class);
+                recommendation1.setTalent(mockedTalent);
+                when(mockedTalent.getId()).thenReturn("idUser");
+                when(recommendationRepository.findById(eq(recommendation1.getId()))).thenReturn(Optional.of(recommendation1));
+
+                AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+                    recommendationService.deleteByIdTalent("unauthorizedUserId", recommendation1.getId());
+                });
+
+                assertEquals("You are not allowed to delete this recommendation.", exception.getMessage());
+                verify(recommendationRepository, never()).deleteById(any());
+            }
         }
-        @Test
-        void deleteById_NotFound_ThrowsException() {
 
-            when(recommendationRepository.findById("999")).thenReturn(Optional.empty());
-            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-                recommendationService.deleteById("userId","999");
-            });
+        @Nested
+        class DeleteByIdContractor {
 
-            assertEquals("Recommendation with id 999 not found.", exception.getMessage());
+            @Test
+            void deleteByIdContractor_Success() {
+                recommendation1.setContractorId(123L);
+                when(recommendationRepository.findById(recommendation1.getId())).thenReturn(Optional.of(recommendation1));
 
-            verify(recommendationRepository, never()).deleteById("999");
-        }
+                RecommendationResponseDTO response = recommendationService.deleteByIdContractor(123L, recommendation1.getId());
 
-        @Test
-        void testDeleteById_UnAuthorized() {
-            // Arrange
-            User mockedTalent = mock(User.class);
-            recommendation1.setTalent(mockedTalent);
-            when(mockedTalent.getId()).thenReturn("idUser");
-            when(recommendationRepository.findById(eq(recommendation1.getId()))).thenReturn(Optional.of(recommendation1));
+                verify(recommendationRepository, times(1)).deleteById(recommendation1.getId());
 
-            // Act & Assert
-            AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
-                recommendationService.deleteById("idUser123", recommendation1.getId());
-            });
+                assertNotNull(response);
+                assertEquals(recommendation1.getId(), response.getId());
+                assertEquals(StatusType.PENDING, response.getStatus());
+            }
 
-            assertEquals("You are not allowed to delete this recommendation.", exception.getMessage());
-            verify(recommendationRepository, never()).save(any());
+            @Test
+            void deleteByIdContractor_NotFound_ThrowsException() {
+                when(recommendationRepository.findById("999")).thenReturn(Optional.empty());
+
+                EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+                    recommendationService.deleteByIdContractor(123L, "999");
+                });
+
+                assertEquals("Recommendation with id 999 not found.", exception.getMessage());
+                verify(recommendationRepository, never()).deleteById(any());
+            }
+
+            @Test
+            void deleteByIdContractor_Unauthorized_ThrowsException() {
+                recommendation1.setContractorId(999L);
+                when(recommendationRepository.findById(recommendation1.getId())).thenReturn(Optional.of(recommendation1));
+
+                AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+                    recommendationService.deleteByIdContractor(123L, recommendation1.getId());
+                });
+
+                assertEquals("You are not allowed to delete this recommendation.", exception.getMessage());
+                verify(recommendationRepository, never()).deleteById(any());
+            }
         }
     }
+
     @Nested
     class patchStatus{
 

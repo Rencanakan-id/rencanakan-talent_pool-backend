@@ -42,12 +42,24 @@ public class RecommendationController {
 
         return ResponseEntity.ok(response);
     }
-
-    @DeleteMapping("/{id}")
+  
+    @DeleteMapping("/{recommendationId}")
     public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
-            @PathVariable("id") String id,
+            @PathVariable("recommendationId") String recommendationId,
             @AuthenticationPrincipal User user ){
-        RecommendationResponseDTO res = this.recommendationService.deleteById(user.getId(),  id);
+        RecommendationResponseDTO res = this.recommendationService.deleteByIdTalent(user.getId(),  recommendationId);
+        WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
+                .data(res)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{recommendationId}/contractor/{contractorId}")
+    public ResponseEntity<WebResponse<RecommendationResponseDTO>> deleteByStatusId(
+            @PathVariable("recommendationId") String recommendationId,
+            @PathVariable("contractorId") Long contractorId){
+        RecommendationResponseDTO res = this.recommendationService
+                .deleteByIdContractor(contractorId, recommendationId);
         WebResponse<RecommendationResponseDTO> response = WebResponse.<RecommendationResponseDTO>builder()
                 .data(res)
                 .build();
