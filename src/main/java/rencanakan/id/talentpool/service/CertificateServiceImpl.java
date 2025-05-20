@@ -59,13 +59,10 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public CertificateResponseDTO editById(Long id, CertificateRequestDTO dto, String userId) {
+    public CertificateResponseDTO editById(Long id, CertificateRequestDTO dto){
         Certificate certificate = certificateRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Certificate with ID " + id + " not found"));
 
-        if (!certificate.getUser().getId().equals(userId)) {
-            throw new RuntimeException("You are not permitted to access this certificate.");
-        }
         certificate.setTitle(dto.getTitle());
         certificate.setFile(dto.getFile());
 
