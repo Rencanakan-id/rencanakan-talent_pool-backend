@@ -26,6 +26,7 @@ services:
       PG_USER: ${PG_USER}
       PG_PASS: ${PG_PASS}
       RESET_PW_BASE_URL: ${RESET_PW_BASE_URL}
+      JWT_KEY: ${JWT_KEY}
       PRODUCTION: "true"
     restart: unless-stopped
 
