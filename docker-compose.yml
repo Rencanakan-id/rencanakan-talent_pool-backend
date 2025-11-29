@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:18
+    container_name: talentpool-postgres
+    environment:
+      POSTGRES_DB: ${PG_DB}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASS}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    image: rencanakan-talentpool-api
+    container_name: talentpool-api
+    depends_on:
+      - db
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+    environment:
+      PG_HOST: ${PG_HOST}
+      PG_USER: ${PG_USER}
+      PG_PASS: ${PG_PASS}
+      RESET_PW_BASE_URL: ${RESET_PW_BASE_URL}
+      PRODUCTION: "true"
+    restart: unless-stopped
+
+volumes:
+  db_data:
