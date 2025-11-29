@@ -9,6 +9,8 @@ public class WebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.addPathPrefix("/api", c -> true);
+        configurer.addPathPrefix("/api",
+            c -> c.getPackageName().startsWith("rencanakan.id.talentpool.controller")
+        );
     }
 }

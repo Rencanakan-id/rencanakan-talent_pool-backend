@@ -13,9 +13,9 @@ ENV JDBC_DATABASE_USERNAME ${JDBC_DATABASE_USERNAME}
 ENV JWT_KEY ${JWT_KEY}
 ENV RESET_PW_BASE_URL ${RESET_PW_BASE_URL}
 
-
 WORKDIR /app
 RUN ls -al
-COPY ./talentPool-0.0.1-SNAPSHOT.jar /app
+COPY build/libs/talentPool-0.0.1-SNAPSHOT.jar app.jar
+
 EXPOSE 8080
-CMD ["java","-jar","talentPool-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "/app/app.jar", "--spring.profiles.active=dev"]
