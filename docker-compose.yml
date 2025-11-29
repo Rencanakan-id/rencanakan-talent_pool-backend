@@ -30,4 +30,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  db_data:
+  postgres-data:
