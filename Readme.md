@@ -20,34 +20,31 @@ A Spring Boot (Java 21) backend service for the Rencanakan TalentPool platform, 
 ./gradlew clean bootJar
 ```
 
-### 2. Build the JAR
+### 2. Build the Docker Image
 ```bash
 docker build -t rencanakan-talentpool-api .
 ```
 
-### 3. Build the JAR
-Expose the API on localhost:8081:
+### 3. Update .env for Docker Compose Deployment
+On the server, your .env might look like:
 ```bash
-docker run --rm -p 8081:8081 \
-  --env-file .env \
-  rencanakan-talentpool-api
+PG_DB=your-database-name
+PG_USER=your-database-username
+PG_PASS=your-database-password
+
+RESET_PW_BASE_URL=https://your-frontend-domain/reset-password
+JWT_KEY=your-very-secret-jwt-key
+PRODUCTION=true
 ```
 
----
-
-## 📄 Environment Variables
-Create a .env file in the project root:
+### 4. Run on the server
+Expose the API:
 ```bash
-PG_HOST=jdbc:postgresql://host.docker.internal:5432/<your_database_name>
-PG_USER=<your_db_user>
-PG_PASS=<your_db_password>
-
-RESET_PW_BASE_URL=http://localhost:3000/reset-password
-PRODUCTION=false
+docker compose up -d
 ```
 
 ---
 
 ## 📘 API Documentation (Swagger UI)
-Once the server is running, open:
+Once the server is running, open (dev only):
 👉 http://localhost:8081/swagger-ui/index.html
