@@ -13,6 +13,7 @@ services:
     restart: unless-stopped
 
   app:
+    build: .
     image: rencanakan-talentpool-api
     container_name: talentpool-api
     depends_on:
@@ -21,15 +22,6 @@ services:
       - "8080:8080"
     env_file:
       - .env
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      PG_HOST: ${PG_HOST}
-      PG_USER: ${PG_USER}
-      PG_PASS: ${PG_PASS}
-      RESET_PW_BASE_URL: ${RESET_PW_BASE_URL}
-      JWT_KEY: ${JWT_KEY}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
-      PRODUCTION: "true"
     restart: unless-stopped
 
 volumes:

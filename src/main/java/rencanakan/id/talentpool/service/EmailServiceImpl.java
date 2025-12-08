@@ -1,20 +1,27 @@
 package rencanakan.id.talentpool.service;
 
+import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import rencanakan.id.talentpool.model.PasswordResetToken;
-import rencanakan.id.talentpool.model.User;
 import rencanakan.id.talentpool.repository.PasswordResetTokenRepository;
 import rencanakan.id.talentpool.repository.UserRepository;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
@@ -28,16 +35,30 @@ public class EmailServiceImpl implements EmailService {
     @Value("${app.reset-password.base-url}")
     private String resetBaseUrl;
 
-
     @Override
     public void sendResetPasswordEmail(String to, String resetLink) {
+        String html = loadHtmlTemplate("mail/reset-password.html")
+                .replace("{{LINK}}", resetLink);
+
         userService.findByEmail(to);
         System.out.println("Sending reset password email to " + to);
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Reset Password - Talent Pool");
-        message.setText("Klik link berikut untuk reset password Anda:\n" + resetLink + "\n\nJika Anda tidak meminta reset password, abaikan email ini.");
-        mailSender.send(message);
+
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            messageHelper.setTo(to);
+            messageHelper.setSubject("Reset Password - Talent Pool");
+            messageHelper.setText(html, true);
+
+            ClassPathResource logo = new ClassPathResource("mail/logo.png");
+            messageHelper.addInline("logoImage", logo);
+
+            mailSender.send(mimeMessage);
+        } catch (Exception e) {
+            log.error("Failed to send reset password email to {}", to, e);
+            throw new RuntimeException("Gagal mengirim email reset password", e);
+        }
     }
 
     @Override
@@ -59,5 +80,15 @@ public class EmailServiceImpl implements EmailService {
 
         String resetLink = resetBaseUrl + "?token=" + token;
         sendResetPasswordEmail(email, resetLink);
+    }
+
+    private String loadHtmlTemplate(String path) {
+        try {
+            ClassPathResource resource = new ClassPathResource(path);
+            byte[] bytes = resource.getInputStream().readAllBytes();
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load email template: " + path, e);
+        }
     }
 }
